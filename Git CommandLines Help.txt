@@ -1,0 +1,19 @@
+### To Create Branches
+
+- Create Branch without switching
+git branch <Branch Name>
+
+- Create Branch and switching to it
+git checkout -b <Branch name>
+
+- Check Existing Branches
+git branch -a
+
+###To Remove Branches
+- Locally
+git branch -d <Branch name>
+- Remotely
+git push origin --delete <Branch name>
+
+
+
