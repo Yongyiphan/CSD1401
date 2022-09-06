@@ -4,6 +4,6 @@
 /bin
 /Trash
 /.vs
-.vcxproj.user
+*vcxproj.user
 
 
