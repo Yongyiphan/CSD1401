@@ -1,0 +1,9 @@
+#git ignore
+/.tmp
+
+/bin
+/Trash
+/.vs
+*vcsproj.user
+
+
