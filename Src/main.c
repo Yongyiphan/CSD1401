@@ -1,5 +1,5 @@
 #include "cprocessing.h"
-#include "nigger.c"
+#include "BigNig.h"
 
 CP_Image logo;
 
