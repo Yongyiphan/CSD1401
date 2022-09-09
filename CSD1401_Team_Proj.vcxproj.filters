@@ -23,12 +23,12 @@
     <ClCompile Include="Src\main.c">
       <Filter>Source Files</Filter>
     </ClCompile>
-    <ClCompile Include="Nigger.c">
+    <ClCompile Include="Src\SourceFile.c">
       <Filter>Source Files</Filter>
     </ClCompile>
   </ItemGroup>
   <ItemGroup>
-    <ClInclude Include="BigNig.h">
+    <ClInclude Include="Inc\SourceFile.h">
       <Filter>Header Files</Filter>
     </ClInclude>
   </ItemGroup>
