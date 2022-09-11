@@ -1,5 +1,5 @@
 #include "cprocessing.h"
-#include "SourceFile.h"
+#include "nigger.c"
 
 CP_Image logo;
 
@@ -34,8 +34,8 @@ void game_exit(void)
 int main(void)
 {
 	//CP_Engine_SetNextGameState(splash_screen_init, splash_screen_update, splash_screen_exit);
-	//CP_Engine_SetNextGameState(game_init, game_update, game_exit);
-	//CP_Engine_Run();
-	TestingOutput();
+	CP_Engine_SetNextGameState(game_init, game_update, game_exit);
+	CP_Engine_Run();
+	printNigga();
 	return 0;
 }
