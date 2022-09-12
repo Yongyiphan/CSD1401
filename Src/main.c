@@ -1,6 +1,8 @@
 #include "cprocessing.h"
 #include "SourceFile.h"
 
+//#include "test.h"
+
 CP_Image logo;
 
 void game_init(void)
@@ -37,5 +39,8 @@ int main(void)
 	//CP_Engine_SetNextGameState(game_init, game_update, game_exit);
 	//CP_Engine_Run();
 	TestingOutput();
+	
+	print();
+
 	return 0;
 }
