@@ -105,10 +105,12 @@ xcopy "$(SolutionDir)Assets\*" "$(OutDir)Assets\" /s /r /y /q
     <Image Include="Assests\DigiPen_Singapore_WEB_RED.png" />
   </ItemGroup>
   <ItemGroup>
+    <ClCompile Include="Src\game.c" />
     <ClCompile Include="Src\main.c" />
     <ClCompile Include="Src\SourceFile.c" />
   </ItemGroup>
   <ItemGroup>
+    <ClInclude Include="Inc\game.h" />
     <ClInclude Include="Inc\SourceFile.h" />
   </ItemGroup>
   <Import Project="$(VCTargetsPath)\Microsoft.Cpp.targets" />
