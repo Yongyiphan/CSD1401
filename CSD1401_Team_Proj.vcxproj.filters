@@ -10,6 +10,9 @@
     <ClCompile Include="Src\SourceFile.c">
       <Filter>files</Filter>
     </ClCompile>
+    <ClCompile Include="Src\game.c">
+      <Filter>Source Files</Filter>
+    </ClCompile>
   </ItemGroup>
   <ItemGroup>
     <ClInclude Include="Inc\game.h">
@@ -17,6 +20,9 @@
     </ClInclude>
     <ClInclude Include="Inc\SourceFile.h">
       <Filter>header</Filter>
+    </ClInclude>
+    <ClInclude Include="Inc\game.h">
+      <Filter>Header Files</Filter>
     </ClInclude>
   </ItemGroup>
   <ItemGroup>
