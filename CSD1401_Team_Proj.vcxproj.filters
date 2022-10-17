@@ -26,5 +26,16 @@
     <ClCompile Include="nigger.c">
       <Filter>Source Files</Filter>
     </ClCompile>
+    <ClCompile Include="Src\game.c">
+      <Filter>Source Files</Filter>
+    </ClCompile>
+  </ItemGroup>
+  <ItemGroup>
+    <ClInclude Include="Inc\SourceFile.h">
+      <Filter>Header Files</Filter>
+    </ClInclude>
+    <ClInclude Include="Inc\game.h">
+      <Filter>Header Files</Filter>
+    </ClInclude>
   </ItemGroup>
 </Project>
