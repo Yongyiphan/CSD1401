@@ -26,9 +26,21 @@
     <ClCompile Include="Src\SourceFile.c">
       <Filter>Source Files</Filter>
     </ClCompile>
+    <ClCompile Include="Src\Mob.c">
+      <Filter>Source Files</Filter>
+    </ClCompile>
+    <ClCompile Include="Src\Playground.c">
+      <Filter>Source Files</Filter>
+    </ClCompile>
   </ItemGroup>
   <ItemGroup>
     <ClInclude Include="Inc\SourceFile.h">
+      <Filter>Header Files</Filter>
+    </ClInclude>
+    <ClInclude Include="Inc\Mob.h">
+      <Filter>Header Files</Filter>
+    </ClInclude>
+    <ClInclude Include="Inc\Playground.h">
       <Filter>Header Files</Filter>
     </ClInclude>
   </ItemGroup>
