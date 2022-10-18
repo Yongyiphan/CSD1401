@@ -2,16 +2,20 @@
 <Project ToolsVersion="4.0" xmlns="http://schemas.microsoft.com/developer/msbuild/2003">
   <ItemGroup>
     <ClCompile Include="Src\game.c">
-      <Filter>files</Filter>
+      <Filter>source</Filter>
     </ClCompile>
     <ClCompile Include="Src\main.c">
-      <Filter>files</Filter>
+      <Filter>source</Filter>
     </ClCompile>
     <ClCompile Include="Src\SourceFile.c">
-      <Filter>files</Filter>
+      <Filter>source</Filter>
     </ClCompile>
     <ClCompile Include="Src\game.c">
       <Filter>Source Files</Filter>
+    </ClCompile>
+    <ClCompile Include="Src\test.c" />
+    <ClCompile Include="Src\map.c">
+      <Filter>source</Filter>
     </ClCompile>
   </ItemGroup>
   <ItemGroup>
@@ -24,6 +28,10 @@
     <ClInclude Include="Inc\game.h">
       <Filter>Header Files</Filter>
     </ClInclude>
+    <ClInclude Include="Inc\test.h" />
+    <ClInclude Include="Inc\map.h">
+      <Filter>header</Filter>
+    </ClInclude>
   </ItemGroup>
   <ItemGroup>
     <Image Include="Assests\DigiPen_Singapore_WEB_RED.png" />
@@ -32,7 +40,7 @@
     <Filter Include="header">
       <UniqueIdentifier>{291da8cd-7a28-4d67-9cff-04bfc2aa5d0f}</UniqueIdentifier>
     </Filter>
-    <Filter Include="files">
+    <Filter Include="source">
       <UniqueIdentifier>{8fbe0212-ba85-48b8-8d8c-19621f03f4e7}</UniqueIdentifier>
     </Filter>
   </ItemGroup>
