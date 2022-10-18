@@ -2,17 +2,15 @@
 #include "CProcessing.h"
 #include <stdlib.h>
 
-Mob CreateMob(int Title, double hp, double def, double speed, int Range, double Dmg, double x, double y, int size)
+int MobCosts[3] = {1,2,3};
+
+Mob CreateMob(int Title, MobStats Base, Coor coor)
 {
 	Mob m = {
 		.Title = Title,
-		.HP = hp,
-		.DEF = def,
-		.Speed = speed,
-		.Range = Range,
-		.Dmg = Dmg,
-		.coor = (Coor) {x, y},
-		.size = size
+		.BaseStats = Base,
+		.CStats = Base,
+		.coor = coor
 	};
 	//Allocate Size
 
@@ -22,23 +20,80 @@ Mob CreateMob(int Title, double hp, double def, double speed, int Range, double 
 void DrawMob(Mob* mob)
 {
 	//Draw Circle
-	CP_Settings_Fill(CP_Color_Create(255,255,255,255));
-	CP_Graphics_DrawCircle(mob->coor.x, mob->coor.y, mob->size);
+	int alpha = (mob->CStats.HP / mob->BaseStats.HP) * 255;
+	CP_Settings_Fill(CP_Color_Create(255,255,255, alpha));
+	CP_Graphics_DrawCircle(mob->coor.x, mob->coor.y, mob->CStats.size);
 }
 
-void MobFactory(Mob arr[], int quantity, int mobCount) {
+//Generates Mobs
+void GenerateWaves(Mob *arr, int *quantity, int waveCost) {
+	//quantity = upper limit of mobs that can be created
 	int height = CP_System_GetWindowHeight(), width = CP_System_GetWindowWidth();
-	int Title = 0, Range = 20, size = 25;
-	double HP = 5, DEF = 5, Speed = 1, Dmg = 1;
+	int generatedMobCount = 0, newQuantity;
+	Mob currentMob;
+	while (waveCost > 0) {
+		int randMob = CP_Random_RangeInt(0, 2);
+		int randMobCost = MobCosts[randMob];
+	
+		//Overhead of 100;
+		if (generatedMobCount > *quantity) {
+			newQuantity = *quantity + 100;
+			Mob *temp = realloc(arr, sizeof(Mob) * newQuantity);
+			if (temp != NULL) {
+				arr = temp;
+				*quantity = newQuantity;
+			}
+		}
 
-	for (int i = 0; i < quantity; i++) {
-		Coor coor = {drand(0,width), drand(0, height)};
-		Mob m =  {.Title = Title, .HP = HP, .DEF = DEF, .Range = Range, .size = size, .Speed = Speed, .Dmg = Dmg, .coor = coor};
-		arr[i] = m;
+		if (waveCost >= randMobCost) {
+			Coor coor = {(double) CP_Random_RangeFloat(0,width), (double) CP_Random_RangeFloat(0, height)};
+			arr[generatedMobCount] = CreateMob(randMob, CreateBaseStat(randMob), coor);
+			waveCost -= randMobCost;
+			generatedMobCount+=1;
+		}
+	}
+
+//	for (int i = 0; i < quantity; i++) {
+//		Coor coor = {(double) CP_Random_RangeFloat(0,width), (double) CP_Random_RangeFloat(0, height)};
+//		Mob m = CreateMob(Title,, coor);
+//		arr[i] = m;
+//	}
+}
+
+void GenerateMobs() {
+
+}
+
+MobStats CreateBaseStat(int type) {
+	switch (type) {
+	case SmallMob:
+		return (MobStats) {
+			.HP = 5,
+			.DEF = 0,
+			.size = 10,
+			.Speed = 0,
+			.Dmg = 0,
+			.Range = 0
+		};
+	case MediumMob:
+		return (MobStats) {
+			.HP = 5,
+			.DEF = 0,
+			.size = 20,
+			.Speed = 0,
+			.Dmg = 0,
+			.Range = 0
+		};
+	case BigMob:
+		return (MobStats) {
+			.HP = 5,
+			.DEF = 0,
+			.size = 30,
+			.Speed = 0,
+			.Dmg = 0,
+			.Range = 0
+		};
+
 	}
 }
 
-double drand ( double low, double high )
-{
-    return ( (double)rand() * ( high - low ) ) / (double) RAND_MAX + low;
-}
