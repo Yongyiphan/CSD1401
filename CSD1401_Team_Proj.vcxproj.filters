@@ -17,6 +17,12 @@
     <ClCompile Include="Src\map.c">
       <Filter>source</Filter>
     </ClCompile>
+    <ClCompile Include="Src\Camera.c">
+      <Filter>source</Filter>
+    </ClCompile>
+    <ClCompile Include="Src\player.c">
+      <Filter>source</Filter>
+    </ClCompile>
   </ItemGroup>
   <ItemGroup>
     <ClInclude Include="Inc\game.h">
@@ -30,6 +36,12 @@
     </ClInclude>
     <ClInclude Include="Inc\test.h" />
     <ClInclude Include="Inc\map.h">
+      <Filter>header</Filter>
+    </ClInclude>
+    <ClInclude Include="Inc\Camera.h">
+      <Filter>header</Filter>
+    </ClInclude>
+    <ClInclude Include="Inc\player.h">
       <Filter>header</Filter>
     </ClInclude>
   </ItemGroup>
