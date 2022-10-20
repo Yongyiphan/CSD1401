@@ -7,13 +7,9 @@
     <ClCompile Include="Src\main.c">
       <Filter>source</Filter>
     </ClCompile>
-    <ClCompile Include="Src\SourceFile.c">
-      <Filter>source</Filter>
-    </ClCompile>
     <ClCompile Include="Src\game.c">
       <Filter>Source Files</Filter>
     </ClCompile>
-    <ClCompile Include="Src\test.c" />
     <ClCompile Include="Src\map.c">
       <Filter>source</Filter>
     </ClCompile>
@@ -23,18 +19,17 @@
     <ClCompile Include="Src\player.c">
       <Filter>source</Filter>
     </ClCompile>
+    <ClCompile Include="Src\utils.c">
+      <Filter>source</Filter>
+    </ClCompile>
   </ItemGroup>
   <ItemGroup>
     <ClInclude Include="Inc\game.h">
       <Filter>header</Filter>
     </ClInclude>
-    <ClInclude Include="Inc\SourceFile.h">
-      <Filter>header</Filter>
-    </ClInclude>
     <ClInclude Include="Inc\game.h">
       <Filter>Header Files</Filter>
     </ClInclude>
-    <ClInclude Include="Inc\test.h" />
     <ClInclude Include="Inc\map.h">
       <Filter>header</Filter>
     </ClInclude>
@@ -42,6 +37,9 @@
       <Filter>header</Filter>
     </ClInclude>
     <ClInclude Include="Inc\player.h">
+      <Filter>header</Filter>
+    </ClInclude>
+    <ClInclude Include="Inc\utils.h">
       <Filter>header</Filter>
     </ClInclude>
   </ItemGroup>
