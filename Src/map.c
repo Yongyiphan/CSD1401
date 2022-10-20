@@ -26,7 +26,6 @@ int MobPoolQuantity = 50;
 WaveTrack waveTrack[1];
 // pause state for the game when paused.
 int isPaused;
-CP_Vector centerOffSet;
 
 
 void map_Init(void) {
@@ -47,7 +46,6 @@ void map_Init(void) {
 	waveTrack[0] = (WaveTrack){ 0, 0, 50, MobPoolQuantity, malloc(sizeof(Mob) * MobPoolQuantity)};
 	//GenerateWaves(&waveTrack[0], 0, CP_System_GetDisplayWidth(), 0, CP_System_GetDisplayHeight(), 50);
 	GenerateWaves(&waveTrack[0], 0, CP_System_GetWindowWidth(), 0, CP_System_GetWindowHeight(), 50);
-	centerOffSet = (CP_Vector){ CP_System_GetWindowWidth() / 2.0f, CP_System_GetWindowHeight() / 2.0f };
 	
 	CameraDemo_Init();
 }
@@ -66,21 +64,17 @@ void map_Update(void) {
 		if (CP_Input_KeyDown(KEY_H)) {
 			P.SPEED *= 1.1;
 		}
+		
+
 
 		WaveTrack *cWave = &waveTrack[0];
+		
 
-		
-		//offsetVector = p.x, p.y
-		CP_Vector offsetVector = CP_Vector_Set(P.x, P.y);
-		CP_Vector offsetOrigin = CP_Vector_Subtract(offsetVector, centerOffSet);
-		CP_Vector currentPosition = CP_Vector_Scale(offsetOrigin, -1.0f);
-		
-		printf("\n\nCurrent Pos: %f %f\n\n", P.x, P.y);
+		CameraDemo_Update(&P);
 		for (int i = 0; i < cWave->MobCount; i++) {
-			MobBasicAtk(&cWave->arr[i], P.x + currentPosition.x, P.y + currentPosition.y);
+			MobBasicAtk(&cWave->arr[i], P.x, P.y);
 			DrawMob(&cWave->arr[i], 255, 255, 255);
 		}
-		CameraDemo_Update(&P);
 	}
 	
 	

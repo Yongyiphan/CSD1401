@@ -75,6 +75,9 @@ void CameraDemo_Update(Player *player)
 	CP_Vector offsetOrigin = CP_Vector_Scale(currentPosition, -1.0f);
 	CP_Vector offsetVector = CP_Vector_Add(offsetOrigin, centerOffset);
 	CP_Matrix offsetMatrix = CP_Matrix_Translate(CP_Vector_Scale(offsetVector, -1.0f));
+	printf("Off Set Origin: %f %f\n", offsetOrigin.x, offsetOrigin.y);
+	printf("Off Set Vector %f %f\n", offsetVector.x, offsetVector.y);
+
 	//translate all objects by the world space position of the current screen center
 	CP_Matrix offsetUndoMatrix = CP_Matrix_Translate(offsetVector);
 	//now all objects are within the screen center's local coord system
