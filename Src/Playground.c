@@ -7,7 +7,7 @@ int Height = 800;
 int Width = 800;
 
 int MobPoolQuantity = 50;
-Mob *MobPoolPtr = NULL, tempPlayer;
+Mob tempPlayer;
 WaveTrack waveTrack[1];
 int cWaveID = 0, waveBuffer = 1;
 
@@ -33,17 +33,17 @@ Print Conditions
 : Waves with mob count > 0
 
 */
+
 void game_init(void) {
-
-	CP_System_SetWindowSize(Width, Height);
-	waveTrack[0] = (WaveTrack){ 0, 0, 350, MobPoolQuantity, malloc(sizeof(Mob) * MobPoolQuantity)};
-
 	
-//	int i = sizeof(Mob), j = sizeof(Mob*), k = sizeof(MobPoolPtr+1);
-	//GenerateWaves(waveTrack[0].arr, &waveTrack[0].arrSize, waveTrack[0].waveCost, &waveTrack[0].MobCount);
-	GenerateWaves(&waveTrack[0]);
-	waveTrack[0].CurrentCount = waveTrack[0].MobCount;
+	CP_System_SetWindowSize(Width, Height);
+	waveTrack[0] = (WaveTrack){ 0, 0, 50, MobPoolQuantity, malloc(sizeof(Mob) * MobPoolQuantity)};
 
+	GenerateWaves(&waveTrack[0], 0, Width, 0, Height, 50);
+	//waveTrack[0].CurrentCount = waveTrack[0].MobCount;
+	
+	//Temp player
+	tempPlayer = CreateMob(3, CreateBaseStat(3), Width / 2, Width / 2, Height / 2, Height / 2, 0);
 }
 
 void game_update(void) {
@@ -52,13 +52,16 @@ void game_update(void) {
 		: If no more mobs, spawn interval reached
 	*/
 	currentTime = CP_System_GetMillis();
-
+	CP_Graphics_ClearBackground(CP_Color_Create(150, 150, 150, 255));	
 	//Loop and Draw
 	WaveTrack *cWave = &waveTrack[0];
-
+	DrawMob(&(tempPlayer), 100, 100, 100);
 	for (int i = 0; i < cWave->MobCount; i++) {
-		DrawMob(&cWave->arr[i]);
+		MobBasicAtk(&cWave->arr[i], tempPlayer.coor.x, tempPlayer.coor.y);
+		DrawMob(&cWave->arr[i], 255, 255, 255);
 	}
+
+
 }
 
 void game_exit(void) {
