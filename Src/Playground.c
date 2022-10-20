@@ -36,7 +36,7 @@ Print Conditions
 void game_init(void) {
 
 	CP_System_SetWindowSize(Width, Height);
-	waveTrack[0] = (WaveTrack){ 0, 0, 70, MobPoolQuantity, malloc(sizeof(Mob) * MobPoolQuantity)};
+	waveTrack[0] = (WaveTrack){ 0, 0, 350, MobPoolQuantity, malloc(sizeof(Mob) * MobPoolQuantity)};
 
 	
 //	int i = sizeof(Mob), j = sizeof(Mob*), k = sizeof(MobPoolPtr+1);
@@ -59,9 +59,6 @@ void game_update(void) {
 	for (int i = 0; i < cWave->MobCount; i++) {
 		DrawMob(&cWave->arr[i]);
 	}
-
-
-	printf("Fuck\n");
 }
 
 void game_exit(void) {

@@ -49,7 +49,7 @@ void GenerateWaves(WaveTrack *tracker) {
 	
 		Mob m = CreateMob(randMobI, CreateBaseStat(randMobI), xLeft, xRight, yTop, yBtm);
 
-		if (gMobCount-1 > tracker->arrSize) {
+		if (gMobCount >= tracker->arrSize) {
 			int nQuantity = tracker->arrSize + 100;
 			
 			Mob *temp = realloc(tracker->arr, sizeof(Mob) * nQuantity);
@@ -57,16 +57,14 @@ void GenerateWaves(WaveTrack *tracker) {
 				tracker->arr = temp;
 				tracker->arrSize = nQuantity;
 			}
+			printf("\n\tArray Expended\n\n");
+			printf("\n\tNew Array Size: %d\n", tracker->arrSize);
 			continue;
 		}
 	
 		if (waveCost >= randMobCost) {
 			tracker->arr[gMobCount] = m;
-			Mob e = tracker->arr[gMobCount];
-			//int  Titleat = e.Title;
-			//int x = e.coor.x;
-			//int y = e.coor.y;
-			//printf("Pos: %d -> Title: %d | X: %d | Y: %d\n",gMobCount, Titleat,x, y);
+			printf("Pos: %d -> Title: %d | X: %d | Y: %d\n",gMobCount,m.Title,(int) m.coor.x,(int) m.coor.y);
 			//printf("%p\n", &e);
 			gMobCount += 1;
 			waveCost -= randMobCost;
