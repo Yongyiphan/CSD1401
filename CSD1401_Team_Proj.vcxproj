@@ -44,13 +44,13 @@
   </ImportGroup>
   <PropertyGroup Label="UserMacros" />
   <PropertyGroup Condition="'$(Configuration)|$(Platform)'=='Debug|x64'">
-    <IncludePath>$(VC_IncludePath);$(WindowsSDK_IncludePath);$(SolutionDir)Extern\CProcessing\inc</IncludePath>
+    <IncludePath>$(VC_IncludePath);$(WindowsSDK_IncludePath);$(SolutionDir)Extern\CProcessing\inc;$(SolutionDir)Inc</IncludePath>
     <LibraryPath>$(VC_LibraryPath_x64);$(WindowsSDK_LibraryPath_x64);$(SolutionDir)Extern\CProcessing\lib\x64</LibraryPath>
     <OutDir>$(SolutionDir)bin\$(Configuration)-$(Platform)\</OutDir>
     <IntDir>$(SolutionDir).tmp\$(Configuration)-$(Platform)\</IntDir>
   </PropertyGroup>
   <PropertyGroup Condition="'$(Configuration)|$(Platform)'=='Release|x64'">
-    <IncludePath>$(VC_IncludePath);$(WindowsSDK_IncludePath);$(SolutionDir)Extern\CProcessing\inc</IncludePath>
+    <IncludePath>$(VC_IncludePath);$(WindowsSDK_IncludePath);$(SolutionDir)Extern\CProcessing\inc;$(SolutionDir)Inc</IncludePath>
     <LibraryPath>$(VC_LibraryPath_x64);$(WindowsSDK_LibraryPath_x64);$(SolutionDir)Extern\CProcessing\lib\x64</LibraryPath>
     <OutDir>$(SolutionDir)bin\$(Configuration)-$(Platform)\</OutDir>
     <IntDir>$(SolutionDir).tmp\$(Configuration)-$(Platform)\</IntDir>
@@ -69,10 +69,9 @@
       <AdditionalDependencies>$(CoreLibraryDependencies);%(AdditionalDependencies);CProcessingd.lib</AdditionalDependencies>
     </Link>
     <PostBuildEvent>
-      <Command>
-				xcopy "$(SolutionDir)Extern\CProcessing\lib\x64\CProcessingd.dll" "$(OutDir)" /s /r /y /q
-				xcopy "$(SolutionDir)Extern\CProcessing\lib\x64\fmodL.dll" "$(OutDir)" /s /r /y /q
-				xcopy "$(SolutionDir)Assets\*" "$(OutDir)Assets\" /s /r /y /q
+      <Command>xcopy "$(SolutionDir)Extern\CProcessing\lib\x64\CProcessingd.dll" "$(OutDir)" /s /r /y /q
+xcopy "$(SolutionDir)Extern\CProcessing\lib\x64\fmodL.dll" "$(OutDir)" /s /r /y /q
+xcopy "$(SolutionDir)Assets\*" "$(OutDir)Assets\" /s /r /y /q
 			</Command>
     </PostBuildEvent>
   </ItemDefinitionGroup>
@@ -105,13 +104,19 @@
     <Image Include="Assests\DigiPen_Singapore_WEB_RED.png" />
   </ItemGroup>
   <ItemGroup>
+    <ClCompile Include="Src\Camera.c" />
     <ClCompile Include="Src\game.c" />
     <ClCompile Include="Src\main.c" />
-    <ClCompile Include="Src\SourceFile.c" />
+    <ClCompile Include="Src\map.c" />
+    <ClCompile Include="Src\player.c" />
+    <ClCompile Include="Src\utils.c" />
   </ItemGroup>
   <ItemGroup>
+    <ClInclude Include="Inc\Camera.h" />
     <ClInclude Include="Inc\game.h" />
-    <ClInclude Include="Inc\SourceFile.h" />
+    <ClInclude Include="Inc\map.h" />
+    <ClInclude Include="Inc\player.h" />
+    <ClInclude Include="Inc\utils.h" />
   </ItemGroup>
   <Import Project="$(VCTargetsPath)\Microsoft.Cpp.targets" />
   <ImportGroup Label="ExtensionTargets">
