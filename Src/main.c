@@ -1,11 +1,12 @@
 #include "cprocessing.h"
 #include "game.h"
 #include "map.h"
+#include "Playground.h"
+
 
 int main(void)
 {
-	CP_Engine_SetNextGameState(game_Init, game_Update, game_Exit);
-	//CP_Engine_SetNextGameState(map_Init, map_Update, map_Exit);
+	CP_Engine_SetNextGameState(game_init, game_update, game_exit);
 	CP_Engine_Run();
 	return 0;
 }
