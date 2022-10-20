@@ -22,9 +22,10 @@ CP_Vector start_vector;
 CP_Color grey, black, red, green, blue, white;
 
 //Mob Stuff
-int MobPoolQuantity = 50;
-WaveTrack waveTrack[1];
-// pause state for the game when paused.
+#define NO_WAVES 4
+int StartMobQuantity = 50, cWaveID = 0;
+int WaveIDQueue[NO_WAVES];
+WaveTrack waveTrack[NO_WAVES]; // pause state for the game when paused.
 int isPaused;
 
 
@@ -43,9 +44,11 @@ void map_Init(void) {
 	start_vector = CP_Vector_Zero();
 	// Initialize the coordinates and stats of the player
 	P = (Player){ start_vector.x, start_vector.y, 90, PLAYER_HP, PLAYER_SPEED, PLAYER_DAMAGE, ATK_SPEED, DEFENSE, PLAYER_HITBOX};
-	waveTrack[0] = (WaveTrack){ 0, 0, 50, MobPoolQuantity, malloc(sizeof(Mob) * MobPoolQuantity)};
+	for (int i = 0; i < NO_WAVES; i++) {
+		waveTrack[i] = (WaveTrack){ 0, 0, 50, StartMobQuantity, malloc(sizeof(Mob) * StartMobQuantity)};
+	}
 	//GenerateWaves(&waveTrack[0], 0, CP_System_GetDisplayWidth(), 0, CP_System_GetDisplayHeight(), 50);
-	GenerateWaves(&waveTrack[0], 0, CP_System_GetWindowWidth(), 0, CP_System_GetWindowHeight(), 50);
+	GenerateWaves(&waveTrack[cWaveID], 0, CP_System_GetWindowWidth(), 0, CP_System_GetWindowHeight(), 50);
 	
 	CameraDemo_Init();
 }
@@ -67,12 +70,12 @@ void map_Update(void) {
 		
 
 
-		WaveTrack *cWave = &waveTrack[0];
-		
+		WaveTrack *cWave = &waveTrack[cWaveID];
+			
 
 		CameraDemo_Update(&P);
 		for (int i = 0; i < cWave->MobCount; i++) {
-			MobBasicAtk(&cWave->arr[i], P.x, P.y);
+			MobPathFinding(&cWave->arr[i], P.x, P.y);
 			DrawMob(&cWave->arr[i], 255, 255, 255);
 		}
 	}

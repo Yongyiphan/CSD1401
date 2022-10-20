@@ -1,51 +1,49 @@
-#include "Mob.h"
 #include "cprocessing.h"
 #include <stdlib.h>
 #include <stdio.h>
 #include <math.h>
+#include "Mob.h"
+#include "player.h"
 
 //Pool of Mob Types
 //Edit here for different Mob Types
 int MobCosts[3] = {1,2,3};
 MobStats CreateBaseStat(int type) {
 	switch (type) {
+		//Mob Format:
+		//int HP;
+		//int DEF;
+		//int Speed;
+
+		//int Range;
+		//int Dmg;
+		//int size;
 		case SmallMob:
 			return (MobStats) {
-				.HP = 5,
-				.DEF = 0,
-				.size = 10,
-				.Speed = 2,
-				.Dmg = 0,
-				.Range = 0
+				.HP = 5, .DEF = 10, .Speed = 5, .Range = 0, .Dmg = 1, .size = 10
 			};
 		case MediumMob:
 			return (MobStats) {
-				.HP = 5,
-				.DEF = 0,
-				.size = 20,
-				.Speed = 3,
-				.Dmg = 0,
-				.Range = 0
+				.HP = 5, .DEF = 10, .Speed = 5, .Range = 0, .Dmg = 1, .size = 15
 			};
 		case BigMob:
 			return (MobStats) {
-				.HP = 5,
-				.DEF = 0,
-				.size = 30,
-				.Speed = 4,
-				.Dmg = 0,
-				.Range = 0
+				.HP = 5, .DEF = 10, .Speed = 5, .Range = 0, .Dmg = 1, .size = 25
 			};
-
+		case RangedMob:
+			return (MobStats) {
+				.HP = 5, .DEF = 10, .Speed = 5, .Range = 0, .Dmg = 1, .size = 25
+			};
 		case BigBoss:
 			return (MobStats) {
-				.HP = 5,
-				.DEF = 0,
-				.size = 35,
-				.Speed = 5,
-				.Dmg = 0,
-				.Range = 0
+				.HP = 5, .DEF = 10, .Speed = 5, .Range = 0, .Dmg = 1, .size = 50
 			};
+		default:
+			//Something Might be wrong;
+			return (MobStats) {
+				.HP = 5, .DEF = 10, .Speed = 5, .Range = 0, .Dmg = 1, .size = 100
+			};
+
 	}
 }
 Mob CreateMob(int Title, MobStats Base, int xLeft, int xRight, int yTop, int yBtm, int offSet)
@@ -84,7 +82,6 @@ void GenerateWaves(WaveTrack *tracker, int xLeft, int xRight, int yTop, int yBtm
 		int randMobI = CP_Random_RangeInt(0, 2);
 		int randMobCost = MobCosts[randMobI];
 	
-	
 		//Algo to extend array size when nearing max capacity
 		//Provides array with overhead for additional 100 Mobs.
 		if (gMobCount >= tracker->arrSize) {
@@ -107,7 +104,7 @@ void GenerateWaves(WaveTrack *tracker, int xLeft, int xRight, int yTop, int yBtm
 			//Generated a new mob at specified locations
 			Mob m = CreateMob(randMobI, CreateBaseStat(randMobI), xLeft, xRight, yTop, yBtm, offSet);
 			tracker->arr[gMobCount] = m;
-			//printf("Pos: %d -> Title: %d | X: %d | Y: %d\n",gMobCount,m.Title,(int) m.coor.x,(int) m.coor.y);
+			printf("Pos: %d -> Title: %d | X: %d | Y: %d\n",gMobCount,m.Title,(int) m.coor.x,(int) m.coor.y);
 			//printf("%p\n", &m);
 			
 			
@@ -119,14 +116,15 @@ void GenerateWaves(WaveTrack *tracker, int xLeft, int xRight, int yTop, int yBtm
 	tracker->CurrentCount = gMobCount;
 }
 
-void MobBasicAtk(Mob* mob, float tX, float tY) {
-	
-	int speed = mob->CStats.Speed;
-	CP_Vector v = CP_Vector_Normalize(CP_Vector_Set(mob->coor.x - tX, mob->coor.y - tY));
-	mob->coor.x -= v.x * mob->CStats.Speed;
-	mob->coor.y -= v.y * mob->CStats.Speed;
-
-
+void MobPathFinding(Mob* mob, float tX, float tY) {
+	CP_Vector v;
+	switch (mob->Title) {
+	default:
+		v = CP_Vector_Normalize(CP_Vector_Set(mob->coor.x - tX, mob->coor.y - tY));
+		mob->coor.x -= v.x * mob->CStats.Speed;
+		mob->coor.y -= v.y * mob->CStats.Speed;
+		break;
+	}
 }
 
 void DrawMob(Mob* mob, int r, int g, int b)
