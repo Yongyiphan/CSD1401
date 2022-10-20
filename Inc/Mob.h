@@ -17,12 +17,12 @@ typedef struct Coordinates {
 }Coor;
 
 typedef struct MobBase {
-	double HP;
-	double DEF;
-	double Speed;
+	int HP;
+	int DEF;
+	int Speed;
 
 	int Range;
-	double Dmg;
+	int Dmg;
 	int size;
 	
 }MobStats;
@@ -35,13 +35,22 @@ typedef struct Mob {
 	Coor coor;
 } Mob;
 
+typedef struct WaveTracker {
+	int MobCount;
+	int CurrentCount;
+	int waveCost;
+	int arrSize;
+	Mob* arr;
+}WaveTrack;
 
 
 
-Mob CreateMob(int Title, MobStats Base, Coor coor);
 
-void GenerateWaves(Mob arr[], int *MobQuantity, int waveCost);
+Mob CreateMob(int Title, MobStats Base, int xLeft, int xRight, int yTop, int yBtm);
+//void GenerateWaves(Mob *arr, int *MobQuantity, int waveCost, int *outMobCount);
+void GenerateWaves(WaveTrack *tracker);
 
+void AddMobToArr(Mob* container, Mob* m);
 
 void DrawMob(Mob *mob);
 

@@ -1,4 +1,4 @@
-#include "CProcessing.h"
+#include "cprocessing.h"
 #include "Mob.h"
 #include <stdlib.h>
 #include <stdio.h>
@@ -6,11 +6,13 @@
 int Height = 800;
 int Width = 800;
 
-int MobPoolQuantity = 100;
-Mob *MobPoolPtr, tempPlayer;
-int waveTrack[5], cWave = 0;
+int MobPoolQuantity = 5;
+Mob *MobPoolPtr = NULL, tempPlayer;
+WaveTrack waveTrack[1];
+int cWave = 0, waveBuffer = 1;
 
 int spawnInterval = 5, currentTime;
+
 
 /*
 Mob C Flow
@@ -34,17 +36,14 @@ Print Conditions
 void game_init(void) {
 
 	CP_System_SetWindowSize(Width, Height);
-	MobPoolPtr = malloc(MobPoolQuantity * sizeof(Mob *));
+	waveTrack[0] = (WaveTrack){ 0, 0, 7, MobPoolQuantity, malloc(sizeof(Mob) * MobPoolQuantity)};
+
 	
-	if (NULL == MobPoolPtr) {
-		printf("Allocation MobPoolPtr Failed\n");
-	}
-	waveTrack[0] = 350;
-	waveTrack[1] = 50;
-	waveTrack[2] = 10;
-//	int* MobQPtr = MobPoolQuantity;
-	GenerateWaves(MobPoolPtr, &MobPoolQuantity, waveTrack[cWave]);
-//	tempPlayer = CreateMob(2, )
+//	int i = sizeof(Mob), j = sizeof(Mob*), k = sizeof(MobPoolPtr+1);
+	//GenerateWaves(waveTrack[0].arr, &waveTrack[0].arrSize, waveTrack[0].waveCost, &waveTrack[0].MobCount);
+	GenerateWaves(&waveTrack[0]);
+	waveTrack[0].CurrentCount = waveTrack[0].MobCount;
+
 }
 
 void game_update(void) {
@@ -53,16 +52,10 @@ void game_update(void) {
 		: If no more mobs, spawn interval reached
 	*/
 	currentTime = CP_System_GetMillis();
-		
-	int meh = MobPoolQuantity;
-
-	CP_Graphics_ClearBackground(CP_Color_Create(0,0,0,255));
-	for (int i = 0; i < MobPoolQuantity; i++) {
-		DrawMob(&MobPoolPtr[i]);
-	}
+	printf("Fuck\n");
 }
 
 void game_exit(void) {
 	//Free Pool
-	free(MobPoolPtr);
+	//free(MobPoolPtr);
 }

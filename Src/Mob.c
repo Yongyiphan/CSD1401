@@ -1,67 +1,97 @@
 #include "Mob.h"
-#include "CProcessing.h"
+#include "cprocessing.h"
 #include <stdlib.h>
+#include <stdio.h>
 
 int MobCosts[3] = {1,2,3};
 
-Mob CreateMob(int Title, MobStats Base, Coor coor)
+Mob CreateMob(int Title, MobStats Base, int xLeft, int xRight, int yTop, int yBtm)
 {
+	Coor c = { (double)CP_Random_RangeFloat(xLeft, xRight), (double)CP_Random_RangeFloat(yTop, yBtm) };
 	Mob m = {
 		.Title = Title,
 		.BaseStats = Base,
 		.CStats = Base,
-		.coor = coor
+		.coor = c
 	};
 	//Allocate Size
-
 	return m;
 }
+
+void AddMobToArr(Mob* container, Mob* m) {
+	container = malloc(sizeof(Mob));
+	container->Title = m->Title;
+	container->BaseStats = m->BaseStats;
+	container->CStats = m->CStats;
+	container->coor = m->coor;
+}
+
 
 void DrawMob(Mob* mob)
 {
 	//Draw Circle
 	int alpha = (mob->CStats.HP / mob->BaseStats.HP) * 255;
 	CP_Settings_Fill(CP_Color_Create(255,255,255, alpha));
-	CP_Graphics_DrawCircle(mob->coor.x, mob->coor.y, mob->CStats.size);
+	CP_Graphics_DrawCircle((double) mob->coor.x, (double) mob->coor.y, mob->CStats.size);
 }
 
 //Generates Mobs
-void GenerateWaves(Mob *arr, int *quantity, int waveCost) {
-	//quantity = upper limit of mobs that can be created
-	int height = CP_System_GetWindowHeight(), width = CP_System_GetWindowWidth();
-	int generatedMobCount = 0, newQuantity;
-	Mob currentMob;
-	while (waveCost > 0) {
-		int randMob = CP_Random_RangeInt(0, 2);
-		int randMobCost = MobCosts[randMob];
-	
-		//Overhead of 100;
-		if (generatedMobCount > *quantity) {
-			newQuantity = *quantity + 100;
-			Mob *temp = realloc(arr, sizeof(Mob) * newQuantity);
-			if (temp != NULL) {
-				arr = temp;
-				*quantity = newQuantity;
-			}
-		}
+//void GenerateWaves(Mob *arr, int* arrSize, int waveCost, int *outMobCount) {
+void GenerateWaves(WaveTrack *tracker) {
+	int gMobCount = 0;
+	int xLeft = 0, xRight = CP_System_GetWindowWidth(), yTop = 0, yBtm = CP_System_GetWindowHeight();
+	int waveCost = tracker->waveCost;
+	//if (tracker->MobCount == 0) {
+	//	Mob* baseArr = malloc(tracker->arrSize * sizeof(Mob));
+	//	*tracker->arr = &baseArr;
+	//}
 
+	
+	while (waveCost > 0) {
+		//int randMobI = CP_Random_RangeInt(0, 1);
+		int randMobI = 0;
+		int randMobCost = MobCosts[randMobI];
+	
+
+		if (gMobCount > tracker->arrSize) {
+			int nQuantity = tracker->arrSize + 100;
+			
+			Mob *temp = realloc(tracker->arr, sizeof(Mob) * nQuantity);
+			if (temp != NULL) {
+				tracker->arr = temp;
+				tracker->arrSize = nQuantity;
+			}
+			continue;
+		}
+	
 		if (waveCost >= randMobCost) {
-			Coor coor = {(double) CP_Random_RangeFloat(0,width), (double) CP_Random_RangeFloat(0, height)};
-			arr[generatedMobCount] = CreateMob(randMob, CreateBaseStat(randMob), coor);
+			Mob m = CreateMob(randMobI, CreateBaseStat(randMobI), xLeft, xRight, yTop, yBtm);
+			tracker->arr[gMobCount] = m;
+			Mob e = tracker->arr[gMobCount];
+			int  Titleat = e.Title;
+			int x = e.coor.x;
+			int y = e.coor.y;
+		printf("Pos: %d -> Title: %d | X: %d | Y: %d\n",gMobCount, Titleat,x, y);
+		printf("%p\n", &e);
+			gMobCount += 1;
 			waveCost -= randMobCost;
-			generatedMobCount+=1;
 		}
 	}
+	tracker->MobCount = gMobCount;
+	for (int i = 0; i < gMobCount; i++) {
+		Mob *t = &tracker->arr[i];
+		//int  Titleat = t.Title;
+		//int x = t.coor.x;
+		//int y = t.coor.y;
+		int  Titleat = t->Title;
+		int x = t->coor.x;
+		int y = t->coor.y;
+		printf("Pos: %d -> Title: %d | X: %d | Y: %d\n",i, Titleat,x, y);
+		printf("%p\n", &t);
+		
+	}
 
-//	for (int i = 0; i < quantity; i++) {
-//		Coor coor = {(double) CP_Random_RangeFloat(0,width), (double) CP_Random_RangeFloat(0, height)};
-//		Mob m = CreateMob(Title,, coor);
-//		arr[i] = m;
-//	}
-}
-
-void GenerateMobs() {
-
+	//temp is free'ed
 }
 
 MobStats CreateBaseStat(int type) {
