@@ -6,10 +6,10 @@
 int Height = 800;
 int Width = 800;
 
-int MobPoolQuantity = 5;
+int MobPoolQuantity = 50;
 Mob *MobPoolPtr = NULL, tempPlayer;
 WaveTrack waveTrack[1];
-int cWave = 0, waveBuffer = 1;
+int cWaveID = 0, waveBuffer = 1;
 
 int spawnInterval = 5, currentTime;
 
@@ -36,7 +36,7 @@ Print Conditions
 void game_init(void) {
 
 	CP_System_SetWindowSize(Width, Height);
-	waveTrack[0] = (WaveTrack){ 0, 0, 7, MobPoolQuantity, malloc(sizeof(Mob) * MobPoolQuantity)};
+	waveTrack[0] = (WaveTrack){ 0, 0, 70, MobPoolQuantity, malloc(sizeof(Mob) * MobPoolQuantity)};
 
 	
 //	int i = sizeof(Mob), j = sizeof(Mob*), k = sizeof(MobPoolPtr+1);
@@ -52,6 +52,15 @@ void game_update(void) {
 		: If no more mobs, spawn interval reached
 	*/
 	currentTime = CP_System_GetMillis();
+
+	//Loop and Draw
+	WaveTrack *cWave = &waveTrack[0];
+
+	for (int i = 0; i < cWave->MobCount; i++) {
+		DrawMob(&cWave->arr[i]);
+	}
+
+
 	printf("Fuck\n");
 }
 
