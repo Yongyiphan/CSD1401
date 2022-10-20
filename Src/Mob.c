@@ -53,9 +53,11 @@ Mob CreateMob(int Title, MobStats Base, int xLeft, int xRight, int yTop, int yBt
 	//Assume Player center of spawnable area
 	//Player coor = xRight - xLeft, yBtm - yTop
 	Coor c, PlayerCoor = { (xRight - xLeft) / 2, (yBtm - yTop) / 2 };
+	int Diff = 0;
 	do {
 		c = (Coor) {(double)CP_Random_RangeFloat(xLeft, xRight), (double)CP_Random_RangeFloat(yTop, yBtm)};
-	} while (sqrt(pow(c.x - PlayerCoor.x,2) + pow(c.y - PlayerCoor.y,2)) <= offSet);
+		Diff = sqrt(pow(c.x - PlayerCoor.x, 2) + pow(c.y - PlayerCoor.y, 2));
+	} while (Diff <= offSet);
 
 	Mob m = {
 		.Title = Title,
@@ -105,8 +107,8 @@ void GenerateWaves(WaveTrack *tracker, int xLeft, int xRight, int yTop, int yBtm
 			//Generated a new mob at specified locations
 			Mob m = CreateMob(randMobI, CreateBaseStat(randMobI), xLeft, xRight, yTop, yBtm, offSet);
 			tracker->arr[gMobCount] = m;
-			printf("Pos: %d -> Title: %d | X: %d | Y: %d\n",gMobCount,m.Title,(int) m.coor.x,(int) m.coor.y);
-			printf("%p\n", &m);
+			//printf("Pos: %d -> Title: %d | X: %d | Y: %d\n",gMobCount,m.Title,(int) m.coor.x,(int) m.coor.y);
+			//printf("%p\n", &m);
 			
 			
 			gMobCount += 1;

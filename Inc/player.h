@@ -12,11 +12,11 @@ typedef struct Player {
 	int HITBOX;
 }Player;
 
-typedef struct Mob {
-	float hitbox;
-	float x;
-	float y;
-}Mob;
+//typedef struct Mob {
+//	float hitbox;
+//	float x;
+//	float y;
+//}Mob;
 
 typedef struct Items {
 	float hitbox;
@@ -32,7 +32,7 @@ typedef struct Bullet {
 
 }Bullet;
 
-int collide_mob(Player, Mob);
+//int collide_mob(Player, Mob);
 int collide_item(Player, Items);
 int collide_bullet(Player, Bullet);
 

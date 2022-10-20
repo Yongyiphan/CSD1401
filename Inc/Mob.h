@@ -49,7 +49,7 @@ typedef struct WaveTracker {
 Mob CreateMob(int Title, MobStats Base, int xLeft, int xRight, int yTop, int yBtm, int offSet);
 //void GenerateWaves(Mob *arr, int *MobQuantity, int waveCost, int *outMobCount);
 //void GenerateWaves(WaveTrack *tracker);
-void GenerateWaves(WaveTrack* tracker, int xLeft, int xRight, int yTop, int yBtmgg, int offSet);
+void GenerateWaves(WaveTrack* tracker, int xLeft, int xRight, int yTop, int yBtm, int offSet);
 
 
 void DrawMob(Mob *mob, int r, int g, int b);
