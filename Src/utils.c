@@ -22,8 +22,8 @@ int IsAreaClicked(float area_center_x, float area_center_y, float area_width, fl
 }
 
 void option_screen(int* isPaused) {
-	float screen_width = CP_System_GetDisplayWidth();
-	float screen_height = CP_System_GetDisplayHeight();
+	float screen_width = CP_System_GetWindowWidth();
+	float screen_height = CP_System_GetWindowHeight();
 	CP_Vector middle = CP_Vector_Set(screen_width / 2, screen_height / 2);
 
 	int width = 300;

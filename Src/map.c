@@ -22,10 +22,12 @@ CP_Vector start_vector;
 CP_Color grey, black, red, green, blue, white;
 
 //Mob Stuff
-#define NO_WAVES 4
+#define NO_WAVES 2
+#define Spawn_Timer 5
 int StartMobQuantity = 50, cWaveID = 0;
+int currentTime;
 int WaveIDQueue[NO_WAVES];
-WaveTrack waveTrack[NO_WAVES]; // pause state for the game when paused.
+WaveTrack waveTrack[NO_WAVES], *cWave; // pause state for the game when paused.
 int isPaused;
 
 
@@ -48,8 +50,8 @@ void map_Init(void) {
 		waveTrack[i] = (WaveTrack){ 0, 0, 50, StartMobQuantity, malloc(sizeof(Mob) * StartMobQuantity)};
 	}
 	//GenerateWaves(&waveTrack[0], 0, CP_System_GetDisplayWidth(), 0, CP_System_GetDisplayHeight(), 50);
-	GenerateWaves(&waveTrack[cWaveID], 0, CP_System_GetWindowWidth(), 0, CP_System_GetWindowHeight(), 50);
-	
+	GenerateWaves(&waveTrack[cWaveID], P.x, P.y, 550);
+	cWave = &waveTrack[cWaveID];
 	CameraDemo_Init();
 }
 
@@ -67,13 +69,28 @@ void map_Update(void) {
 		if (CP_Input_KeyDown(KEY_H)) {
 			P.SPEED *= 1.1;
 		}
+	
+
+		//WaveTrack *cWave = &waveTrack[cWaveID];
+		
+		CameraDemo_Update(&P);
+
+		currentTime = CP_System_GetFrameCount();
+		//if (currentTime % (Spawn_Timer * 5) == 0) {
+		if (currentTime % (Spawn_Timer * (int) CP_System_GetFrameRate()) == 0  || currentTime == 0)  {
+			printf("\n%d\n", currentTime);
+			printf("%f", CP_System_GetFrameRate());
+			
+			int t = (cWaveID + 1) % NO_WAVES;
+			GenerateWaves(&waveTrack[t], P.x, P.y, 550);
+			cWaveID = t;
+			cWave = &waveTrack[cWaveID];
+		}
+
+		printf("Current Wave: %d Seconds: %f\n",cWaveID, CP_System_GetSeconds());
 		
 
 
-		WaveTrack *cWave = &waveTrack[cWaveID];
-			
-
-		CameraDemo_Update(&P);
 		for (int i = 0; i < cWave->MobCount; i++) {
 			MobPathFinding(&cWave->arr[i], P.x, P.y);
 			DrawMob(&cWave->arr[i], 255, 255, 255);

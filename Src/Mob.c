@@ -41,20 +41,31 @@ MobStats CreateBaseStat(int type) {
 		default:
 			//Something Might be wrong;
 			return (MobStats) {
-				.HP = 5, .DEF = 10, .Speed = 5, .Range = 0, .Dmg = 1, .size = 100
+				.HP = 5, .DEF = 10, .Speed = 5, .Range = 0, .Dmg = 1, .size = 200
 			};
 
 	}
 }
-Mob CreateMob(int Title, MobStats Base, int xLeft, int xRight, int yTop, int yBtm, int offSet)
+//Mob CreateMob(int Title, MobStats Base,int xLeft, int xRight, int yTop,int yBtm , int offSet)
+Mob CreateMob(int Title, MobStats Base,int playerX, int playerY , int offSet)
 {
+	int SWidth = CP_System_GetWindowWidth(), SHeight = CP_System_GetWindowHeight();
+	CP_Vector centerOffset = CP_Vector_Set(SWidth / 2.0f, SHeight / 2.0f);
 	//Assume Player center of spawnable area
 	//Player coor = xRight - xLeft, yBtm - yTop
-	Coor c, PlayerCoor = { (xRight - xLeft) / 2, (yBtm - yTop) / 2 };
-	int Diff = 0;
+	Coor c;
+	float xLeft = playerX - centerOffset.x , xRight = playerX + centerOffset.x, yTop = playerY - centerOffset.y, yBtm = playerY + centerOffset.y, Diff = 0.0;
+	if (playerX == 0 && playerY == 0) {
+		xLeft = 0;
+		xRight = SWidth;
+		yTop = 0;
+		yBtm = SHeight;
+		playerX = centerOffset.x;
+		playerY = centerOffset.y;
+	}
 	do {
 		c = (Coor) {(double)CP_Random_RangeFloat(xLeft, xRight), (double)CP_Random_RangeFloat(yTop, yBtm)};
-		Diff = sqrt(pow(c.x - PlayerCoor.x, 2) + pow(c.y - PlayerCoor.y, 2));
+		Diff = CP_Math_Distance(c.x, c.y, playerX, playerY);
 	} while (Diff <= offSet);
 
 	Mob m = {
@@ -71,7 +82,8 @@ Mob CreateMob(int Title, MobStats Base, int xLeft, int xRight, int yTop, int yBt
 // Input parameters will be a wavetrack struct (refer to Mob.h)
 // xLeft, xRight, yTop, yBtm denotes the areas of which mobs can be generated in
 //OffSet Prevents mobs from being spawned in area around Player
-void GenerateWaves(WaveTrack *tracker, int xLeft, int xRight, int yTop, int yBtm, int offSet) {
+//void GenerateWaves(WaveTrack *tracker, int xLeft, int xRight, int yTop, int yBtm, int offSet) {
+void GenerateWaves(WaveTrack *tracker, int playerX, int playerY, int offSet) {
 	//gMobCount = Generated Mob Count throughout this func
 	//waveCost = Amt of "currency" the func will take to generated random types of mobs per wave
 	int gMobCount = 0, waveCost = tracker->waveCost;
@@ -102,9 +114,9 @@ void GenerateWaves(WaveTrack *tracker, int xLeft, int xRight, int yTop, int yBtm
 		//Algo to add Mob generated to array.
 		if (waveCost >= randMobCost) {
 			//Generated a new mob at specified locations
-			Mob m = CreateMob(randMobI, CreateBaseStat(randMobI), xLeft, xRight, yTop, yBtm, offSet);
+			Mob m = CreateMob(randMobI, CreateBaseStat(randMobI), playerX, playerY, offSet);
 			tracker->arr[gMobCount] = m;
-			printf("Pos: %d -> Title: %d | X: %d | Y: %d\n",gMobCount,m.Title,(int) m.coor.x,(int) m.coor.y);
+			//printf("Pos: %d -> Title: %d | X: %d | Y: %d\n",gMobCount,m.Title,(int) m.coor.x,(int) m.coor.y);
 			//printf("%p\n", &m);
 			
 			
@@ -136,4 +148,11 @@ void DrawMob(Mob* mob, int r, int g, int b)
 	CP_Graphics_DrawCircle((double) mob->coor.x, (double) mob->coor.y, mob->CStats.size);
 }
 
+void MobCollision(Mob* mob, int playerSize, int playerX, int playerY) {
+	//Drop items?
+	//Drop HP?
+
+
+
+}
 
