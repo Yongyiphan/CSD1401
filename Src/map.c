@@ -77,17 +77,18 @@ void map_Update(void) {
 
 		currentTime = CP_System_GetFrameCount();
 		//if (currentTime % (Spawn_Timer * 5) == 0) {
+
+		int t = (cWaveID + 1) % NO_WAVES;
 		if (currentTime % (Spawn_Timer * (int) CP_System_GetFrameRate()) == 0  || currentTime == 0)  {
 			printf("\n%d\n", currentTime);
 			printf("%f", CP_System_GetFrameRate());
 			
-			int t = (cWaveID + 1) % NO_WAVES;
 			GenerateWaves(&waveTrack[t], P.x, P.y, 550);
 			cWaveID = t;
 			cWave = &waveTrack[cWaveID];
 		}
 
-		printf("Current Wave: %d Seconds: %f\n",cWaveID, CP_System_GetSeconds());
+		printf("Current Wave: %d Seconds: %f\n",t, CP_System_GetSeconds());
 		
 
 

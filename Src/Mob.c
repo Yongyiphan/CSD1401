@@ -151,8 +151,5 @@ void DrawMob(Mob* mob, int r, int g, int b)
 void MobCollision(Mob* mob, int playerSize, int playerX, int playerY) {
 	//Drop items?
 	//Drop HP?
-
-
-
 }
 
