@@ -29,7 +29,7 @@ void CameraDemo_Init(void)
 }
 
 
-void CameraDemo_Update(Player player)
+void CameraDemo_Update(Player *player)
 {
 	float dt = CP_System_GetDt();
 
@@ -48,32 +48,34 @@ void CameraDemo_Update(Player player)
 	// THIS IS ALL CAMERA MOVEMENT, ARROW KEYS UP DOWN LEFT RIGHT FOR CAMERA CONTROL
 	if (CP_Input_KeyDown(KEY_W))
 	{
-		currentPosition.y += dt * player.SPEED;
+		currentPosition.y += dt * player->SPEED;
 		translationMatrix = CP_Matrix_Translate(currentPosition);
-		printf("Current Pos: %f %f\n", currentPosition.x, currentPosition.y);
+		//printf("Current Pos: %f %f\n", currentPosition.x, currentPosition.y);
 	}
 	if (CP_Input_KeyDown(KEY_S))
 	{
-		currentPosition.y += dt * -player.SPEED;
+		currentPosition.y += dt * -player->SPEED;
 		translationMatrix = CP_Matrix_Translate(currentPosition);
-		printf("Current Pos: %f %f\n", currentPosition.x, currentPosition.y);
+		//printf("Current Pos: %f %f\n", currentPosition.x, currentPosition.y);
 	}
 	if (CP_Input_KeyDown(KEY_D))
 	{
-		currentPosition.x += dt * -player.SPEED;
+		currentPosition.x += dt * -player->SPEED;
 		translationMatrix = CP_Matrix_Translate(currentPosition);
-		printf("Current Pos: %f %f\n", currentPosition.x, currentPosition.y);
+		//printf("Current Pos: %f %f\n", currentPosition.x, currentPosition.y);
 	}
 	if (CP_Input_KeyDown(KEY_A))
 	{
-		currentPosition.x += dt * player.SPEED;
+		currentPosition.x += dt * player->SPEED;
 		translationMatrix = CP_Matrix_Translate(currentPosition);
-		printf("Current Pos: %f %f\n", currentPosition.x, currentPosition.y);
+		//printf("Current Pos: %f %f\n", currentPosition.x, currentPosition.y);
 	}
 
+	//printf("Current Pos: %f %f\n", currentPosition.x, currentPosition.y);
 	CP_Vector offsetOrigin = CP_Vector_Scale(currentPosition, -1.0f);
 	CP_Vector offsetVector = CP_Vector_Add(offsetOrigin, centerOffset);
 	CP_Matrix offsetMatrix = CP_Matrix_Translate(CP_Vector_Scale(offsetVector, -1.0f));
+
 	//translate all objects by the world space position of the current screen center
 	CP_Matrix offsetUndoMatrix = CP_Matrix_Translate(offsetVector);
 	//now all objects are within the screen center's local coord system
@@ -101,7 +103,7 @@ void CameraDemo_Update(Player player)
 
 	/* THIS IS THE PLAYER!!! */
 	CP_Settings_Fill(CP_Color_Create(0, 0, 255, 255));
-	player.x = offsetVector.x;
-	player.y = offsetVector.y;
-	CP_Graphics_DrawCircle(player.x, player.y, 50.0f);
+	player->x = offsetVector.x;
+	player->y = offsetVector.y;
+	CP_Graphics_DrawCircle(player->x, player->y, 50.0f);
 }
