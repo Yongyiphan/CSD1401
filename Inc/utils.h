@@ -15,3 +15,8 @@ Parameters:
 	click_y
 */
 void IsAreaClicked(float, float, float, float, float, float);
+
+//Gives angle between 2 different points (x1, y1, x2, y2)
+float point_point_angle(float, float, float, float);
+
+

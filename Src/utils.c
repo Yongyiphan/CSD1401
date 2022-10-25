@@ -1,6 +1,7 @@
 #include "cprocessing.h"
 #include <stdio.h>
 #include "game.h"
+#include <math.h>
 
 int IsAreaClicked(float area_center_x, float area_center_y, float area_width, float area_height, float click_x, float click_y)
 {
@@ -71,3 +72,19 @@ void option_screen(int* isPaused) {
 	}
 	
 }
+
+float point_point_angle(float x1, float y1, float x2, float y2)
+{
+	float tempx=0, tempy=0, temp=0;
+	tempx = x2 - x1;
+	tempy = y2 - y1;
+	temp = atan2(tempy, tempx);
+	temp = CP_Math_Degrees(temp);
+	if (tempy < 0)
+		temp += 360;
+	printf("Angle: %f, %f, %f\n", temp, tempx, tempy);
+	return temp;
+}
+
+
+

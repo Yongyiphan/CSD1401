@@ -4,10 +4,12 @@
 #include <math.h>
 
 #define BULLET_CAP 50
+#define BULLET_MOB 0
+#define BULLET_PLAYER 1
 #define TRUE 1
 #define FLASE 0
 #define PBULLET_NORMAL 1
-#define BULLET_LASER 2
+#define BULLET_TEST 2
 
 static int bulletcounter = 0;
 
@@ -21,6 +23,7 @@ typedef struct Bullet
 	float traveldistance;
 	float maxdistance;
 	float timer;
+	float damage;
 	int type;
 	int friendly;
 	int exist;
@@ -41,6 +44,7 @@ void BulletReset() //Reset active bullet
 	bullet[bulletcounter].maxdistance = 0;
 	bullet[bulletcounter].degree = 0;
 	bullet[bulletcounter].friendly = 0;
+	bullet[bulletcounter].damage = 0;
 }
 
 void Bulletinit() //Include this in mapinit (Reset for all bullets)
@@ -49,43 +53,39 @@ void Bulletinit() //Include this in mapinit (Reset for all bullets)
 		BulletReset();
 }
 
-void BulletCoor(float playerx, float playery, float playerangle) //Sets bullet coords
+void BulletCoor(float coordx, float coordy, float angle) //Sets bullet coords
 {
-	bullet[bulletcounter].x = playerx;
-	bullet[bulletcounter].y = playery;
-	bullet[bulletcounter].degree = playerangle;
+	bullet[bulletcounter].x = coordx;
+	bullet[bulletcounter].y = coordy;
+	bullet[bulletcounter].degree = angle;
 }
 
 void BulletType(int type) //Sets type of bullet and stats
 {
 	if (type == PBULLET_NORMAL) // Adjust value of 1 into variable after upgrades are made
 	{
-		BulletReset();
 		bullet[bulletcounter].size = 10 * 1;
 		bullet[bulletcounter].speed = 10 * 1;
 		bullet[bulletcounter].maxdistance = 100 * 1;
-		bullet[bulletcounter].friendly = TRUE;
+		bullet[bulletcounter].damage = 10 * 1;
 	}
 }
 
-void BulletShoot(float playerx, float playery, float playerangle, int type) //Sets bullet to active
+void BulletShoot(float coordx, float coordy, float angle, int type, int friendly) //Sets bullet to active
 {
+	BulletReset();
+	BulletType(type);
+	BulletCoor(coordx, coordy, angle);
 	bullet[bulletcounter].exist = TRUE;
-	if (bulletcounter < BULLET_CAP)
+	if (friendly == BULLET_MOB) bullet[bulletcounter].friendly = BULLET_MOB; else bullet[bulletcounter].friendly = BULLET_PLAYER;
+	if (bulletcounter < BULLET_CAP) //Adjustments to bullet data should be before this to prevent buffer overrun
 		bulletcounter++;
 	else bulletcounter = 0;
-	BulletType(type);
-	BulletCoor(playerx, playery, playerangle);
-	
 }
 
-void BulletDirection(float playerangle, int i) //Determine the bullet directions and travel towards it
+void BulletDirection(float angle, int i) //Determine the bullet directions and travel towards it
 {
-	if (playerangle >= 360)
-		playerangle -= 360;
-	if (playerangle <= 0)
-		playerangle += 360;
-	float radianangle = CP_Math_Radians(playerangle);
+	float radianangle = CP_Math_Radians(angle);
 	double x = cos(radianangle), y = sin(radianangle);
 	bullet[i].x += x * bullet[i].speed;
 	bullet[i].y += y * bullet[i].speed;

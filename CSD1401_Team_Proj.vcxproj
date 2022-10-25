@@ -104,6 +104,7 @@ xcopy "$(SolutionDir)Assets\*" "$(OutDir)Assets\" /s /r /y /q
     <Image Include="Assests\DigiPen_Singapore_WEB_RED.png" />
   </ItemGroup>
   <ItemGroup>
+    <ClCompile Include="Src\bullet.c" />
     <ClCompile Include="Src\Camera.c" />
     <ClCompile Include="Src\game.c" />
     <ClCompile Include="Src\main.c" />
@@ -114,6 +115,7 @@ xcopy "$(SolutionDir)Assets\*" "$(OutDir)Assets\" /s /r /y /q
     <ClCompile Include="Src\Playground.c" />
   </ItemGroup>
   <ItemGroup>
+    <ClInclude Include="Inc\bullet.h" />
     <ClInclude Include="Inc\Camera.h" />
     <ClInclude Include="Inc\game.h" />
     <ClInclude Include="Inc\map.h" />

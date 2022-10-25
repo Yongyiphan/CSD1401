@@ -6,6 +6,7 @@
 #include "player.h"
 #include "utils.h"
 #include "Mob.h"
+#include "bullet.h"
 
 #define MAP_SIZEX 1300
 #define MAP_SIZEY 900
@@ -32,7 +33,7 @@ int currentSec;
 int WaveIDQueue[NO_WAVES], totalWave = 0;
 WaveTrack waveTrack[NO_WAVES], *cWave; // pause state for the game when paused.
 int isPaused;
-
+float mousex, mousey;
 
 void map_Init(void) {
 	
@@ -55,6 +56,7 @@ void map_Init(void) {
 		WaveIDQueue[i] = -1;
 	}
 	CameraDemo_Init();
+	Bulletinit();
 }
 
 void map_Update(void) {
@@ -142,6 +144,16 @@ void map_Update(void) {
 			}
 		}
 		//printf("MobCount: %d |\tFPS: %f \n", MobC, CP_System_GetFrameRate());
+		
+		if (CP_Input_MouseDown(MOUSE_BUTTON_LEFT))
+		{ //Current issue, playermovement causes degree to go off
+			mousex = CP_Input_GetMouseX();
+			mousey = CP_Input_GetMouseY();
+			float bulletangle = 0;
+			bulletangle = point_point_angle(P.x, P.y, mousex, mousey);
+			BulletShoot(P.x, P.y, bulletangle, 1, BULLET_PLAYER);
+		}
+		BulletDraw();
 	}
 	
 	
