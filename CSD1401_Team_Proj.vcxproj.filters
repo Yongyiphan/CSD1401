@@ -17,6 +17,9 @@
     <ClCompile Include="Src\map.c">
       <Filter>source</Filter>
     </ClCompile>
+    <ClCompile Include="Src\bullet.c">
+      <Filter>source</Filter>
+    </ClCompile>
   </ItemGroup>
   <ItemGroup>
     <ClInclude Include="Inc\game.h">
@@ -30,6 +33,9 @@
     </ClInclude>
     <ClInclude Include="Inc\test.h" />
     <ClInclude Include="Inc\map.h">
+      <Filter>header</Filter>
+    </ClInclude>
+    <ClInclude Include="Inc\bullet.h">
       <Filter>header</Filter>
     </ClInclude>
   </ItemGroup>

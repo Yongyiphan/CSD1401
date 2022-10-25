@@ -1,6 +1,7 @@
 #include "cprocessing.h"
 #include <stdio.h>
 #include <math.h>
+#include "bullet.h"
 
 #define MAP_SIZE 700
 #define PLAYER_HITBOX 50
@@ -55,6 +56,8 @@ void map_Init(void) {
 
 	grey = CP_Color_Create(111, 111, 111, 255);
 	white = CP_Color_Create(255, 255, 255, 255);
+
+	Bulletinit();
 }
 
 void map_Update(void) {
@@ -66,6 +69,14 @@ void map_Update(void) {
 	
 	// Directional Inputs for player
 	player_movement(p_vector);
+
+	//Test shoot
+	if (CP_Input_KeyDown(KEY_SPACE))
+	{
+		BulletShoot(p.x, p.y, p.angle, 1);
+	}
+	BulletDraw();
+
 }
 
 void map_Exit(void) {
