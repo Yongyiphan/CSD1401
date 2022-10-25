@@ -1,3 +1,6 @@
+#pragma once
+#ifndef MOB_H
+#define MOB_H
 #include "player.h"
 
 #define SmallMob 0
@@ -65,11 +68,7 @@ typedef struct WaveTracker {
 
 
 void CreateBaseStat(MobStats* ms, int type);
-//Mob CreateMob(int Title, MobStats Base, int xLeft, int xRight, int yTop, int yBtm, int offSet);
 void CreateMob(Mob* m, int Title, MobStats *Base, Player*player, int offSet);
-//void GenerateWaves(Mob *arr, int *MobQuantity, int waveCost, int *outMobCount);
-//void GenerateWaves(WaveTrack *tracker);
-//void GenerateWaves(WaveTrack* tracker, int xLeft, int xRight, int yTop, int yBtm, int offSet);
 void GenerateWaves(WaveTrack* tracker, Player* player);
 
 
@@ -77,3 +76,4 @@ void DrawMob(Mob *mob, int r, int g, int b);
 void MobPathFinding(Mob* mob, float tX, float tY);
 void MobCollision(Mob* mob, Player* player);
 
+#endif

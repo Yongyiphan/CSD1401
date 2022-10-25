@@ -1,3 +1,4 @@
+#include "map.h"
 #include "cprocessing.h"
 #include <stdio.h>
 #include <stdlib.h>
@@ -6,6 +7,8 @@
 #include "player.h"
 #include "utils.h"
 #include "Mob.h"
+#include "Items.h"
+
 
 #define MAP_SIZEX 1300
 #define MAP_SIZEY 900
@@ -33,6 +36,7 @@ int WaveIDQueue[NO_WAVES], totalWave = 0;
 WaveTrack waveTrack[NO_WAVES], *cWave; // pause state for the game when paused.
 int isPaused;
 
+Item *ItemDrop;
 
 void map_Init(void) {
 	
@@ -71,6 +75,8 @@ void map_Update(void) {
 		if (CP_Input_KeyDown(KEY_H)) {
 			P.SPEED *= 1.1;
 		}
+		float rng = CP_Random_RangeFloat(0,1);
+		printf("%f\n", rng);
 	
 		CameraDemo_Update(&P);
 		if ((int)CP_System_GetSeconds() != currentSec) {

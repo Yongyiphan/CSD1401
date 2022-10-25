@@ -2,8 +2,10 @@
 #include <stdlib.h>
 #include <stdio.h>
 #include <math.h>
-#include "Mob.h"
 #include "player.h"
+#include "Mob.h"
+
+//#include "player.h"
 
 //Pool of Mob Types
 //Edit here for different Mob Types
