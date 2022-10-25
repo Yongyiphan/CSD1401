@@ -48,14 +48,12 @@
     <LibraryPath>$(VC_LibraryPath_x64);$(WindowsSDK_LibraryPath_x64);$(SolutionDir)Extern\CProcessing\lib\x64</LibraryPath>
     <OutDir>$(SolutionDir)bin\$(Configuration)-$(Platform)\</OutDir>
     <IntDir>$(SolutionDir).tmp\$(Configuration)-$(Platform)\</IntDir>
-    <SourcePath>$(VC_SourcePath);$(SolutionDir)Src;</SourcePath>
   </PropertyGroup>
   <PropertyGroup Condition="'$(Configuration)|$(Platform)'=='Release|x64'">
     <IncludePath>$(VC_IncludePath);$(WindowsSDK_IncludePath);$(SolutionDir)Extern\CProcessing\inc;$(SolutionDir)Inc</IncludePath>
     <LibraryPath>$(VC_LibraryPath_x64);$(WindowsSDK_LibraryPath_x64);$(SolutionDir)Extern\CProcessing\lib\x64</LibraryPath>
     <OutDir>$(SolutionDir)bin\$(Configuration)-$(Platform)\</OutDir>
     <IntDir>$(SolutionDir).tmp\$(Configuration)-$(Platform)\</IntDir>
-    <SourcePath>$(VC_SourcePath);$(SolutionDir)Src;</SourcePath>
   </PropertyGroup>
   <ItemDefinitionGroup Condition="'$(Configuration)|$(Platform)'=='Debug|x64'">
     <ClCompile>
@@ -87,7 +85,7 @@ xcopy "$(SolutionDir)Assets\*" "$(OutDir)Assets\" /s /r /y /q
       <ConformanceMode>true</ConformanceMode>
     </ClCompile>
     <Link>
-      <SubSystem>Console</SubSystem>
+      <SubSystem>Windows</SubSystem>
       <EnableCOMDATFolding>true</EnableCOMDATFolding>
       <OptimizeReferences>true</OptimizeReferences>
       <GenerateDebugInformation>true</GenerateDebugInformation>
@@ -95,9 +93,10 @@ xcopy "$(SolutionDir)Assets\*" "$(OutDir)Assets\" /s /r /y /q
       <AdditionalDependencies>$(CoreLibraryDependencies);%(AdditionalDependencies);CProcessing.lib</AdditionalDependencies>
     </Link>
     <PostBuildEvent>
-      <Command>xcopy "$(SolutionDir)Extern\CProcessing\lib\x64\CProcessing.dll" "$(OutDir)" /s /r /y /q
-xcopy "$(SolutionDir)Extern\CProcessing\lib\x64\fmod.dll" "$(OutDir)" /s /r /y /q
-xcopy "$(SolutionDir)Assets\*" "$(OutDir)Assets\" /s /r /y /q
+      <Command>
+				xcopy "$(SolutionDir)Extern\CProcessing\lib\x64\CProcessing.dll" "$(OutDir)" /s /r /y /q
+				xcopy "$(SolutionDir)Extern\CProcessing\lib\x64\fmod.dll" "$(OutDir)" /s /r /y /q
+				xcopy "$(SolutionDir)Assets\*" "$(OutDir)Assets\" /s /r /y /q
 			</Command>
     </PostBuildEvent>
   </ItemDefinitionGroup>
@@ -105,19 +104,23 @@ xcopy "$(SolutionDir)Assets\*" "$(OutDir)Assets\" /s /r /y /q
     <Image Include="Assests\DigiPen_Singapore_WEB_RED.png" />
   </ItemGroup>
   <ItemGroup>
-    <ClCompile Include="Src\bullet.c" />
+    <ClCompile Include="Src\Camera.c" />
     <ClCompile Include="Src\game.c" />
     <ClCompile Include="Src\main.c" />
     <ClCompile Include="Src\map.c" />
-    <ClCompile Include="Src\SourceFile.c" />
-    <ClCompile Include="Src\test.c" />
+    <ClCompile Include="Src\player.c" />
+    <ClCompile Include="Src\utils.c" />
+    <ClCompile Include="Src\Mob.c" />
+    <ClCompile Include="Src\Playground.c" />
   </ItemGroup>
   <ItemGroup>
-    <ClInclude Include="Inc\bullet.h" />
+    <ClInclude Include="Inc\Camera.h" />
     <ClInclude Include="Inc\game.h" />
     <ClInclude Include="Inc\map.h" />
-    <ClInclude Include="Inc\SourceFile.h" />
-    <ClInclude Include="Inc\test.h" />
+    <ClInclude Include="Inc\player.h" />
+    <ClInclude Include="Inc\utils.h" />
+    <ClInclude Include="Inc\Mob.h" />
+    <ClInclude Include="Inc\Playground.h" />
   </ItemGroup>
   <Import Project="$(VCTargetsPath)\Microsoft.Cpp.targets" />
   <ImportGroup Label="ExtensionTargets">

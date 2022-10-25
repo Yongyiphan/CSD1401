@@ -1,82 +1,155 @@
 #include "cprocessing.h"
 #include <stdio.h>
+#include <stdlib.h>
 #include <math.h>
-#include "bullet.h"
+#include "Camera.h"
+#include "player.h"
+#include "utils.h"
+#include "Mob.h"
 
-#define MAP_SIZE 700
+#define MAP_SIZEX 1300
+#define MAP_SIZEY 900
+#define PLAYER_HP 100.0f
+#define PLAYER_SPEED 200.0f
+#define PLAYER_DAMAGE 1.0f
+#define ATK_SPEED 2.0f
+#define DEFENSE 10
 #define PLAYER_HITBOX 50
-#define PLAYER_SPEED 10
-#define PLAYER_ROT_SPEED 5
 
-typedef struct Player {
-	float x;
-	float y;
-	float angle;
-}Player;
 
-Player p;
-CP_Vector p_vector;
-CP_Color grey, black, red, blue, white;
 
-// Return a vector using a given radian angle
-CP_Vector AngleToVector(float radian_angle)
-{
-	// TODO
-	CP_Vector ret = CP_Vector_Set(cos(radian_angle), sin(radian_angle));
-	return ret;
-}
+Player P;
+CP_Vector start_vector;
+CP_Color grey, black, red, green, blue, white;
 
-void player_movement(CP_Vector p_vector) {
-	if (CP_Input_KeyDown(KEY_W)) {
-		p.x += p_vector.x * PLAYER_SPEED;
-		p.y += p_vector.y * PLAYER_SPEED;
-		printf("x: %.2f, y: %.2f, degrees: %.2f\n", p.x, p.y, p.angle);
-	}
-	if (CP_Input_KeyDown(KEY_A)) {
-		p.angle -= PLAYER_ROT_SPEED;
-		printf("x: %.2f, y: %.2f, degrees: %.2f\n", p.x, p.y, p.angle);
-	}
-	if (CP_Input_KeyDown(KEY_S)) {
-		p.x -= p_vector.x * PLAYER_SPEED;
-		p.y -= p_vector.y * PLAYER_SPEED;
-		printf("x: %.2f, y: %.2f, degrees: %.2f\n", p.x, p.y, p.angle);
-	}
-	if (CP_Input_KeyDown(KEY_D)) {
-		p.angle += PLAYER_ROT_SPEED;
-		printf("x: %.2f, y: %.2f, degrees: %.2f\n", p.x, p.y, p.angle);
-	}
-}
+//Mob Stuff
+#define NO_WAVES 5
+#define Spawn_Timer 2
+#define SpawnAreaOffset 550
+
+int StartMobQuantity = 1000, cWaveID = 0,currentWaveCost = 50;
+int currentSec;
+int WaveIDQueue[NO_WAVES], totalWave = 0;
+WaveTrack waveTrack[NO_WAVES], *cWave; // pause state for the game when paused.
+int isPaused;
+
 
 void map_Init(void) {
-	CP_System_SetWindowSize(MAP_SIZE, MAP_SIZE);
-	p.x = 200;
-	p.y = 400;
-	p.angle = 30;
 	
+	CP_System_SetWindowSize(MAP_SIZEX, MAP_SIZEY);
+	//CP_System_Fullscreen();
+	isPaused = 0;
 
 	grey = CP_Color_Create(111, 111, 111, 255);
 	white = CP_Color_Create(255, 255, 255, 255);
+	red = CP_Color_Create(255, 0, 0, 255);
+	green = CP_Color_Create(0, 255, 0, 255);
+	blue = CP_Color_Create(0, 0, 255, 255);
 
-	Bulletinit();
+	start_vector = CP_Vector_Zero();
+	// Initialize the coordinates and stats of the player
+	P = (Player){ start_vector.x, start_vector.y, 90, PLAYER_HP, PLAYER_SPEED, PLAYER_DAMAGE, ATK_SPEED, DEFENSE, PLAYER_HITBOX};
+	//Initialise empty arrays of possible waves
+	for (int i = 0; i < NO_WAVES; i++) {
+		waveTrack[i] = (WaveTrack){ 0, 0, 0, StartMobQuantity, malloc(sizeof(Mob) * StartMobQuantity), SpawnAreaOffset};
+		WaveIDQueue[i] = -1;
+	}
+	CameraDemo_Init();
 }
 
 void map_Update(void) {
-	p_vector = AngleToVector(CP_Math_Radians(p.angle));
-	CP_Graphics_ClearBackground(grey);
-
-	CP_Settings_Fill(white);
-	CP_Graphics_DrawEllipseAdvanced(p.x, p.y, PLAYER_HITBOX, PLAYER_HITBOX, p.angle);
-	
-	// Directional Inputs for player
-	player_movement(p_vector);
-
-	//Test shoot
-	if (CP_Input_KeyDown(KEY_SPACE))
-	{
-		BulletShoot(p.x, p.y, p.angle, 1);
+	int* checkPause = &isPaused;
+	show_healthbar(P);
+	if (isPaused) {
+		option_screen(checkPause);
+		if (CP_Input_KeyTriggered(KEY_ESCAPE))
+			isPaused = 0;
 	}
-	BulletDraw();
+	else {
+		if (CP_Input_KeyTriggered(KEY_ESCAPE))
+			isPaused = 1;
+		if (CP_Input_KeyDown(KEY_H)) {
+			P.SPEED *= 1.1;
+		}
+	
+		CameraDemo_Update(&P);
+		if ((int)CP_System_GetSeconds() != currentSec) {
+			currentSec = (int)CP_System_GetSeconds();
+			//Every SpawnTime interval spawn wave
+			//printf("Generating Wave\n");
+			if (currentSec % Spawn_Timer == 0) {
+				//printf("Queue: %d %d %d %d\n", WaveIDQueue[0], WaveIDQueue[1], WaveIDQueue[2], WaveIDQueue[3]);
+				for (int i = 0; i < NO_WAVES; i++) {
+					//At defauly WaveIDQueue = {-1,-1,-1,-1}
+					//Whereby each "-1" == to available slot to generate waves
+					if (WaveIDQueue[i] == -1) {
+						totalWave += 1;
+						waveTrack[i].waveCost = currentWaveCost;
+						//Generate Waves at avaiable slot 
+						GenerateWaves(&waveTrack[i], &P);
+						//Edit increment to spawn more mob each waves
+						currentWaveCost += 150;
+						
+						WaveIDQueue[i] = totalWave;
+						int r = CP_Random_RangeInt(0, 2);
+						//Assign random color to each wave
+						switch (r) {
+						case 0:
+							waveTrack[i].waveColor = red;
+							break;
+						case 1:
+							waveTrack[i].waveColor = green;
+							break;
+						case 2:
+							waveTrack[i].waveColor = blue;
+							break;
+						}
+						//printf("Created wave at %d\n", 1);
+						break;
+					}
+				}
+			}
+		}
+		
+		int MobC = 0;
+		for (int w = 0; w < NO_WAVES; w++) {
+			cWave = &waveTrack[w];
+			if (WaveIDQueue[w] != -1) {
+				if (cWave->CurrentCount == 0) {
+					//if all mobs are dead
+					//return index to wave queue
+					WaveIDQueue[w] = -1;
+					//skip rest of algo
+					continue;
+				}
+				//printf("Spawning wave: %d\n", w);
+				for (int i = 0; i < cWave->MobCount; i++) {
+					Mob* cMob = &cWave->arr[i];
+					//Only bother handle mobs that are alive
+					//Dead = 0, Alive = 1
+					if (cMob->Status == 0) {
+						continue;
+					}
+					MobC += 1;
+					MobPathFinding(cMob, P.x, P.y);
+					MobCollision(cMob, &P);
+					if (cMob->Status == 0) {
+						cWave->CurrentCount -= 1;
+						continue;
+					}
+					DrawMob(cMob, cWave->waveColor.r, cWave->waveColor.g, cWave->waveColor.b);
+				}
+			}
+		}
+		//printf("MobCount: %d |\tFPS: %f \n", MobC, CP_System_GetFrameRate());
+	}
+	
+	
 
+	if (CP_Input_KeyTriggered(KEY_SPACE))
+		CP_Engine_Terminate();
+
+	
 }
 
 void map_Exit(void) {

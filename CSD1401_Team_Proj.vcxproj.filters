@@ -7,35 +7,52 @@
     <ClCompile Include="Src\main.c">
       <Filter>source</Filter>
     </ClCompile>
-    <ClCompile Include="Src\SourceFile.c">
-      <Filter>source</Filter>
-    </ClCompile>
     <ClCompile Include="Src\game.c">
       <Filter>Source Files</Filter>
     </ClCompile>
-    <ClCompile Include="Src\test.c" />
     <ClCompile Include="Src\map.c">
       <Filter>source</Filter>
     </ClCompile>
-    <ClCompile Include="Src\bullet.c">
+    <ClCompile Include="Src\Camera.c">
+      <Filter>source</Filter>
+    </ClCompile>
+    <ClCompile Include="Src\player.c">
+      <Filter>source</Filter>
+    </ClCompile>
+    <ClCompile Include="Src\Playground.c">
+      <Filter>Source Files</Filter>
+    </ClCompile>
+    <ClCompile Include="Src\game.c">
+      <Filter>Source Files</Filter>
+    <ClCompile Include="Src\utils.c">
       <Filter>source</Filter>
     </ClCompile>
   </ItemGroup>
   <ItemGroup>
-    <ClInclude Include="Inc\game.h">
-      <Filter>header</Filter>
-    </ClInclude>
-    <ClInclude Include="Inc\SourceFile.h">
-      <Filter>header</Filter>
-    </ClInclude>
-    <ClInclude Include="Inc\game.h">
+    <ClInclude Include="Inc\Mob.h">
       <Filter>Header Files</Filter>
     </ClInclude>
-    <ClInclude Include="Inc\test.h" />
+    <ClInclude Include="Inc\Playground.h">
+      <Filter>Header Files</Filter>
+    </ClInclude>
+    <ClInclude Include="Extern\CProcessing\inc\cprocessing.h">
+      <Filter>Header Files</Filter>
+    <ClInclude Include="Inc\game.h">
+      <Filter>header</Filter>
+    </ClInclude>
+    <ClInclude Include="Extern\CProcessing\inc\cprocessing_common.h">
+      <Filter>Header Files</Filter>
+    </ClInclude>
     <ClInclude Include="Inc\map.h">
       <Filter>header</Filter>
     </ClInclude>
-    <ClInclude Include="Inc\bullet.h">
+    <ClInclude Include="Inc\Camera.h">
+      <Filter>header</Filter>
+    </ClInclude>
+    <ClInclude Include="Inc\player.h">
+      <Filter>header</Filter>
+    </ClInclude>
+    <ClInclude Include="Inc\utils.h">
       <Filter>header</Filter>
     </ClInclude>
   </ItemGroup>
@@ -49,5 +66,15 @@
     <Filter Include="source">
       <UniqueIdentifier>{8fbe0212-ba85-48b8-8d8c-19621f03f4e7}</UniqueIdentifier>
     </Filter>
+  </ItemGroup>
+  <ItemGroup>
+    <None Include="Extern\CProcessing\lib\x64\CProcessing.dll" />
+    <None Include="Extern\CProcessing\lib\x64\CProcessingd.dll" />
+    <None Include="Extern\CProcessing\lib\x64\fmod.dll" />
+    <None Include="Extern\CProcessing\lib\x64\fmodL.dll" />
+  </ItemGroup>
+  <ItemGroup>
+    <Library Include="Extern\CProcessing\lib\x64\CProcessing.lib" />
+    <Library Include="Extern\CProcessing\lib\x64\CProcessingd.lib" />
   </ItemGroup>
 </Project>
