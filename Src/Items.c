@@ -25,9 +25,29 @@ void CreateItemEffect(Item* i) {
 };
 
 
-void IAffectPlayer(Item* i, Player* p) {
+void IAffectPlayer(Item* i, Player* p, int currentSec) {
+	
+	if (currentSec - i->Start < i->Duration) {
+		switch (i->Type) {
 
+		}
+	}
 }
 
+void GenerateItem(ItemTracker* tracker, int currentSec) {
+	if (tracker->arrSize <= tracker->itemCount) {
+		//Expand array
+	}
+	for (int i = 0; i < tracker->arrSize;i++) {
+		//Check for Available Slot in arr
+		if (NULL == tracker->arr[i].Type) {
+			//Create Item Object
+		}
+		if (-1 == tracker->arr[i].Type) {
+			//Update Item Object
+		}
+
+	}
+}
 
 
