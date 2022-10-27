@@ -12,13 +12,13 @@
 
 
 
-int collide_mob(Player p, Mob mob) {
-	if (CP_Math_Distance(p.x, p.y, mob.x, mob.y) < p.HITBOX / 2 + mob.hitbox / 2) {
-		p.CURRENT_HP -= 5;
-		return 1;
-	}
-	return 0;
-}
+//int collide_mob(Player p, Mob mob) {
+//	if (CP_Math_Distance(p.x, p.y, mob.x, mob.y) < p.HITBOX / 2 + mob.hitbox / 2) {
+//		p.CURRENT_HP -= 5;
+//		return 1;
+//	}
+//	return 0;
+//}
 
 int collide_item(Player p, Items item) {
 	if (CP_Math_Distance(p.x, p.y, item.x, item.y) < p.HITBOX / 2 + item.hitbox / 2) {
