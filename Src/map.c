@@ -1,7 +1,7 @@
 #include "map.h"
 #include "cprocessing.h"
-#include <stdio.h>
 #include <stdlib.h>
+#include <stdio.h>
 #include "Camera.h"
 #include "player.h"
 #include "utils.h"
@@ -25,15 +25,19 @@ CP_Vector start_vector;
 CP_Color grey, black, red, green, blue, white;
 
 //Mob Stuff
-#define NO_WAVES 5
+#define NO_WAVES 6
 #define Spawn_Timer 1
+#define Wave_Timer 5
 #define SpawnAreaOffset 110
 
-int StartMobQuantity = 1000, cWaveID = 0,currentWaveCost = 10;
-int currentSec = 0;
-int WaveIDQueue[NO_WAVES], totalWave = 0;
-WaveTrack waveTrack[NO_WAVES], *cWave; // pause state for the game when paused.
 Mob* cMob;
+int StartMobQuantity = 100, cWaveID = 0,currentWaveCost, MaxMob;
+int currentSec = 0;
+int WaveIDQueue[NO_WAVES];
+WaveTrack waveTrack[NO_WAVES], *cWave; // pause state for the game when paused.
+
+//Might be useful variable for Waves Tracking
+int totalWave = 0, MobCount[NO_WAVES];
 int isPaused;
 
 
@@ -52,9 +56,20 @@ void map_Init(void) {
 	start_vector = CP_Vector_Zero();
 	// Initialize the coordinates and stats of the player
 	P = (Player){ start_vector.x, start_vector.y, 90, PLAYER_HP, PLAYER_SPEED, PLAYER_DAMAGE, ATK_SPEED, DEFENSE, PLAYER_HITBOX}; //Initialise empty arrays of possible waves
+	currentWaveCost = 10;
+	MaxMob = 200;
 	for (int i = 0; i < NO_WAVES; i++) {
-		waveTrack[i] = (WaveTrack){ 0, 0, 0, StartMobQuantity, malloc(sizeof(Mob) * StartMobQuantity), SpawnAreaOffset};
-		
+		waveTrack[i] = (WaveTrack){
+			MaxMob,
+			0,
+			0,
+			0, 
+			malloc(sizeof(Mob*) * StartMobQuantity), 
+			StartMobQuantity, 
+			SpawnAreaOffset,
+			white
+		};
+		InitWavesArr(&waveTrack[i]);
 		WaveIDQueue[i] = -1;
 	}
 	CameraDemo_Init();
@@ -77,39 +92,44 @@ void map_Update(void) {
 		CameraDemo_Update(&P);
 		if ((int)CP_System_GetSeconds() != currentSec) {
 			currentSec = (int)CP_System_GetSeconds();
-			//printf("Current Sec: %d\n", 1);
+			printf("\n\tCurrent Sec: %d | Current FPS:%f\n", currentSec, CP_System_GetFrameRate());
 			//Every SpawnTime interval spawn wave
+			if (currentSec % Wave_Timer == 0) {
+				//Growth Per Wave
+				MaxMob += 150;
+				//printf("Max Mobs Increased to %d\n", MaxMob);
+			}
 			if (currentSec % Spawn_Timer == 0) {
-				//printf("Generating Wave\n");
+				//Growth Per Wave
+				currentWaveCost += 50;
+				/*
+				Generate Waves
+				-) Update/ Reference == Require Pointers
+				===== Params ================
+					-> Player (Reference)
+					-> WaveTrack Arr (Update)
+					-> WaveID Queue (Update)
+					-> No of spawnable Waves
+					-> WaveCost Growth
+					-> MaxMob Growth
+				===== Optional =============== (May be deleted if unnecessary)
+					-> Total Wave Count (Update)
+					-> Mob Count (Update)
+				*/
+				GenerateWaves(&P, &waveTrack, &WaveIDQueue, NO_WAVES,currentWaveCost, MaxMob, &totalWave, &MobCount);
+				//Result Print Start
+				printf("\nCurrent Wave: %d\nWave Queue: ", totalWave);
 				for (int i = 0; i < NO_WAVES; i++) {
-					//At defauly WaveIDQueue = {-1,-1,-1,-1}
-					//Whereby each "-1" == to available slot to generate waves
-					if (WaveIDQueue[i] == -1) {
-						totalWave += 1;
-						waveTrack[i].waveCost = currentWaveCost;
-						//Generate Waves at avaiable slot 
-						GenerateWaves(&waveTrack[i], &P);
-						//Edit increment to spawn more mob each waves
-						currentWaveCost += 250;
-						
-						WaveIDQueue[i] = totalWave;
-						int r = CP_Random_RangeInt(0, 2);
-						//Assign random color to each wave
-						switch (r) {
-						case 0:
-							waveTrack[i].waveColor = red;
-							break;
-						case 1:
-							waveTrack[i].waveColor = green;
-							break;
-						case 2:
-							waveTrack[i].waveColor = blue;
-							break;
-						}
-						break;
-					}
+					printf("| %d ", WaveIDQueue[i]);
 				}
-			//	printf("Queue: %d %d %d %d\n", WaveIDQueue[0], WaveIDQueue[1], WaveIDQueue[2], WaveIDQueue[3]);
+				printf("\nMob Count: ");
+				int tMob = 0;
+				for (int i = 0; i < NO_WAVES; i++) {
+					printf("| %d ", MobCount[i]);
+					tMob += MobCount[i];
+				}
+				printf(" |Total: %d\n", tMob);
+				//Result Print End
 			}
 		}
 		
@@ -126,7 +146,7 @@ void map_Update(void) {
 				}
 				//printf("Spawning wave: %d\n", w);
 				for (int i = 0; i < cWave->MobCount; i++) {
-					cMob = &cWave->arr[i];
+					cMob = cWave->arr[i];
 					//Only bother handle mobs that are alive
 					//Dead = 0, Alive = 1
 					if (cMob->Status == 0) {
@@ -137,12 +157,14 @@ void map_Update(void) {
 					MobCollision(cMob, &P);
 					if (cMob->Status == 0) {
 						cWave->CurrentCount -= 1;
+						MobCount[w] -= 1;
 						continue;
 					}
 					DrawMob(cMob, cWave->waveColor.r, cWave->waveColor.g, cWave->waveColor.b);
 				}
 			}
 		}
+		//printf("Here\n");
 		//printf("MobCount: %d |\tFPS: %f \n", MobC, CP_System_GetFrameRate());
 	}
 	
@@ -158,5 +180,4 @@ void map_Exit(void) {
 	for (int i = 0; i < NO_WAVES; i++) {
 		free(waveTrack[i].arr);
 	}
-	free(cMob);
 }

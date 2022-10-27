@@ -3,6 +3,7 @@
 #define MOB_H
 #include "player.h"
 
+#define MobTypes 5
 #define SmallMob 0
 #define MediumMob 1
 #define BigMob 2
@@ -29,17 +30,19 @@ typedef struct Mob {
 	int Title;
 	MobStats BaseStats;
 	MobStats CStats;
-	Coor coor;
+	float x;
+	float y;
 	//Dead = 0 | Alive = 1
 	int Status; 
 } Mob;
 
 typedef struct WaveTracker {
+	int MaxMob;
 	int MobCount;
 	int CurrentCount;
-	int waveCost;
+	int WaveCost;
+	Mob** arr;
 	int arrSize;
-	Mob* arr;
 	int spawnOffset;
 	CP_Color waveColor;
 }WaveTrack;
@@ -66,11 +69,11 @@ typedef struct WaveTracker {
 //*/
 //
 
-
+void InitWavesArr(WaveTrack* tracker);
 void CreateBaseStat(MobStats* ms, int type);
 void CreateMob(Mob* m, int Title, MobStats *Base, Player*player, int offSet);
-void GenerateWaves(WaveTrack* tracker, Player* player);
-
+void GenerateMobs(WaveTrack* tracker, Player* player);
+void GenerateWaves(Player* P, WaveTrack* queue, int* queueID, int WavesNo, int CostGrowth, int MaxMobGrowth,int *TotalWaveCount,  int* MobCount);
 
 void DrawMob(Mob *mob, int r, int g, int b);
 void MobPathFinding(Mob* mob, float tX, float tY);
