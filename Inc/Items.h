@@ -3,6 +3,12 @@
 #define ITEMS_H
 #include "player.h"
 
+#define Empty -1
+#define EXP 0
+#define StatBoost 1 //random stat boost
+
+
+
 typedef struct ItemStat {
 	int Hitbox;
 	int Start;
@@ -11,8 +17,9 @@ typedef struct ItemStat {
 		Apply Effect
 	*/
 	int Duration;// In Secs //-1 == Permanent
-	//Effect Type
-	int Type;
+	int Type;//Effect Type
+	int Modifier; //Stat Modified amt
+
 	//Coordinates
 	double x;
 	double y;

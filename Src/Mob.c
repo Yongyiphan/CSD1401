@@ -104,6 +104,9 @@ void GenerateWaves(WaveTrack *tracker, Player*player) {
 	//waveCost = Amt of "currency" the func will take to generated random types of mobs per wave
 	int gMobCount = 0, waveCost = tracker->waveCost;
 	int Reused = 0;
+	if (tracker->arr == NULL) {
+		printf("Here\n");
+	}
 
 	//int xLeft = 0, xRight = CP_System_GetWindowWidth(), yTop = 0, yBtm = CP_System_GetWindowHeight();
 	while (waveCost > 0) {
@@ -121,9 +124,11 @@ void GenerateWaves(WaveTrack *tracker, Player*player) {
 			if (temp != NULL) {
 				//IF realloc is successful
 				//Update tracker with new parameters
+				//free(tracker->arr);
 				tracker->arr = temp;
 				tracker->arrSize = nQuantity;
 			}
+			free(temp);
 			printf("\n\tArray Expended");
 			printf("\n\tNew Array Size: %d\n", tracker->arrSize);
 			continue;

@@ -10,14 +10,14 @@
 #define BigBoss 4
 
 typedef struct Coordinates {
-	double x;
-	double y;
+	float x;
+	float y;
 }Coor;
 
 typedef struct MobBase {
-	int HP;
-	int DEF;
-	int Speed;
+	float HP;
+	float DEF;
+	float Speed;
 
 	int Range;
 	int Dmg;

@@ -1,7 +1,7 @@
 #pragma once
 
 // Create options screen
-void option_screen(void);
+void option_screen(int*);
 
 
 /*

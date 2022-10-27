@@ -8,6 +8,7 @@
 
 
 
+
 void CreateItemEffect(Item* i) {
 	//Get Random chance generator
 	float RNG = CP_Random_RangeFloat(0, 1), DropChance;
@@ -46,7 +47,6 @@ void GenerateItem(ItemTracker* tracker, int currentSec) {
 		if (-1 == tracker->arr[i].Type) {
 			//Update Item Object
 		}
-
 	}
 }
 
