@@ -1,6 +1,6 @@
 #pragma once
 
-typedef struct Player {
+typedef struct Player{
 	float x;
 	float y;
 	float CURRENT_HP;
@@ -38,4 +38,14 @@ int collide_bullet(Player, Bullet);
 
 void shoot_bullet(Bullet);
 
-void show_healthbar(Player);
+/*
+Shows healthbar of the player. Creates 2 rectangles, one specifying current HP, and the other max HP.
+Current HP is always proportional to the length of max HP.
+*/
+void show_healthbar(Player*);
+
+// Create a death screen when player is dead.
+void death_screen(void);
+
+
+//void player_dead();
