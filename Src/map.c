@@ -135,6 +135,14 @@ void map_Update(void) {
 					MobC += 1;
 					MobPathFinding(cMob, P.x, P.y);
 					MobCollision(cMob, &P);
+					int bchecker;
+					if ((bchecker = BulletCollision(cMob->coor.x, cMob->coor.y, cMob->CStats.size)) >= 0 && bullet[bchecker].friendly == BULLET_PLAYER)
+					{
+						cMob->CStats.HP -= bullet[bchecker].damage;
+						if (cMob->CStats.HP <= 0)
+							cMob->Status = 0;
+						bullet[bchecker].exist = FALSE;
+					}
 					if (cMob->Status == 0) {
 						cWave->CurrentCount -= 1;
 						continue;
@@ -146,9 +154,9 @@ void map_Update(void) {
 		//printf("MobCount: %d |\tFPS: %f \n", MobC, CP_System_GetFrameRate());
 		
 		if (CP_Input_MouseDown(MOUSE_BUTTON_LEFT))
-		{ //Current issue, playermovement causes degree to go off
-			mousex = CP_Input_GetMouseX();
-			mousey = CP_Input_GetMouseY();
+		{
+			mousex = CP_Input_GetMouseWorldX();
+			mousey = CP_Input_GetMouseWorldY();
 			float bulletangle = 0;
 			bulletangle = point_point_angle(P.x, P.y, mousex, mousey);
 			BulletShoot(P.x, P.y, bulletangle, 1, BULLET_PLAYER);

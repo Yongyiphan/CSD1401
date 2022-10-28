@@ -24,7 +24,7 @@ int collide_item(Player p, Items item) {
 	return 0;
 }
 
-int collide_bullet(Player p, Bullet bullet) {
+/*int collide_bullet(Player p, Bullet bullet) {
 	if (CP_Math_Distance(p.x, p.y, bullet.x, bullet.y) < p.HITBOX / 2 + bullet.hitbox / 2) {
 		p.CURRENT_HP -= 5;
 		return 1;
@@ -34,7 +34,7 @@ int collide_bullet(Player p, Bullet bullet) {
 
 void shoot_bullet(Bullet bullet) {
 	
-}
+} */
 
 void show_healthbar(Player p) {
 	float x_coord = 50;

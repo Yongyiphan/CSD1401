@@ -25,17 +25,17 @@ typedef struct Items {
 
 }Items;
 
-typedef struct Bullet {
+/*typedef struct Bullet {
 	float hitbox;
 	float x;
 	float y;
 
-}Bullet;
+}Bullet; */
 
 //int collide_mob(Player, Mob);
 int collide_item(Player, Items);
-int collide_bullet(Player, Bullet);
+//int collide_bullet(Player, Bullet);
 
-void shoot_bullet(Bullet);
+//void shoot_bullet(Bullet);
 
 void show_healthbar(Player);

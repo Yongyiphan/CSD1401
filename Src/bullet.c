@@ -2,34 +2,9 @@
 #include "cprocessing.h"
 #include <stdio.h>
 #include <math.h>
-
-#define BULLET_CAP 50
-#define BULLET_MOB 0
-#define BULLET_PLAYER 1
-#define TRUE 1
-#define FLASE 0
-#define PBULLET_NORMAL 1
-#define BULLET_TEST 2
+#include "bullet.h"
 
 static int bulletcounter = 0;
-
-typedef struct Bullet
-{
-	float x;
-	float y;
-	float degree;
-	float speed;
-	float size;
-	float traveldistance;
-	float maxdistance;
-	float timer;
-	float damage;
-	int type;
-	int friendly;
-	int exist;
-}Bullet;
-
-Bullet bullet[BULLET_CAP];
 
 void BulletReset() //Reset active bullet
 {
@@ -110,5 +85,18 @@ void BulletDraw(void) //Draws the location of all active bullets
 		}
 
 	}
+}
+
+int BulletCollision(float targetx, float targety, float size)
+{
+	float distance = 0;
+	for (int i = 0; i < BULLET_CAP; i++) {
+		if (bullet[i].exist == FALSE)
+			continue;
+		distance = CP_Math_Distance(bullet[i].x, bullet[i].y, targetx, targety);
+		if (distance < size)
+			return i;
+	}
+	return -1; // for no collision
 }
 

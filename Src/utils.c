@@ -80,9 +80,6 @@ float point_point_angle(float x1, float y1, float x2, float y2)
 	tempy = y2 - y1;
 	temp = atan2(tempy, tempx);
 	temp = CP_Math_Degrees(temp);
-	if (tempy < 0)
-		temp += 360;
-	printf("Angle: %f, %f, %f\n", temp, tempx, tempy);
 	return temp;
 }
 
