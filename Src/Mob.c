@@ -11,7 +11,12 @@
 
 //Pool of Mob Types
 //Edit here for different Mob Types
-
+/*
+@brief		Function to update mob's base stats based off type given
+@params		cStat	-> current mob's base stats
+			type	-> types of values to update with.
+@returns	Updated base stats with new values
+*/
 int MobCosts[MobTypes] = { 1,2,3, 4, 5};
 void CreateBaseStat(MobStats* cStat, int type) {
 	switch (type) {
@@ -75,22 +80,38 @@ void CreateBaseStat(MobStats* cStat, int type) {
 		
 	}
 }
-//Mob CreateMob(int Title, MobStats Base,int xLeft, int xRight, int yTop,int yBtm , int offSet)
-void CreateMob(Mob*m, int Title, MobStats *Base, Player*player, int offSet)
+/*
+@brief		Function to Update mob with relevant information
+@brief		m	-> target mob to update values with
+			Base	-> base stats generated
+			Player	-> used to determine where mobs can be spawn
+			offset	-> radius of which mobs cannot be spawned in
+@return		Updated Mob struct
+*/
+#include <math.h>
+
+const double PI = 22.0 / 7.0;
+void CreateMob(Mob*m, MobStats *Base, Player*player, int offSet)
 {
-	int SWidth = CP_System_GetWindowWidth(), SHeight = CP_System_GetWindowHeight();
-	CP_Vector centerOffset = CP_Vector_Set(SWidth / 2.0f, SHeight / 2.0f);
+		
+
+	float BoundScale = 1.5f, MaxRadius = CP_Math_Distance(0, 0, CP_System_GetWindowWidth(), CP_System_GetWindowHeight())* BoundScale;
+	//Uncomment below if you want to manually set spawn radius
+	//MaxRadius = 600;
+	
+
 	//Assume Player center of spawnable area
-	//Player coor = xRight - xLeft, yBtm - yTop
-	float xLeft = player->x - centerOffset.x , xRight = player->x + centerOffset.x, yTop = player->y - centerOffset.y, yBtm = player->y + centerOffset.y, Diff = 0.0;
-	float nx, ny;
+	float nx, ny, rTheta, r, Diff = 0.0;
 	do {
-		nx = CP_Random_RangeFloat(xLeft, xRight);
-		ny = CP_Random_RangeFloat(yTop, yBtm);
+		/*Formula for generating points in circle*/
+		rTheta = CP_Random_RangeFloat(0, 1) * 2 * PI;
+		//eqn = sqrt( random() * (MaxRadius**2 - MinRadius**2) + MinRadius**2 ) <- MinRadius == offSet
+		r = sqrt(CP_Random_RangeFloat(0, 1) * (pow(MaxRadius, 2) - pow(offSet, 2)) + pow(offSet, 2));
+		nx = player->x + r * cos(rTheta);
+		ny = player->y + r * sin(rTheta);
 		Diff = CP_Math_Distance(nx, ny, player->x, player->y);
 	} while (Diff <= offSet);
 
-	m->Title = Title;
 	m->BaseStats = *Base;
 	m->CStats = *Base;
 	m->x = nx;
@@ -98,14 +119,20 @@ void CreateMob(Mob*m, int Title, MobStats *Base, Player*player, int offSet)
 	m->Status = 1;
 }
 
+/*
+@brief		Initialise Mob arrays with Blank Mobs with blank MobStats
+@params		WaveTrack struct pointer to be filled with blank mobs
+@returns	WaveTrack's array to be filled with blank mobs (to be modified/updated when needed)
+*/
 void InitWavesArr(WaveTrack* tracker) {
 	MobStats bs = (MobStats){
 		0,0,0,0,0,0
 	};
 
 	for (int w = 0; w < tracker->arrSize;w++) {
+		//Allocate memory to it
 		tracker->arr[w] = malloc(sizeof(Mob));
-		
+		//Fill each mob pointers with data
 		tracker->arr[w]->Title = w;
 		tracker->arr[w]->BaseStats = bs;
 		tracker->arr[w]->CStats = bs;
@@ -113,16 +140,17 @@ void InitWavesArr(WaveTrack* tracker) {
 		tracker->arr[w]->y = 0;
 		tracker->arr[w]->Status = 0;
 	}
-	//for (int w = 0; w < tracker->arrSize; w++) {
-	//	printf("%d\n", tracker->arr[w]->Title);
-	//}
 }
 
 //Function that generated Mobs based off a cost system
-// Input parameters will be a wavetrack struct (refer to Mob.h)
-// xLeft, xRight, yTop, yBtm denotes the areas of which mobs can be generated in
-//OffSet Prevents mobs from being spawned in area around Player
-//void GenerateWaves(WaveTrack *tracker, int xLeft, int xRight, int yTop, int yBtm, int offSet) {
+/*
+@brief		Generates Mobs, Fills up a single array with mobs
+@params		tracker ->	a struct containing wave details, 
+						wave array for mobs and 
+						spawn offset area around player
+			player	->	contains player's coordinates
+@returns	Fills in a array of Mob pointers pointing to blank mob objects (created in InitWaveArr())
+*/
 void GenerateMobs(WaveTrack* tracker, Player* player) {
 	int MobC = 0, cost = tracker->WaveCost, reused = 0, randM, randMCost;
 
@@ -158,8 +186,9 @@ void GenerateMobs(WaveTrack* tracker, Player* player) {
 		}
 
 		Mob* cMob = tracker->arr[MobC];
+		cMob->Title = randM;
 		CreateBaseStat(&cMob->BaseStats, randM);
-		CreateMob(cMob, randM, &cMob->BaseStats, player, tracker->spawnOffset);
+		CreateMob(cMob, &cMob->BaseStats, player, tracker->spawnOffset);
 		reused += 1;
 		cost -= randMCost;
 		MobC += 1;
@@ -168,20 +197,37 @@ void GenerateMobs(WaveTrack* tracker, Player* player) {
 	tracker->CurrentCount = MobC;
 }
 
-
+/*
+@brief		Generates Waves at intervals to spanw mobs
+@params		Player	-> Contains reference to player struct (used for generated mobs)
+			WaveTrack queue ->	Contains an array (1) of array of pointers to mobs structs
+								Each array (1) refering to a wave of mobs
+			queueID	-> Array of int (same size as queue) which array (1) of queue is empty to generate mobs in
+			WavesNo	-> Size of queue & queueID
+			CostGrowth	-> The cost which algo can spend to generate mobs for waves
+			MaxMobGrowth	-> Number which limits the maximum number of mobs that can be generated per wave
+			WaveCount	-> Current Wave number
+			MobCount	-> Array of Int (same size as queue) that contains mob count for every current waves of mobs stores in queue
+@returns	If theres an empty slot in queueID
+				Fill array at that position in queue with mobs based of CostGrowth, Limited by MaxMobGrowth
+				Updates WaveCount
+				Updates MobCount
+			Else:
+				Nothing Happens
+*/
 void GenerateWaves(Player*P, WaveTrack* queue, int* queueID, int WavesNo, int CostGrowth, int MaxMobGrowth, int* WaveCount, int*MobCount) {
 
 	for (int i = 0; i < WavesNo; i++) {
-		//At defauly WaveIDQueue = {-1,-1,-1,-1}
+		//At default WaveIDQueue = {-1,-1,-1,-1}
 		//Whereby each "-1" == to available slot to generate waves
 		if (queueID[i] == -1) {
-			*WaveCount += 1;
-			queue[i].MaxMob = MaxMobGrowth;
-			queue[i].WaveCost = CostGrowth;
+			*WaveCount += 1; //Increment WaveCount
+			queue[i].MaxMob = MaxMobGrowth; //Update Max Mob limit
+			queue[i].WaveCost = CostGrowth;	//Update Value which allows spawning of mobs
 			//Generate Waves at avaiable slot 
 			GenerateMobs(&queue[i], P);
 			//Edit increment to spawn more mob each waves
-			queueID[i] = *WaveCount;
+			queueID[i] = *WaveCount; //Update waves of queue at [i]
 			MobCount[i] = queue[i].MobCount;
 
 			//Wave Color
@@ -200,11 +246,86 @@ void GenerateWaves(Player*P, WaveTrack* queue, int* queueID, int WavesNo, int Co
 			}
 			break;
 		}
-		//printf("\nWave Index: %d\tQueue: %d \t",i, WaveIDQueue[i]);
-		//printf("Mob Count: %d\n", MobCount[i]);
 	}
 }
 
+
+/*
+@brief		Algo to determine how each mobs move
+@params		mob	-> target mob to update movement
+			tX	-> target Position on x axis
+			tY	-> target Position on y axis
+@returns	Update Mob with new coordinates values
+*/
+void MobPathFinding(Mob* mob, float tX, float tY) {
+	CP_Vector v;
+	switch (mob->Title) {
+	default:
+		v = CP_Vector_Normalize(CP_Vector_Set(mob->x - tX, mob->y - tY));
+		mob->x -= v.x * mob->CStats.Speed;
+		mob->y -= v.y * mob->CStats.Speed;
+		break;
+	}
+}
+
+/*
+@brief		Function to draw mob
+@params		Mob	-> pointer to target mob
+			r, g, b	-> RGB values for CP_Color_Create //will change to image/sprite
+@returns	Nothing
+*/
+void DrawMob(Mob* mob, int r, int g, int b)
+{
+	//Draw Circle
+	CP_Settings_StrokeWeight(0.5f);
+	int alpha = (mob->CStats.HP / mob->BaseStats.HP) * 255;
+	CP_Settings_Fill(CP_Color_Create(r,g,b, alpha));
+	CP_Graphics_DrawCircle((double) mob->x, (double) mob->y, mob->CStats.size);
+}
+
+/*
+@brief		Handles Collision between Mobs and Player
+@params		Mob	-> current mob obj
+			Player	-> target player location
+@returns	Nothing
+*/
+void MobCollision(Mob* mob, Player *player) {
+	//Drop items?
+	//Drop HP?
+	if (CP_Math_Distance(mob->x, mob->y, player->x, player->y) <= mob->CStats.size + player->HITBOX) {
+		mob->CStats.HP -= player->DAMAGE;
+		player->CURRENT_HP -= mob->CStats.Dmg;
+	}
+	if (mob->CStats.HP <= 0) {
+		mob->Status = 0;
+	}
+}
+
+
+void PrintWaveStats(int* CWaveCount,int NO_WAVES, int* WaveIDQueue, int* MobCount) {
+
+	//Result Print Start
+	printf("\nCurrent Wave: %d\nWave Queue: ", *CWaveCount);
+	for (int i = 0; i < NO_WAVES; i++) {
+		printf("| %d ", WaveIDQueue[i]);
+	}
+	printf("\nMob Count: ");
+	int tMob = 0;
+	for (int i = 0; i < NO_WAVES; i++) {
+		printf("| %d ", MobCount[i]);
+		tMob += MobCount[i];
+	}
+	printf(" |Total: %d\n", tMob);
+	//Result Print End
+}
+
+
+
+
+/*
+			Old Code(Scraped)
+			  Ignore Below
+*/
 //void GenerateWaves(WaveTrack *tracker, Player*player) {
 //	//gMobCount = Generated Mob Count throughout this func
 //	//waveCost = Amt of "currency" the func will take to generated random types of mobs per wave
@@ -275,37 +396,3 @@ void GenerateWaves(Player*P, WaveTrack* queue, int* queueID, int WavesNo, int Co
 //	printf("Mobs Resused: %d\n", Reused);
 //	printf("New Mobs Created: %d\n", gMobCount - Reused);
 //}
-
-
-void MobPathFinding(Mob* mob, float tX, float tY) {
-	CP_Vector v;
-	switch (mob->Title) {
-	default:
-		v = CP_Vector_Normalize(CP_Vector_Set(mob->x - tX, mob->y - tY));
-		mob->x -= v.x * mob->CStats.Speed;
-		mob->y -= v.y * mob->CStats.Speed;
-		break;
-	}
-}
-
-void DrawMob(Mob* mob, int r, int g, int b)
-{
-	//Draw Circle
-	CP_Settings_StrokeWeight(0.5f);
-	int alpha = (mob->CStats.HP / mob->BaseStats.HP) * 255;
-	CP_Settings_Fill(CP_Color_Create(r,g,b, alpha));
-	CP_Graphics_DrawCircle((double) mob->x, (double) mob->y, mob->CStats.size);
-}
-
-void MobCollision(Mob* mob, Player *player) {
-	//Drop items?
-	//Drop HP?
-	if (CP_Math_Distance(mob->x, mob->y, player->x, player->y) <= mob->CStats.size + player->HITBOX) {
-		mob->CStats.HP -= player->DAMAGE;
-		player->CURRENT_HP -= mob->CStats.Dmg;
-	}
-	if (mob->CStats.HP <= 0) {
-		mob->Status = 0;
-	}
-}
-
