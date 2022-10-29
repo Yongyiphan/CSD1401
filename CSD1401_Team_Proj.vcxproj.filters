@@ -1,80 +1,27 @@
 ﻿<?xml version="1.0" encoding="utf-8"?>
 <Project ToolsVersion="4.0" xmlns="http://schemas.microsoft.com/developer/msbuild/2003">
   <ItemGroup>
-    <ClCompile Include="Src\game.c">
-      <Filter>source</Filter>
-    </ClCompile>
-    <ClCompile Include="Src\main.c">
-      <Filter>source</Filter>
-    </ClCompile>
-    <ClCompile Include="Src\game.c">
-      <Filter>Source Files</Filter>
-    </ClCompile>
-    <ClCompile Include="Src\map.c">
-      <Filter>source</Filter>
-    </ClCompile>
-    <ClCompile Include="Src\Camera.c">
-      <Filter>source</Filter>
-    </ClCompile>
-    <ClCompile Include="Src\player.c">
-      <Filter>source</Filter>
-    </ClCompile>
-    <ClCompile Include="Src\Playground.c">
-      <Filter>Source Files</Filter>
-    </ClCompile>
-    <ClCompile Include="Src\game.c">
-      <Filter>Source Files</Filter>
-    <ClCompile Include="Src\utils.c">
-      <Filter>source</Filter>
-    </ClCompile>
+    <ClCompile Include="Src\Camera.c" />
+    <ClCompile Include="Src\game.c" />
+    <ClCompile Include="Src\main.c" />
+    <ClCompile Include="Src\map.c" />
+    <ClCompile Include="Src\player.c" />
+    <ClCompile Include="Src\utils.c" />
+    <ClCompile Include="Src\Mob.c" />
+    <ClCompile Include="Src\Playground.c" />
+    <ClCompile Include="Src\Items.c" />
   </ItemGroup>
   <ItemGroup>
-    <ClInclude Include="Inc\Mob.h">
-      <Filter>Header Files</Filter>
-    </ClInclude>
-    <ClInclude Include="Inc\Playground.h">
-      <Filter>Header Files</Filter>
-    </ClInclude>
-    <ClInclude Include="Extern\CProcessing\inc\cprocessing.h">
-      <Filter>Header Files</Filter>
-    <ClInclude Include="Inc\game.h">
-      <Filter>header</Filter>
-    </ClInclude>
-    <ClInclude Include="Extern\CProcessing\inc\cprocessing_common.h">
-      <Filter>Header Files</Filter>
-    </ClInclude>
-    <ClInclude Include="Inc\map.h">
-      <Filter>header</Filter>
-    </ClInclude>
-    <ClInclude Include="Inc\Camera.h">
-      <Filter>header</Filter>
-    </ClInclude>
-    <ClInclude Include="Inc\player.h">
-      <Filter>header</Filter>
-    </ClInclude>
-    <ClInclude Include="Inc\utils.h">
-      <Filter>header</Filter>
-    </ClInclude>
+    <ClInclude Include="Inc\Camera.h" />
+    <ClInclude Include="Inc\game.h" />
+    <ClInclude Include="Inc\map.h" />
+    <ClInclude Include="Inc\player.h" />
+    <ClInclude Include="Inc\utils.h" />
+    <ClInclude Include="Inc\Mob.h" />
+    <ClInclude Include="Inc\Playground.h" />
+    <ClInclude Include="Inc\Items.h" />
   </ItemGroup>
   <ItemGroup>
     <Image Include="Assests\DigiPen_Singapore_WEB_RED.png" />
-  </ItemGroup>
-  <ItemGroup>
-    <Filter Include="header">
-      <UniqueIdentifier>{291da8cd-7a28-4d67-9cff-04bfc2aa5d0f}</UniqueIdentifier>
-    </Filter>
-    <Filter Include="source">
-      <UniqueIdentifier>{8fbe0212-ba85-48b8-8d8c-19621f03f4e7}</UniqueIdentifier>
-    </Filter>
-  </ItemGroup>
-  <ItemGroup>
-    <None Include="Extern\CProcessing\lib\x64\CProcessing.dll" />
-    <None Include="Extern\CProcessing\lib\x64\CProcessingd.dll" />
-    <None Include="Extern\CProcessing\lib\x64\fmod.dll" />
-    <None Include="Extern\CProcessing\lib\x64\fmodL.dll" />
-  </ItemGroup>
-  <ItemGroup>
-    <Library Include="Extern\CProcessing\lib\x64\CProcessing.lib" />
-    <Library Include="Extern\CProcessing\lib\x64\CProcessingd.lib" />
   </ItemGroup>
 </Project>
