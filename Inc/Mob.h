@@ -71,12 +71,14 @@ typedef struct WaveTracker {
 
 void InitWavesArr(WaveTrack* tracker);
 void CreateBaseStat(MobStats* ms, int type);
-void CreateMob(Mob* m, int Title, MobStats *Base, Player*player, int offSet);
+void CreateMob(Mob* m, MobStats *Base, Player*player, int offSet);
 void GenerateMobs(WaveTrack* tracker, Player* player);
 void GenerateWaves(Player* P, WaveTrack* queue, int* queueID, int WavesNo, int CostGrowth, int MaxMobGrowth,int *TotalWaveCount,  int* MobCount);
 
 void DrawMob(Mob *mob, int r, int g, int b);
 void MobPathFinding(Mob* mob, float tX, float tY);
 void MobCollision(Mob* mob, Player* player);
+
+void PrintWaveStats(int*CWaveCount, int No_Waves, int*WaveIDQueue, int*MobCount);
 
 #endif

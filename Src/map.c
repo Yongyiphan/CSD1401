@@ -28,7 +28,7 @@ CP_Color grey, black, red, green, blue, white;
 #define NO_WAVES 6
 #define Spawn_Timer 1
 #define Wave_Timer 5
-#define SpawnAreaOffset 110
+#define SpawnAreaOffset 300
 
 Mob* cMob;
 int StartMobQuantity = 100, cWaveID = 0,currentWaveCost, MaxMob;
@@ -96,12 +96,12 @@ void map_Update(void) {
 			//Every SpawnTime interval spawn wave
 			if (currentSec % Wave_Timer == 0) {
 				//Growth Per Wave
-				MaxMob += 150;
+				MaxMob += 50;
 				//printf("Max Mobs Increased to %d\n", MaxMob);
 			}
 			if (currentSec % Spawn_Timer == 0) {
 				//Growth Per Wave
-				currentWaveCost += 50;
+				currentWaveCost += 20;
 				/*
 				Generate Waves
 				-) Update/ Reference == Require Pointers
@@ -112,27 +112,16 @@ void map_Update(void) {
 					-> No of spawnable Waves
 					-> WaveCost Growth
 					-> MaxMob Growth
-				===== Optional =============== (May be deleted if unnecessary)
+				===== Optional =============== (May be deleted accordingly if unnecessary)
 					-> Total Wave Count (Update)
 					-> Mob Count (Update)
 				*/
-				GenerateWaves(&P, &waveTrack, &WaveIDQueue, NO_WAVES,currentWaveCost, MaxMob, &totalWave, &MobCount);
-				//Result Print Start
-				printf("\nCurrent Wave: %d\nWave Queue: ", totalWave);
-				for (int i = 0; i < NO_WAVES; i++) {
-					printf("| %d ", WaveIDQueue[i]);
-				}
-				printf("\nMob Count: ");
-				int tMob = 0;
-				for (int i = 0; i < NO_WAVES; i++) {
-					printf("| %d ", MobCount[i]);
-					tMob += MobCount[i];
-				}
-				printf(" |Total: %d\n", tMob);
-				//Result Print End
+				GenerateWaves(&P, &waveTrack, &WaveIDQueue, NO_WAVES, currentWaveCost, MaxMob, &totalWave, &MobCount);
+				//Used to print current wave statistics, can be removed :)
+				PrintWaveStats(&totalWave,NO_WAVES, &WaveIDQueue, &MobCount);
 			}
 		}
-		
+
 		int MobC = 0;
 		for (int w = 0; w < NO_WAVES; w++) {
 			cWave = &waveTrack[w];
@@ -164,10 +153,7 @@ void map_Update(void) {
 				}
 			}
 		}
-		//printf("Here\n");
-		//printf("MobCount: %d |\tFPS: %f \n", MobC, CP_System_GetFrameRate());
 	}
-	
 	
 
 	if (CP_Input_KeyTriggered(KEY_SPACE))
