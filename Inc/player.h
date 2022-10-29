@@ -18,12 +18,6 @@ typedef struct Player {
 //	float y;
 //}Mob;
 
-typedef struct Items {
-	float hitbox;
-	float x;
-	float y;
-
-}Items;
 
 typedef struct Bullet {
 	float hitbox;
@@ -33,7 +27,6 @@ typedef struct Bullet {
 }Bullet;
 
 //int collide_mob(Player, Mob);
-int collide_item(Player, Items);
 int collide_bullet(Player, Bullet);
 
 void shoot_bullet(Bullet);
