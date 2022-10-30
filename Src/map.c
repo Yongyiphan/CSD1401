@@ -18,11 +18,16 @@
 #define DEFENSE 10
 #define PLAYER_HITBOX 50
 
-
+//Sprite Stuff
+int Mob_Img = 1;
+CP_Image** MobSprites;
 
 Player P;
 CP_Vector start_vector;
 CP_Color grey, black, red, green, blue, white;
+
+//Starting Quantity
+int StartMobQuantity = 1000, StartItemQuantity = 1000;
 
 //Mob Stuff
 #define NO_WAVES 6
@@ -31,13 +36,17 @@ CP_Color grey, black, red, green, blue, white;
 #define SpawnAreaOffset 300
 
 Mob* cMob;
-int StartMobQuantity = 100, cWaveID = 0,currentWaveCost, MaxMob;
+int cWaveID = 0,currentWaveCost, MaxMob;
 int currentSec = 0;
 int WaveIDQueue[NO_WAVES];
-WaveTrack waveTrack[NO_WAVES], *cWave; // pause state for the game when paused.
+WaveTrack WaveTracker[NO_WAVES], *cWave; // pause state for the game when paused.
 
 //Might be useful variable for Waves Tracking
 int totalWave = 0, MobCount[NO_WAVES];
+
+//Item Stuff
+ItemTrack *ItemTracker;
+
 int isPaused;
 
 
@@ -59,19 +68,25 @@ void map_Init(void) {
 	currentWaveCost = 10;
 	MaxMob = 200;
 	for (int i = 0; i < NO_WAVES; i++) {
-		waveTrack[i] = (WaveTrack){
-			MaxMob,
-			0,
-			0,
-			0, 
-			malloc(sizeof(Mob*) * StartMobQuantity), 
-			StartMobQuantity, 
-			SpawnAreaOffset,
-			white
+		WaveTracker[i] = (WaveTrack){
+			MaxMob, //Max Mob
+			0, //MobCount
+			0, //Current Mob Count
+			0, //Wave Cost
+			StartMobQuantity, //Array Size 
+			SpawnAreaOffset, //Spawn offset
+			malloc(sizeof(Mob*) * StartMobQuantity), //Arr
+			white //Wave Color
 		};
-		InitWavesArr(&waveTrack[i]);
+		InitWavesArr(&WaveTracker[i]);
 		WaveIDQueue[i] = -1;
 	}
+	ItemTracker = &(ItemTrack){malloc(sizeof(Item*) * StartItemQuantity), StartItemQuantity, 0};
+	InitItemArr(ItemTracker);
+	MobSprites = malloc(sizeof(CP_Image*) * Mob_Img);
+	MobLoadImage(MobSprites, Mob_Img);
+	
+	
 	CameraDemo_Init();
 }
 
@@ -96,12 +111,12 @@ void map_Update(void) {
 			//Every SpawnTime interval spawn wave
 			if (currentSec % Wave_Timer == 0) {
 				//Growth Per Wave
-				MaxMob += 50;
+				MaxMob += 150;
 				//printf("Max Mobs Increased to %d\n", MaxMob);
 			}
 			if (currentSec % Spawn_Timer == 0) {
 				//Growth Per Wave
-				currentWaveCost += 20;
+				currentWaveCost += 50;
 				/*
 				Generate Waves
 				-) Update/ Reference == Require Pointers
@@ -116,7 +131,7 @@ void map_Update(void) {
 					-> Total Wave Count (Update)
 					-> Mob Count (Update)
 				*/
-				GenerateWaves(&P, &waveTrack, &WaveIDQueue, NO_WAVES, currentWaveCost, MaxMob, &totalWave, &MobCount);
+				GenerateWaves(&P, &WaveTracker, &WaveIDQueue, NO_WAVES, currentWaveCost, MaxMob, &totalWave, &MobCount);
 				//Used to print current wave statistics, can be removed :)
 				PrintWaveStats(&totalWave,NO_WAVES, &WaveIDQueue, &MobCount);
 			}
@@ -124,7 +139,7 @@ void map_Update(void) {
 
 		int MobC = 0;
 		for (int w = 0; w < NO_WAVES; w++) {
-			cWave = &waveTrack[w];
+			cWave = &WaveTracker[w];
 			if (WaveIDQueue[w] != -1) {
 				if (cWave->CurrentCount == 0) {
 					//if all mobs are dead
@@ -149,7 +164,7 @@ void map_Update(void) {
 						MobCount[w] -= 1;
 						continue;
 					}
-					DrawMob(cMob, cWave->waveColor.r, cWave->waveColor.g, cWave->waveColor.b);
+					DrawMobImage(MobSprites, cMob);
 				}
 			}
 		}
@@ -164,6 +179,8 @@ void map_Update(void) {
 
 void map_Exit(void) {
 	for (int i = 0; i < NO_WAVES; i++) {
-		free(waveTrack[i].arr);
+		free(WaveTracker[i].arr);
 	}
+	free(MobSprites);
+	free(ItemTracker);
 }

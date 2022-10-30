@@ -9,6 +9,8 @@
 
 #define MOB_CAP 500
 
+
+
 //Pool of Mob Types
 //Edit here for different Mob Types
 /*
@@ -77,7 +79,6 @@ void CreateBaseStat(MobStats* cStat, int type) {
 			cStat->Dmg = 1;
 			cStat->size = 200;
 			break;
-		
 	}
 }
 /*
@@ -93,13 +94,9 @@ void CreateBaseStat(MobStats* cStat, int type) {
 const double PI = 22.0 / 7.0;
 void CreateMob(Mob*m, MobStats *Base, Player*player, int offSet)
 {
-		
-
 	float BoundScale = 1.5f, MaxRadius = CP_Math_Distance(0, 0, CP_System_GetWindowWidth(), CP_System_GetWindowHeight())* BoundScale;
 	//Uncomment below if you want to manually set spawn radius
 	//MaxRadius = 600;
-	
-
 	//Assume Player center of spawnable area
 	float nx, ny, rTheta, r, Diff = 0.0;
 	do {
@@ -156,7 +153,8 @@ void GenerateMobs(WaveTrack* tracker, Player* player) {
 
 	while (cost > 0) {
 		//Generate N no of mobs based off wave cost
-		randM = CP_Random_RangeInt(0, MobTypes - 1);
+		//randM = CP_Random_RangeInt(0, MobTypes - 1);
+		randM = 0;
 		randMCost = MobCosts[randM];
 
 		//Expand array
@@ -180,10 +178,11 @@ void GenerateMobs(WaveTrack* tracker, Player* player) {
 				tracker->arr[w]->Status = 0;
 			}
 		}
-		if (MobC == tracker->MaxMob) {
-			printf("\tMax Mob Limit\n");
-			break;
-		}
+
+		//if (MobC == tracker->MaxMob) {
+		//	printf("\tMax Mob Limit\n");
+		//	break;
+		//}
 
 		Mob* cMob = tracker->arr[MobC];
 		cMob->Title = randM;
@@ -216,7 +215,6 @@ void GenerateMobs(WaveTrack* tracker, Player* player) {
 				Nothing Happens
 */
 void GenerateWaves(Player*P, WaveTrack* queue, int* queueID, int WavesNo, int CostGrowth, int MaxMobGrowth, int* WaveCount, int*MobCount) {
-
 	for (int i = 0; i < WavesNo; i++) {
 		//At default WaveIDQueue = {-1,-1,-1,-1}
 		//Whereby each "-1" == to available slot to generate waves
@@ -231,19 +229,8 @@ void GenerateWaves(Player*P, WaveTrack* queue, int* queueID, int WavesNo, int Co
 			MobCount[i] = queue[i].MobCount;
 
 			//Wave Color
-			int r = CP_Random_RangeInt(0, 2);
 			//Assign random color to each wave
-			switch (r) {
-			case 0:
-				queue[i].waveColor = CP_Color_Create(255, 0, 0, 255);
-				break;
-			case 1:
-				queue[i].waveColor = CP_Color_Create(0, 255, 0, 255);
-				break;
-			case 2:
-				queue[i].waveColor = CP_Color_Create(0, 0, 255, 255);
-				break;
-			}
+			queue[i].waveColor = CP_Color_Create(CP_Random_RangeInt(100, 255), CP_Random_RangeInt(100, 255), CP_Random_RangeInt(100, 255), 255);
 			break;
 		}
 	}
@@ -269,6 +256,38 @@ void MobPathFinding(Mob* mob, float tX, float tY) {
 }
 
 /*
+CP_Image **MobSprite = * -> *MobSprite -> Mob_Img * CP_Image
+
+*/
+
+//*Sprites == *MobSprites
+void MobLoadImage(CP_Image* Sprites, int Size) {
+	char FilePaths[] = {
+		"./Assets/M1.png"
+	};
+
+	for (int i = 0; i < Size; i++) {
+		Sprites[i] = malloc(sizeof(CP_Image));
+		Sprites[i] = CP_Image_Load(&FilePaths[i]);
+
+	}
+
+
+}
+
+void DrawMobImage(CP_Image* Sprites, Mob*m) {
+
+	int IHeight = CP_Image_GetHeight(Sprites[m->Title]);
+	int IWidth = CP_Image_GetWidth(Sprites[m->Title]);
+	int alpha = (m->CStats.HP / m->BaseStats.HP) * 255;
+	switch (m->Title) {
+	default:
+			CP_Image_Draw(Sprites[m->Title], m->x,m->y,IWidth, IHeight,alpha);
+			break;
+	}
+}
+
+/*
 @brief		Function to draw mob
 @params		Mob	-> pointer to target mob
 			r, g, b	-> RGB values for CP_Color_Create //will change to image/sprite
@@ -276,7 +295,6 @@ void MobPathFinding(Mob* mob, float tX, float tY) {
 */
 void DrawMob(Mob* mob, int r, int g, int b)
 {
-	//Draw Circle
 	CP_Settings_StrokeWeight(0.5f);
 	int alpha = (mob->CStats.HP / mob->BaseStats.HP) * 255;
 	CP_Settings_Fill(CP_Color_Create(r,g,b, alpha));
@@ -299,6 +317,14 @@ void MobCollision(Mob* mob, Player *player) {
 	if (mob->CStats.HP <= 0) {
 		mob->Status = 0;
 	}
+}
+
+void MobTMobCollision(Mob* mob,Player*P, WaveTrack *tracker, int No_Waves) {
+
+	for (int i = 0; i <No_Waves; i++) {
+		
+	}
+
 }
 
 

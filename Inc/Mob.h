@@ -2,6 +2,7 @@
 #ifndef MOB_H
 #define MOB_H
 #include "player.h"
+#include "cprocessing.h"
 
 #define MobTypes 5
 #define SmallMob 0
@@ -23,17 +24,19 @@ typedef struct MobBase {
 	int Range;
 	int Dmg;
 	int size;
-	
+
 }MobStats;
 
 typedef struct Mob {
 	int Title;
+
 	MobStats BaseStats;
 	MobStats CStats;
 	float x;
 	float y;
-	//Dead = 0 | Alive = 1
 	int Status; 
+
+	//Dead = 0 | Alive = 1
 } Mob;
 
 typedef struct WaveTracker {
@@ -41,9 +44,9 @@ typedef struct WaveTracker {
 	int MobCount;
 	int CurrentCount;
 	int WaveCost;
-	Mob** arr;
 	int arrSize;
 	int spawnOffset;
+	Mob** arr;
 	CP_Color waveColor;
 }WaveTrack;
 
@@ -68,13 +71,14 @@ typedef struct WaveTracker {
 //
 //*/
 //
-
+void MobLoadImage(CP_Image *Sprites, int arrSize);
 void InitWavesArr(WaveTrack* tracker);
 void CreateBaseStat(MobStats* ms, int type);
 void CreateMob(Mob* m, MobStats *Base, Player*player, int offSet);
 void GenerateMobs(WaveTrack* tracker, Player* player);
 void GenerateWaves(Player* P, WaveTrack* queue, int* queueID, int WavesNo, int CostGrowth, int MaxMobGrowth,int *TotalWaveCount,  int* MobCount);
 
+void DrawMobImage(CP_Image* Sprites, Mob* m);
 void DrawMob(Mob *mob, int r, int g, int b);
 void MobPathFinding(Mob* mob, float tX, float tY);
 void MobCollision(Mob* mob, Player* player);
