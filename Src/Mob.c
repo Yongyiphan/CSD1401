@@ -256,50 +256,55 @@ void MobPathFinding(Mob* mob, float tX, float tY) {
 }
 
 /*
-CP_Image **MobSprite = * -> *MobSprite -> Mob_Img * CP_Image
-
+@brief		Function To load images
+@params		Sprites	-> array that contains sprites for mobs
+			Size	-> Size of array
+@returns	Filled up array of pointers to CP_Image Objs
 */
-
-//*Sprites == *MobSprites
-void MobLoadImage(CP_Image* Sprites, int Size) {
-	char FilePaths[] = {
-		"./Assets/M1.png"
+void MobLoadImage(CP_Image* Sprites, int No_Img) {
+	char *FilePaths[] = {
+		"./Assets/Attack (1).png"
 	};
 
-	for (int i = 0; i < Size; i++) {
-		Sprites[i] = malloc(sizeof(CP_Image));
-		Sprites[i] = CP_Image_Load(&FilePaths[i]);
-
+	int Img_C = (sizeof(FilePaths) / sizeof(FilePaths[0]));
+	if (Img_C == No_Img) {
+		for (int i = 0; i < No_Img; i++) {
+			Sprites[i] = malloc(sizeof(CP_Image));
+			Sprites[i] = CP_Image_Load(FilePaths[i]);
+		}
+	}
+	else {
+		printf("Error: Image and arr size don't match\n");
 	}
 
-
+//	for (int i = 0; i < Size; i++) {
+//		Sprites[i] = CP_Image_Load(&FilePaths[i]);
+//	}
 }
+void DrawMobImage(CP_Image* Sprites, Mob*m, Player *p) {
 
-void DrawMobImage(CP_Image* Sprites, Mob*m) {
+	int IHeight = CP_Image_GetHeight(Sprites[m->Title]), IWidth = CP_Image_GetWidth(Sprites[m->Title]);
+	int alpha = (m->CStats.HP / m->BaseStats.HP) * 255, cSec = CP_System_GetSeconds();
+	float Distance = CP_Math_Distance(m->x, m->y, p->x, p->y);
+	int atkFrame = 7, deadFrame = 12, walkFrame = 10;
+	if (Distance >= 100) {
+		//Move
+	}
+	else {
+		//Attack
+	}
+	
+	
+	
+	
 
-	int IHeight = CP_Image_GetHeight(Sprites[m->Title]);
-	int IWidth = CP_Image_GetWidth(Sprites[m->Title]);
-	int alpha = (m->CStats.HP / m->BaseStats.HP) * 255;
 	switch (m->Title) {
 	default:
-			CP_Image_Draw(Sprites[m->Title], m->x,m->y,IWidth, IHeight,alpha);
+			CP_Image_Draw(Sprites[m->Title], m->x,m->y,IWidth/5, IHeight/5,alpha);
 			break;
 	}
 }
 
-/*
-@brief		Function to draw mob
-@params		Mob	-> pointer to target mob
-			r, g, b	-> RGB values for CP_Color_Create //will change to image/sprite
-@returns	Nothing
-*/
-void DrawMob(Mob* mob, int r, int g, int b)
-{
-	CP_Settings_StrokeWeight(0.5f);
-	int alpha = (mob->CStats.HP / mob->BaseStats.HP) * 255;
-	CP_Settings_Fill(CP_Color_Create(r,g,b, alpha));
-	CP_Graphics_DrawCircle((double) mob->x, (double) mob->y, mob->CStats.size);
-}
 
 /*
 @brief		Handles Collision between Mobs and Player
@@ -345,7 +350,21 @@ void PrintWaveStats(int* CWaveCount,int NO_WAVES, int* WaveIDQueue, int* MobCoun
 	//Result Print End
 }
 
+void FreeMobResource(WaveTrack* wtracker,int noWaves, CP_Image* spritesheet, int Mob_Img) {
+	for (int i = 0; i < noWaves; i++) {
+		for (int a = 0; a < wtracker[i].arrSize; a++) {
+			free(wtracker[i].arr[a]);
+		}
+		free(wtracker[i].arr);
+	}
+	for (int i = 0; i < Mob_Img; i++) {
+		CP_Image* c = spritesheet[i];
+		CP_Image_Free(&(spritesheet[i]));
+		free(spritesheet[i]);
+	}
 
+	//free(spritesheet);
+}
 
 
 /*
@@ -422,3 +441,18 @@ void PrintWaveStats(int* CWaveCount,int NO_WAVES, int* WaveIDQueue, int* MobCoun
 //	printf("Mobs Resused: %d\n", Reused);
 //	printf("New Mobs Created: %d\n", gMobCount - Reused);
 //}
+
+//Depreceated 
+/*
+@brief		Function to draw mob
+@params		Mob	-> pointer to target mob
+			r, g, b	-> RGB values for CP_Color_Create //will change to image/sprite
+@returns	Nothing
+*/
+void DrawMob(Mob* mob, int r, int g, int b)
+{
+	CP_Settings_StrokeWeight(0.5f);
+	int alpha = (mob->CStats.HP / mob->BaseStats.HP) * 255;
+	CP_Settings_Fill(CP_Color_Create(r,g,b, alpha));
+	CP_Graphics_DrawCircle((double) mob->x, (double) mob->y, mob->CStats.size);
+}

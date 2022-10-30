@@ -48,4 +48,5 @@ void InitItemArr(ItemTrack* tracker);
 void CreateItemEffect(Item* i);
 void IAffectPlayer(Item* i, Player* p, int currentSec);
 
+void FreeItemResource(ItemTrack* tracker);
 #endif

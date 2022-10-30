@@ -19,7 +19,7 @@
 #define PLAYER_HITBOX 50
 
 //Sprite Stuff
-int Mob_Img = 1;
+#define Mob_Img 1
 CP_Image** MobSprites;
 
 Player P;
@@ -45,7 +45,7 @@ WaveTrack WaveTracker[NO_WAVES], *cWave; // pause state for the game when paused
 int totalWave = 0, MobCount[NO_WAVES];
 
 //Item Stuff
-ItemTrack *ItemTracker;
+//ItemTrack *ItemTracker;
 
 int isPaused;
 
@@ -81,8 +81,8 @@ void map_Init(void) {
 		InitWavesArr(&WaveTracker[i]);
 		WaveIDQueue[i] = -1;
 	}
-	ItemTracker = &(ItemTrack){malloc(sizeof(Item*) * StartItemQuantity), StartItemQuantity, 0};
-	InitItemArr(ItemTracker);
+	//ItemTracker = &(ItemTrack){malloc(sizeof(Item*) * StartItemQuantity), StartItemQuantity, 0};
+	//InitItemArr(ItemTracker);
 	MobSprites = malloc(sizeof(CP_Image*) * Mob_Img);
 	MobLoadImage(MobSprites, Mob_Img);
 	
@@ -133,7 +133,7 @@ void map_Update(void) {
 				*/
 				GenerateWaves(&P, &WaveTracker, &WaveIDQueue, NO_WAVES, currentWaveCost, MaxMob, &totalWave, &MobCount);
 				//Used to print current wave statistics, can be removed :)
-				PrintWaveStats(&totalWave,NO_WAVES, &WaveIDQueue, &MobCount);
+				//PrintWaveStats(&totalWave,NO_WAVES, &WaveIDQueue, &MobCount);
 			}
 		}
 
@@ -164,7 +164,7 @@ void map_Update(void) {
 						MobCount[w] -= 1;
 						continue;
 					}
-					DrawMobImage(MobSprites, cMob);
+					DrawMobImage(MobSprites, cMob, &P);
 				}
 			}
 		}
@@ -178,9 +178,9 @@ void map_Update(void) {
 }
 
 void map_Exit(void) {
-	for (int i = 0; i < NO_WAVES; i++) {
-		free(WaveTracker[i].arr);
-	}
+	FreeMobResource(&WaveTracker, NO_WAVES, MobSprites, Mob_Img);
 	free(MobSprites);
-	free(ItemTracker);
+	
+	//FreeItemResource(&ItemTracker);
+	//free(ItemTracker);
 }

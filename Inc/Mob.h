@@ -71,18 +71,19 @@ typedef struct WaveTracker {
 //
 //*/
 //
-void MobLoadImage(CP_Image *Sprites, int arrSize);
+void MobLoadImage(CP_Image *Sprites, int No_Img);
 void InitWavesArr(WaveTrack* tracker);
 void CreateBaseStat(MobStats* ms, int type);
 void CreateMob(Mob* m, MobStats *Base, Player*player, int offSet);
 void GenerateMobs(WaveTrack* tracker, Player* player);
 void GenerateWaves(Player* P, WaveTrack* queue, int* queueID, int WavesNo, int CostGrowth, int MaxMobGrowth,int *TotalWaveCount,  int* MobCount);
 
-void DrawMobImage(CP_Image* Sprites, Mob* m);
+void DrawMobImage(CP_Image* Sprites, Mob* m, Player*p);
 void DrawMob(Mob *mob, int r, int g, int b);
 void MobPathFinding(Mob* mob, float tX, float tY);
 void MobCollision(Mob* mob, Player* player);
 
 void PrintWaveStats(int*CWaveCount, int No_Waves, int*WaveIDQueue, int*MobCount);
 
+void FreeMobResource(WaveTrack* wtracker, int noWaves, CP_Image *spritesheet, int Mob_Img);
 #endif

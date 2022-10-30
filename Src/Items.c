@@ -74,4 +74,9 @@ void GenerateItem(ItemTrack* tracker, int currentSec) {
 	}
 }
 
+void FreeItemResource(ItemTrack *tracker) {
+	for (int w = 0; w < tracker->arrSize;w++) {
+		free(tracker->arr[w]);
+	}
+}
 
