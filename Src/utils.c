@@ -1,6 +1,7 @@
 #include "cprocessing.h"
 #include <stdio.h>
 #include "game.h"
+#include "player.h"
 
 int IsAreaClicked(float area_center_x, float area_center_y, float area_width, float area_height, float click_x, float click_y)
 {
@@ -14,8 +15,6 @@ int IsAreaClicked(float area_center_x, float area_center_y, float area_width, fl
 	// if x-coordinate of click is within left and right of the area, and 
 	// y-coordinate is within top and bottom of the area, then return 1. If not, return 0.
 	if (leftLimit < click_x && click_x < rightLimit && topLimit < click_y && click_y < bottomLimit) {
-		printf("%d\t%d\t%d\t%d\n", leftLimit, rightLimit, topLimit, bottomLimit);
-		printf("%f\t%f", click_x, click_y);
 		return 1;
 	}
 	return 0;
@@ -29,6 +28,7 @@ void option_screen(int* isPaused) {
 	int width = 300;
 	int height = 60;
 	int padding = 30;
+	float cornerRadius = 30;
 
 	float textSize = 30.0;
 
@@ -37,7 +37,8 @@ void option_screen(int* isPaused) {
 	CP_Settings_NoStroke();
 	// Options background
 	CP_Settings_Fill(CP_Color_Create(80, 80, 100, 120));
-	CP_Graphics_DrawRect(middle.x, middle.y, screen_width * 4.0 / 10, screen_height * 8.0 / 10);
+
+	CP_Graphics_DrawRectAdvanced(middle.x, middle.y, screen_width * 4.0 / 10, screen_height * 8.0 / 10, 0, cornerRadius);
 
 	// Draw out option boxes
 	CP_Settings_Fill(CP_Color_Create(255, 100, 100, 255));
@@ -52,6 +53,7 @@ void option_screen(int* isPaused) {
 	// Draw text of respective boxes at respective coordinates.
 	CP_Settings_TextSize(40.0f);
 	CP_Settings_TextAlignment(centerHor, centerVert);
+	//CP_Font_DrawTextBox("Upgrades", middle.x, middle.y - height - padding, width);
 	CP_Font_DrawText("Resume Game", middle.x, middle.y);
 	CP_Font_DrawText("Exit to main menu", middle.x, middle.y + height + padding);
 
@@ -60,8 +62,12 @@ void option_screen(int* isPaused) {
 	CP_Settings_RectMode(CP_POSITION_CORNER);
 	CP_Settings_Stroke(CP_Color_Create(0, 0, 0, 255));
 
-	
+
 	if (CP_Input_MouseClicked()) {
+		/*if (IsAreaClicked(middle.x, middle.y - height - padding, width, height, CP_Input_GetMouseX(), CP_Input_GetMouseY())) {
+			upgrade_screen(P, isMenu);
+		}*/
+
 		if (IsAreaClicked(middle.x, middle.y, width, height, CP_Input_GetMouseX(), CP_Input_GetMouseY())) {
 			*isPaused = 0;
 		}
@@ -69,5 +75,5 @@ void option_screen(int* isPaused) {
 			CP_Engine_SetNextGameState(game_Init, game_Update, game_Exit);
 		}
 	}
-	
 }
+	

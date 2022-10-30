@@ -27,11 +27,11 @@ CP_Color grey, black, red, green, blue, white;
 #define Spawn_Timer 2
 #define SpawnAreaOffset 550
 
-int StartMobQuantity = 1000, cWaveID = 0,currentWaveCost = 50;
+int StartMobQuantity = 1000, cWaveID = 0,currentWaveCost;
 int currentSec;
 int WaveIDQueue[NO_WAVES], totalWave = 0;
 WaveTrack waveTrack[NO_WAVES], *cWave; // pause state for the game when paused.
-int isPaused;
+int isPaused, isMenu;
 
 
 void map_Init(void) {
@@ -39,6 +39,8 @@ void map_Init(void) {
 	CP_System_SetWindowSize(MAP_SIZEX, MAP_SIZEY);
 	//CP_System_Fullscreen();
 	isPaused = 0;
+	isMenu = 0;
+	currentWaveCost = 50;
 
 	grey = CP_Color_Create(111, 111, 111, 255);
 	white = CP_Color_Create(255, 255, 255, 255);
@@ -58,10 +60,21 @@ void map_Init(void) {
 }
 
 void map_Update(void) {
-	int* checkPause = &isPaused;
+	
 	show_healthbar(&P);
 	if (isPaused) {
-		option_screen(checkPause);
+		/*if (P.CURRENT_HP > 0)	option_screen(checkPause);
+		else death_screen(&isPaused);*/
+		if (isMenu) {
+			upgrade_screen(&P, &isMenu, &isPaused);
+			printf("Player Stats: %f\n", P.MAX_HP);
+		}
+		else if (P.CURRENT_HP > 0) {
+			option_screen(&isPaused);
+		}
+		// temporarily paused the death_screen function to allow the game to continue running
+		// else death_screen(&isPaused);
+	
 		// if you press "escape"
 		if (CP_Input_KeyTriggered(KEY_ESCAPE))
 			isPaused = 0;
@@ -73,8 +86,38 @@ void map_Update(void) {
 		if (CP_Input_KeyDown(KEY_H)) {
 			P.SPEED *= 1.1;
 		}
+
+		if (CP_Input_KeyTriggered(KEY_U)) {
+			isMenu = 1;
+			isPaused = 1;
+		}
+
+		if (CP_Input_KeyDown(KEY_Q)) {
+			P.CURRENT_HP -= 4;
+		}
+		else if (CP_Input_KeyDown(KEY_E)) {
+			P.CURRENT_HP += 4;
+		}
+
+		if (P.CURRENT_HP <= 0) {
+			isPaused = 1;
+		}
 	
+		/*
+		Makes it such that the player is always in the middle of the screen.
+		Any other objects that are placed below this camera function will be displaced.
+
+		For example, mob1 moves to u at x speed, and player is moving at x speed too.
+		On the screen, it will appear as if mob1 moves at the same speed as you due to displacement.
+
+		For any objects that are placed above the camera function, it will not be displaced.
+		For example, mob2 moves to u at x speed, and player is moving at x speed. However, due to camera
+		displacement, player is always in the middle of the screen, but mob2 is not displaced by the camera,
+		and hence is able to reach the player.
+		*/
 		CameraDemo_Update(&P);
+
+
 		if ((int)CP_System_GetSeconds() != currentSec) {
 			currentSec = (int)CP_System_GetSeconds();
 			//Every SpawnTime interval spawn wave
@@ -145,30 +188,9 @@ void map_Update(void) {
 		}
 		//printf("MobCount: %d |\tFPS: %f \n", MobC, CP_System_GetFrameRate());
 
-		if (CP_Input_KeyDown(KEY_Q)) {
-			P.CURRENT_HP -= 4;
-		}
-		else if(CP_Input_KeyDown(KEY_E)) {
-			P.CURRENT_HP += 4;
-		}
-
-		if (P.CURRENT_HP <= 0) {
-			death_screen();
-		}
-
-		/*
-		Makes it such that the player is always in the middle of the screen.
-		Any other objects that are placed below this camera function will be displaced.
 		
-		For example, mob1 moves to u at x speed, and player is moving at x speed too.
-		On the screen, it will appear as if mob1 moves at the same speed as you due to displacement.
-		
-		For any objects that are placed above the camera function, it will not be displaced. 
-		For example, mob2 moves to u at x speed, and player is moving at x speed. However, due to camera
-		displacement, player is always in the middle of the screen, but mob2 is not displaced by the camera,
-		and hence is able to reach the player.
-		*/
-		CameraDemo_Update(P);
+
+
 	}
 	
 	
@@ -180,5 +202,7 @@ void map_Update(void) {
 }
 
 void map_Exit(void) {
-
+	for (int i = 0; i < NO_WAVES; i++) {
+		free(waveTrack[i].arr);
+	}
 }

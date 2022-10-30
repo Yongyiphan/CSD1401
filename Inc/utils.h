@@ -1,4 +1,5 @@
 #pragma once
+#include "player.h"
 
 // Create options screen
 void option_screen(int*);

@@ -45,7 +45,7 @@ Current HP is always proportional to the length of max HP.
 void show_healthbar(Player*);
 
 // Create a death screen when player is dead.
-void death_screen(void);
+void death_screen(int*);
 
-
-//void player_dead();
+// Show the upgrade screen for players to upgrade their stats.
+void upgrade_screen(Player*, int*, int*);
