@@ -1,6 +1,6 @@
+#include "player.h"
 #include "cprocessing.h"
 #include <stdio.h>
-#include "player.h"
 
 // Player hitbox is a circle
 #define PLAYER_DIAMETER 50.0f

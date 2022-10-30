@@ -18,12 +18,6 @@ typedef struct Player {
 //	float y;
 //}Mob;
 
-typedef struct Items {
-	float hitbox;
-	float x;
-	float y;
-
-}Items;
 
 /*typedef struct Bullet {
 	float hitbox;
