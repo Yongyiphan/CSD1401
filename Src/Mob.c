@@ -114,6 +114,7 @@ void CreateMob(Mob*m, MobStats *Base, Player*player, int offSet)
 	m->x = nx;
 	m->y = ny;
 	m->Status = 1;
+	m->AnimationCycle = 0;
 }
 
 /*
@@ -136,6 +137,7 @@ void InitWavesArr(WaveTrack* tracker) {
 		tracker->arr[w]->x = 0;
 		tracker->arr[w]->y = 0;
 		tracker->arr[w]->Status = 0;
+		tracker->arr[w]->AnimationCycle = 0;
 	}
 }
 
@@ -154,7 +156,8 @@ void GenerateMobs(WaveTrack* tracker, Player* player) {
 	while (cost > 0) {
 		//Generate N no of mobs based off wave cost
 		//randM = CP_Random_RangeInt(0, MobTypes - 1);
-		randM = 0;
+		randM = CP_Random_RangeInt(0,1);
+		//randM = 0;
 		randMCost = MobCosts[randM];
 
 		//Expand array
@@ -176,13 +179,14 @@ void GenerateMobs(WaveTrack* tracker, Player* player) {
 				tracker->arr[w]->x = 0;
 				tracker->arr[w]->y = 0;
 				tracker->arr[w]->Status = 0;
+				tracker->arr[w]->AnimationCycle = 0;
 			}
 		}
 
-		//if (MobC == tracker->MaxMob) {
-		//	printf("\tMax Mob Limit\n");
-		//	break;
-		//}
+		if (MobC == tracker->MaxMob) {
+			//printf("\tMax Mob Limit\n");
+			break;
+		}
 
 		Mob* cMob = tracker->arr[MobC];
 		cMob->Title = randM;
@@ -263,8 +267,17 @@ void MobPathFinding(Mob* mob, float tX, float tY) {
 */
 void MobLoadImage(CP_Image* Sprites, int No_Img) {
 	char *FilePaths[] = {
-		"./Assets/Attack (1).png"
+		"./Assets/SmallM.png",
+		"./Assets/SmallM_Flipped.png",
+		"./Assets/RangeM.png",
+		"./Assets/RangeM_Flipped.png",
 	};
+	/*
+	(Walk = +0, Atk = +1, Die = +2)
+	Small Mob => 0 ~ 2
+	Medium Mob => 3 ~ 5
+	Big Mob => 6 ~ 8
+	*/
 
 	int Img_C = (sizeof(FilePaths) / sizeof(FilePaths[0]));
 	if (Img_C == No_Img) {
@@ -283,25 +296,47 @@ void MobLoadImage(CP_Image* Sprites, int No_Img) {
 }
 void DrawMobImage(CP_Image* Sprites, Mob*m, Player *p) {
 
-	int IHeight = CP_Image_GetHeight(Sprites[m->Title]), IWidth = CP_Image_GetWidth(Sprites[m->Title]);
-	int alpha = (m->CStats.HP / m->BaseStats.HP) * 255, cSec = CP_System_GetSeconds();
-	float Distance = CP_Math_Distance(m->x, m->y, p->x, p->y);
-	int atkFrame = 7, deadFrame = 12, walkFrame = 10;
-	if (Distance >= 100) {
-		//Move
+	int IHeight, IWidth, alpha = 255, scale = 160;
+	int SizeDef, StartImgI = m->Title * 2, Step, targetFPS = 6;
+	m->AnimationCycle += 1;
+	int u0, v0, u1, v1;
+		/*
+		u0 (float) - The left most pixel of the sub-image(far left = 0).
+		v0 (float) - The top most pixel of the sub-image (top = 0).
+		u1 (float) - The right most pixel for the sub-image (far right = image width).
+		v1 (float) - The bottom most pixel for the sub-image (bottom = image height).
+		*/
+	/*
+	SM = 0, 0 * 2 = 0
+	MM = 1, 1 * 2 = 2
+	BM = 2, 2 * 2 = 4
+	*/
+	if (CP_Math_Distance(m->x, m->y, p->x, p->y) <= p->HITBOX) {
+		//Dying
+		alpha = (m->CStats.HP / m->BaseStats.HP) * 255;
 	}
-	else {
-		//Attack
+	if (m->x > p->x) {
+		StartImgI += 1;
 	}
-	
-	
-	
-	
+	CP_Image* SImg = Sprites[StartImgI];
+
 
 	switch (m->Title) {
+	case SmallMob:
+		SizeDef = 5,IHeight = CP_Image_GetHeight(SImg), IWidth = CP_Image_GetWidth(SImg) / SizeDef;
+		Step = (m->AnimationCycle / targetFPS) % SizeDef;
+		u0 = Step * IWidth, v0 = 0, u1 = Step * IWidth + IWidth, v1 = IHeight;
+		CP_Image_DrawSubImage(SImg, m->x, m->y, IHeight, IWidth, u0, v0, u1, v1, alpha);
+		break;
+	case MediumMob:
+		SizeDef = 2,IHeight = CP_Image_GetHeight(SImg), IWidth = CP_Image_GetWidth(SImg) / SizeDef;
+		Step = ( m->AnimationCycle / targetFPS) % SizeDef;
+
+		u0 = Step * IWidth, v0 = 0, u1 = Step * IWidth + IWidth, v1 = IHeight;
+		CP_Image_DrawSubImage(SImg, m->x, m->y, IHeight, IWidth, u0, v0, u1, v1, alpha);
+		break;
 	default:
-			CP_Image_Draw(Sprites[m->Title], m->x,m->y,IWidth/5, IHeight/5,alpha);
-			break;
+		break;
 	}
 }
 
@@ -449,10 +484,10 @@ void FreeMobResource(WaveTrack* wtracker,int noWaves, CP_Image* spritesheet, int
 			r, g, b	-> RGB values for CP_Color_Create //will change to image/sprite
 @returns	Nothing
 */
-void DrawMob(Mob* mob, int r, int g, int b)
-{
-	CP_Settings_StrokeWeight(0.5f);
-	int alpha = (mob->CStats.HP / mob->BaseStats.HP) * 255;
-	CP_Settings_Fill(CP_Color_Create(r,g,b, alpha));
-	CP_Graphics_DrawCircle((double) mob->x, (double) mob->y, mob->CStats.size);
-}
+//void DrawMob(Mob* mob, int r, int g, int b)
+//{
+//	CP_Settings_StrokeWeight(0.5f);
+//	int alpha = (mob->CStats.HP / mob->BaseStats.HP) * 255;
+//	CP_Settings_Fill(CP_Color_Create(r,g,b, alpha));
+//	CP_Graphics_DrawCircle((double) mob->x, (double) mob->y, mob->CStats.size);
+//}

@@ -19,7 +19,7 @@
 #define PLAYER_HITBOX 50
 
 //Sprite Stuff
-#define Mob_Img 1
+#define Mob_Img 4
 CP_Image** MobSprites;
 
 Player P;
@@ -27,16 +27,18 @@ CP_Vector start_vector;
 CP_Color grey, black, red, green, blue, white;
 
 //Starting Quantity
-int StartMobQuantity = 1000, StartItemQuantity = 1000;
+int StartMobQuantity = 10000, StartItemQuantity = 1000;
 
 //Mob Stuff
 #define NO_WAVES 6
 #define Spawn_Timer 1
 #define Wave_Timer 5
-#define SpawnAreaOffset 300
+#define MaxMobGrowthRate 30
+#define WaveCostGrowthRate 10
+#define SpawnAreaOffset 500
 
 Mob* cMob;
-int cWaveID = 0,currentWaveCost, MaxMob;
+int cWaveCost, MaxMob;
 int currentSec = 0;
 int WaveIDQueue[NO_WAVES];
 WaveTrack WaveTracker[NO_WAVES], *cWave; // pause state for the game when paused.
@@ -65,8 +67,8 @@ void map_Init(void) {
 	start_vector = CP_Vector_Zero();
 	// Initialize the coordinates and stats of the player
 	P = (Player){ start_vector.x, start_vector.y, 90, PLAYER_HP, PLAYER_SPEED, PLAYER_DAMAGE, ATK_SPEED, DEFENSE, PLAYER_HITBOX}; //Initialise empty arrays of possible waves
-	currentWaveCost = 10;
-	MaxMob = 200;
+	cWaveCost = WaveCostGrowthRate;
+	MaxMob = MaxMobGrowthRate;
 	for (int i = 0; i < NO_WAVES; i++) {
 		WaveTracker[i] = (WaveTrack){
 			MaxMob, //Max Mob
@@ -107,16 +109,16 @@ void map_Update(void) {
 		CameraDemo_Update(&P);
 		if ((int)CP_System_GetSeconds() != currentSec) {
 			currentSec = (int)CP_System_GetSeconds();
-			printf("\n\tCurrent Sec: %d | Current FPS:%f\n", currentSec, CP_System_GetFrameRate());
+			//printf("\n\tCurrent Sec: %d | Current FPS:%f\n", currentSec, CP_System_GetFrameRate());
 			//Every SpawnTime interval spawn wave
 			if (currentSec % Wave_Timer == 0) {
 				//Growth Per Wave
-				MaxMob += 150;
+				MaxMob += MaxMobGrowthRate;
 				//printf("Max Mobs Increased to %d\n", MaxMob);
 			}
 			if (currentSec % Spawn_Timer == 0) {
 				//Growth Per Wave
-				currentWaveCost += 50;
+				cWaveCost += WaveCostGrowthRate;
 				/*
 				Generate Waves
 				-) Update/ Reference == Require Pointers
@@ -131,7 +133,7 @@ void map_Update(void) {
 					-> Total Wave Count (Update)
 					-> Mob Count (Update)
 				*/
-				GenerateWaves(&P, &WaveTracker, &WaveIDQueue, NO_WAVES, currentWaveCost, MaxMob, &totalWave, &MobCount);
+				GenerateWaves(&P, &WaveTracker, &WaveIDQueue, NO_WAVES, cWaveCost, MaxMob, &totalWave, &MobCount);
 				//Used to print current wave statistics, can be removed :)
 				//PrintWaveStats(&totalWave,NO_WAVES, &WaveIDQueue, &MobCount);
 			}

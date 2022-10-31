@@ -35,6 +35,7 @@ typedef struct Mob {
 	float x;
 	float y;
 	int Status; 
+	int AnimationCycle;
 
 	//Dead = 0 | Alive = 1
 } Mob;
@@ -50,7 +51,11 @@ typedef struct WaveTracker {
 	CP_Color waveColor;
 }WaveTrack;
 
-
+typedef struct FrameDef {
+	int AtkFC;
+	int WalkFC;
+	int DieFC;
+}FrameDef;
 ///*
 //Mob C Flow
 //: Generate N amt of mobs at random locations
@@ -86,4 +91,6 @@ void MobCollision(Mob* mob, Player* player);
 void PrintWaveStats(int*CWaveCount, int No_Waves, int*WaveIDQueue, int*MobCount);
 
 void FreeMobResource(WaveTrack* wtracker, int noWaves, CP_Image *spritesheet, int Mob_Img);
+
+
 #endif
