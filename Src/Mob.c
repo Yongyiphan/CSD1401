@@ -94,7 +94,7 @@ void CreateBaseStat(MobStats* cStat, int type) {
 const double PI = 22.0 / 7.0;
 void CreateMob(Mob*m, MobStats *Base, Player*player, int offSet)
 {
-	float BoundScale = 1.5f, MaxRadius = CP_Math_Distance(0, 0, CP_System_GetWindowWidth(), CP_System_GetWindowHeight())* BoundScale;
+	float BoundScale = 0.5f, MaxRadius = CP_Math_Distance(0, 0, CP_System_GetWindowWidth(), CP_System_GetWindowHeight())* BoundScale;
 	//Uncomment below if you want to manually set spawn radius
 	//MaxRadius = 600;
 	//Assume Player center of spawnable area
@@ -273,10 +273,10 @@ void MobLoadImage(CP_Image* Sprites, int No_Img) {
 		"./Assets/RangeM_Flipped.png",
 	};
 	/*
-	(Walk = +0, Atk = +1, Die = +2)
-	Small Mob => 0 ~ 2
-	Medium Mob => 3 ~ 5
-	Big Mob => 6 ~ 8
+	(Walk = +0, Flipped = +1)
+	Small Mob => 0 ~ 1
+	Medium Mob => 2 ~ 3
+	Big Mob => 4 ~ 5
 	*/
 
 	int Img_C = (sizeof(FilePaths) / sizeof(FilePaths[0]));
@@ -290,9 +290,6 @@ void MobLoadImage(CP_Image* Sprites, int No_Img) {
 		printf("Error: Image and arr size don't match\n");
 	}
 
-//	for (int i = 0; i < Size; i++) {
-//		Sprites[i] = CP_Image_Load(&FilePaths[i]);
-//	}
 }
 void DrawMobImage(CP_Image* Sprites, Mob*m, Player *p) {
 
@@ -359,12 +356,37 @@ void MobCollision(Mob* mob, Player *player) {
 	}
 }
 
-void MobTMobCollision(Mob* mob,Player*P, WaveTrack *tracker, int No_Waves) {
-
+/*
+@brief		Function that check mob to mob collision
+@params		mob	-> Pointer to Mob
+			P	-> Pointer to Player
+			tracker	-> Pointer to WaveTrack[No_Waves] (in map.c)
+@return		
+*/
+void MobTMobCollision(Mob* mob,Player*p, WaveTrack *tracker, int No_Waves) {
+	int Gap, status = 0;
+	CP_Vector v = CP_Vector_Normalize(CP_Vector_Set(mob->x - p->x, mob->y - p->y));
 	for (int i = 0; i <No_Waves; i++) {
-		
-	}
+		for (int j = 0; j < tracker[i].MobCount; j++) {
+			Mob* target = tracker[i].arr[j];
+			if (mob->x == target->x && mob->y == target->y) {
+				continue;
+			}
+			Gap = mob->CStats.size > target->CStats.size ? mob->CStats.size : target->CStats.size;
+			int dist = CP_Math_Distance(mob->x, mob->y, target->x, target->y);
 
+			if (dist <= Gap) {
+				if (CP_Math_Distance(mob->x, mob->y, p->x, p->y)  > CP_Math_Distance(target->x, target->y, p->x, p->y);
+				mob->x += v.x * mob->CStats.Speed;
+				mob->y += v.y * mob->CStats.Speed;
+				break;
+			}
+			
+		}
+
+	}
+	mob->x -= v.x * mob->CStats.Speed;
+	mob->y -= v.y * mob->CStats.Speed;
 }
 
 

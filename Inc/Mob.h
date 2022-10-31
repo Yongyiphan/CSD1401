@@ -84,9 +84,10 @@ void GenerateMobs(WaveTrack* tracker, Player* player);
 void GenerateWaves(Player* P, WaveTrack* queue, int* queueID, int WavesNo, int CostGrowth, int MaxMobGrowth,int *TotalWaveCount,  int* MobCount);
 
 void DrawMobImage(CP_Image* Sprites, Mob* m, Player*p);
-void DrawMob(Mob *mob, int r, int g, int b);
+//void DrawMob(Mob *mob, int r, int g, int b);
 void MobPathFinding(Mob* mob, float tX, float tY);
 void MobCollision(Mob* mob, Player* player);
+void MobTMobCollision(Mob* mob, Player* p, WaveTrack* tracker, int No_Waves);
 
 void PrintWaveStats(int*CWaveCount, int No_Waves, int*WaveIDQueue, int*MobCount);
 

@@ -35,7 +35,7 @@ int StartMobQuantity = 10000, StartItemQuantity = 1000;
 #define Wave_Timer 5
 #define MaxMobGrowthRate 30
 #define WaveCostGrowthRate 10
-#define SpawnAreaOffset 500
+#define SpawnAreaOffset 50
 
 Mob* cMob;
 int cWaveCost, MaxMob;
@@ -159,8 +159,10 @@ void map_Update(void) {
 						continue;
 					}
 					MobC += 1;
-					MobPathFinding(cMob, P.x, P.y);
 					MobCollision(cMob, &P);
+					MobTMobCollision(cMob, &P, &WaveTracker, NO_WAVES);
+					//MobPathFinding(cMob, P.x, P.y);
+
 					if (cMob->Status == 0) {
 						cWave->CurrentCount -= 1;
 						MobCount[w] -= 1;
