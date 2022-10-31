@@ -14,4 +14,4 @@ Parameters:
 	click_x
 	click_y
 */
-void IsAreaClicked(float, float, float, float, float, float);
+int IsAreaClicked(float, float, float, float, float, float);
