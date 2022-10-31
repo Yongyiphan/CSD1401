@@ -1,3 +1,4 @@
+#pragma once
 
 // Initialize new map
 void map_Init(void);
