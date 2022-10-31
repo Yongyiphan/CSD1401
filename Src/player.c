@@ -179,7 +179,7 @@ void upgrade_screen(Player* P, int* isMenu, int* isPaused) {
 		currentX = background_topX, currentY = background_topY;
 		currentY += box_height + padding;
 	}
-	if (CP_Input_KeyTriggered(KEY_U)) {
+	if (CP_Input_KeyTriggered(KEY_I)) {
 		*isPaused = 0;
 		*isMenu = 0;
 	}

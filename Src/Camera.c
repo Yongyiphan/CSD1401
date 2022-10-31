@@ -34,7 +34,7 @@ void CameraDemo_Update(Player *player)
 	float dt = CP_System_GetDt();
 
 	// Inputs for increasing and reducing camera view
-	if (CP_Input_KeyDown(KEY_I))
+	/*if (CP_Input_KeyDown(KEY_I))
 	{
 		currentScale += dt * SCALE_QUANTUM;
 		scaleMatrix = CP_Matrix_Scale(CP_Vector_Set(currentScale, currentScale));
@@ -43,7 +43,7 @@ void CameraDemo_Update(Player *player)
 	{
 		currentScale += dt * -SCALE_QUANTUM;
 		scaleMatrix = CP_Matrix_Scale(CP_Vector_Set(currentScale, currentScale));
-	}
+	}*/
 
 	// THIS IS ALL CAMERA MOVEMENT, ARROW KEYS UP DOWN LEFT RIGHT FOR CAMERA CONTROL
 	if (CP_Input_KeyDown(KEY_W))

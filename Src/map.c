@@ -38,7 +38,7 @@ WaveTrack waveTrack[NO_WAVES], *cWave; // pause state for the game when paused.
 
 //Might be useful variable for Waves Tracking
 int totalWave = 0, MobCount[NO_WAVES];
-int isPaused;
+int isPaused, isMenu;
 
 
 void map_Init(void) {
@@ -103,6 +103,10 @@ void map_Update(void) {
 			isPaused = 1;
 		if (CP_Input_KeyDown(KEY_H)) {
 			P.SPEED *= 1.1f;
+		}
+		if (CP_Input_KeyDown(KEY_U)) {
+			isMenu = 1;
+			isPaused = 1;
 		}
 		CameraDemo_Update(&P);
 
