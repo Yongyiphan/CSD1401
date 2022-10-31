@@ -1,7 +1,7 @@
 #pragma once
 
 // Create options screen
-void option_screen(void);
+void option_screen(int*);
 
 
 /*
@@ -14,4 +14,4 @@ Parameters:
 	click_x
 	click_y
 */
-void IsAreaClicked(float, float, float, float, float, float);
+int IsAreaClicked(float, float, float, float, float, float);
