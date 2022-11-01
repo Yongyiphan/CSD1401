@@ -34,6 +34,10 @@ typedef struct ItemTracker {
 
 /*
 Item Planning
+
+Player will not know what the item's effect:
+
+
 Player Stat Boost -> Limited Duration
 Exp -> Dropped by Mobs
 Magnet -> Moves Exp to Player's location

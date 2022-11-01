@@ -30,7 +30,7 @@ CP_Vector start_vector;
 CP_Color grey, black, red, green, blue, white;
 
 //Starting Quantity
-int StartMobQuantity = 10, StartItemQuantity = 1000;
+int StartMobQuantity = 1000, StartItemQuantity = 1000;
 
 //Mob Stuff
 #define NO_WAVES 4
@@ -38,7 +38,7 @@ int StartMobQuantity = 10, StartItemQuantity = 1000;
 #define Wave_Timer 5
 #define MaxMobGrowthRate 100
 #define WaveCostGrowthRate 50
-#define SpawnAreaOffset 500
+#define SpawnAreaOffset 1300
 
 Mob* cMob;
 int cWaveCost, MaxMob;
@@ -56,7 +56,7 @@ int isPaused;
 
 
 void map_Init(void) {
-	
+	//CP_System_SetFrameRate(60);
 	CP_System_SetWindowSize(MAP_SIZEX, MAP_SIZEY);
 	wHeight = CP_System_GetWindowHeight() / 2;
 	wWidth = CP_System_GetWindowWidth() / 2;
@@ -141,7 +141,7 @@ void map_Update(void) {
 				*/
 				GenerateWaves(&P, &WaveTracker, &WaveIDQueue, NO_WAVES, cWaveCost, MaxMob, &totalWave, &MobCount);
 				//Used to print current wave statistics, can be removed :)
-				PrintWaveStats(&totalWave, NO_WAVES, &WaveIDQueue, &MobCount);
+				//PrintWaveStats(&totalWave, NO_WAVES, &WaveIDQueue, &MobCount);
 			}
 		}
 
@@ -162,21 +162,20 @@ void map_Update(void) {
 				cMob = cWave->arr[i];
 				//Only bother handle mobs that are alive
 				//Dead = 0, Alive = 1
-				if (cMob->Status == 0) {
-					continue;
-				}
-				//MobTPlayerCollision(cMob, &P);
-				MobTMobCollision(cMob, &P, &WaveTracker, NO_WAVES);
-				MobTPlayerCollision(cMob, &P);
+				if (cMob->Status == 1) {
+					//MobTPlayerCollision(cMob, &P);
+					MobTMobCollision(cMob, &P, &WaveTracker, NO_WAVES);
+					MobTPlayerCollision(cMob, &P);
 
-				if (cMob->Status == 0) {
-					cWave->CurrentCount -= 1;
-					MobCount[w] -= 1;
-					continue;
-				}
-
-				if (cMob->h == 0 || P.x - wWidth - cMob->w < cMob->x && cMob->x < P.x + wWidth + cMob->w && P.y - wHeight - cMob->h < cMob->y && cMob->y < P.y + wHeight + cMob->h) {
-					DrawMobImage(MobSprites, cMob, &P);
+					if (cMob->Status == 0) {
+						cWave->CurrentCount -= 1;
+						MobCount[w] -= 1;
+						continue;
+					}
+					//cMob->h == 0 means haven drawn before. / assigned image to it yet
+					if (P.x - wWidth - cMob->w < cMob->x && cMob->x < P.x + wWidth + cMob->w && P.y - wHeight - cMob->h < cMob->y && cMob->y < P.y + wHeight + cMob->h || cMob->h == 0) {
+						DrawMobImage(MobSprites, cMob, &P);
+					}
 				}
 
 			}

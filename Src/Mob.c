@@ -9,7 +9,7 @@
 
 #define MOB_CAP 500
 #define Img_Scale 80
-#define BoundScale 1.8f
+#define BoundScale 1.2f
 
 
 //Pool of Mob Types
@@ -94,12 +94,13 @@ void CreateBaseStat(MobStats* cStat, int type) {
 const double PI = 22.0 / 7.0;
 void CreateMob(Mob*m, MobStats *Base, Player*player, int offSet)
 {
-	float MaxRadius = hypot(CP_System_GetWindowWidth()/2, CP_System_GetWindowHeight()/2) * BoundScale;
+	float MaxRadius = CP_Vector_Length(CP_Vector_Zero(), CP_Vector_Set(CP_System_GetWindowWidth()/2, CP_System_GetWindowHeight()/2)) * BoundScale;
 	//Uncomment below if you want to manually set spawn radius
 	//MaxRadius = 600;
 	//Assume Player center of spawnable area
 	float nx, ny, rTheta, r, Diff = 0.0;
-	do {
+	//do {
+	//} while (Diff <= offSet);
 		/*Formula for generating points in circle*/
 		rTheta = CP_Random_RangeFloat(0, 1) * 2 * PI;
 		//eqn = sqrt( random() * (MaxRadius**2 - MinRadius**2) + MinRadius**2 ) <- MinRadius == offSet
@@ -107,7 +108,6 @@ void CreateMob(Mob*m, MobStats *Base, Player*player, int offSet)
 		nx = player->x + r * cos(rTheta);
 		ny = player->y + r * sin(rTheta);
 		Diff = CP_Math_Distance(nx, ny, player->x, player->y);
-	} while (Diff <= offSet);
 
 	m->BaseStats = *Base;
 	m->CStats = *Base;
@@ -138,7 +138,8 @@ void InitWavesArr(WaveTrack* tracker, int start) {
 		tracker->arr[w]->CStats = bs;
 		tracker->arr[w]->x = 0;
 		tracker->arr[w]->y = 0;
-		tracker->arr[w]->Status = 0;
+		//Dead = 0, Alive = 1, Blank = 2
+		tracker->arr[w]->Status = 2;
 		tracker->arr[w]->AnimationCycle = 0;
 		tracker->arr[w]->w = 0;
 		tracker->arr[w]->h = 0;
@@ -158,6 +159,10 @@ void GenerateMobs(WaveTrack* tracker, Player* player) {
 	int MobC = 0, cost = tracker->WaveCost, randM, randMCost;
 
 	while (cost > 0) {
+		if (MobC == tracker->MaxMob) {
+			//printf("\tMax Mob Limit\n");
+			break;
+		}
 		//Generate N no of mobs based off wave cost
 		//randM = CP_Random_RangeInt(0, MobTypes - 1);
 		randM = CP_Random_RangeInt(0,1);
@@ -173,12 +178,9 @@ void GenerateMobs(WaveTrack* tracker, Player* player) {
 				tracker->arrSize = nQ;
 			}
 			InitWavesArr(tracker, MobC);
+			printf("\tNew Arr Size = %d", nQ);
 		}
 
-		if (MobC == tracker->MaxMob) {
-			//printf("\tMax Mob Limit\n");
-			break;
-		}
 		if (cost >= randMCost) {
 			Mob* cMob = tracker->arr[MobC];
 			cMob->Title = randM;
@@ -276,7 +278,7 @@ void DrawMobImage(CP_Image* Sprites, Mob* m, Player* p) {
 
 	int IHeight, IWidth, alpha = 255;
 	int SizeDef = 5, StartImgI = m->Title * 2;
-	int FrameStep = 0, targetFPS = 6, targetSize = Img_Scale;
+	int FrameStep = 0, targetFPS = 6;
 	m->AnimationCycle += 1;
 	int u0 = 0, v0 = 0, u1 = 0, v1 = 0;
 	/*
@@ -298,29 +300,25 @@ void DrawMobImage(CP_Image* Sprites, Mob* m, Player* p) {
 		case SmallMob:
 			SizeDef = 5, targetFPS = 6;
 			IWidth = CP_Image_GetWidth(SImg) / SizeDef;
-			m->h = IHeight * targetSize / IHeight, m->w = m->h;
+			m->h = IHeight * Img_Scale / IHeight, m->w = m->h;
 
 			FrameStep = (m->AnimationCycle / targetFPS) % SizeDef;
 			u0 = FrameStep * IWidth, v0 = 0, u1 = FrameStep * IWidth + IWidth, v1 = IHeight;
+			CP_Image_DrawSubImage(SImg, m->x, m->y,m->w, m->h, u0, v0, u1, v1, alpha);
 
 			break;
 		case MediumMob:
-			SizeDef = 2, targetFPS = 6;
+			SizeDef = 2, targetFPS = 4;
 			IWidth = CP_Image_GetWidth(SImg) / SizeDef;
-			m->h = IHeight * targetSize / IHeight, m->w = m->h;
+			m->h = IHeight * Img_Scale / IHeight, m->w = m->h;
 
 			FrameStep = (m->AnimationCycle / targetFPS) % SizeDef;
 			u0 = FrameStep * IWidth, v0 = 0, u1 = FrameStep * IWidth + IWidth, v1 = IHeight;
-
-			//CP_Image_DrawSubImage(SImg, m->x, m->y,m->w,m->h, u0, v0, u1, v1, alpha);
+			CP_Image_DrawSubImage(SImg, m->x, m->y,m->w,m->h, u0, v0, u1, v1, alpha);
 			break;
 		default:
 			break;
 	}
-	//if ( p->x - wWidth - m->w <= m->x && m->x <= p->x + wWidth + m->w && p->y - wHeight - m->h <= m->y && m->y <= p->y + wHeight + m->h) {
-		CP_Image_DrawSubImage(SImg, m->x, m->y,m->w, m->h, u0, v0, u1, v1, alpha);
-	//}
-	
 }
 
 
@@ -338,6 +336,9 @@ void DrawMobImage(CP_Image* Sprites, Mob* m, Player* p) {
 			tracker	-> Pointer to WaveTrack[No_Waves] (in map.c)
 @return		
 */
+float square(float one, float two) {
+	 return one * one + two * two;
+}
 void MobTMobCollision(Mob* m, Player* p, WaveTrack* tracker, int const No_Waves) {
 	if (m->h > 0) {
 		int status = 0;
@@ -351,77 +352,65 @@ void MobTMobCollision(Mob* m, Player* p, WaveTrack* tracker, int const No_Waves)
 			radius of contact of m && tm
 			dist will be left in squared form
 		*/
-		float mRad = (pow(m->w / 2, 2) + pow(m->h / 2, 2)), tmRad;
-		float dMtoP = (pow(p->x - m->x, 2) + pow(p->y - m->y, 2)), dMtoTM, dTMtoP;
+		float mRad = square(m->w/2, m->h/2), tmRad;
+		float dMtoP = square(p->x-m->x, p->y-m->y), dTMtoP, dMtoTM;
 		CP_Vector vMtoP = CP_Vector_Set(p->x - m->x, p->y - m->y);
-		CP_Vector BasePF = CP_Vector_Scale(CP_Vector_Normalize(vMtoP), m->CStats.Speed);
-		if (CP_System_GetFrameRate() < 27) {
+		CP_Vector NormBase = CP_Vector_Normalize(vMtoP);
+		CP_Vector BasePF = CP_Vector_Scale(NormBase, m->CStats.Speed);
+		if (CP_System_GetFrameRate() < 27.0f) {
 			goto BasicMovement;
 		}
-		//for (int i = 0; i < No_Waves; i++) {
-		//	for (int j = 0; j < tracker[i].MobCount; j++) {
-		for (int i = No_Waves - 1; i--;) {
-			if (tracker[i].MobCount != 0) {
-				for (int j = tracker[i].MobCount - 1; j--;) {
-					if (m == tracker[i].arr[j] || tracker[i].arr[j]->Status == 0) {
+		//Some complicated ass iter using pointers XD
+		for (WaveTrack* i = tracker; i < tracker + No_Waves; i++) {
+			if (i->CurrentCount != 0) {
+				for (Mob** j = i->arr; j < i->arr + i->MobCount; j++) {
+					if (m == *j) {
 						continue;
 					}
-					tm = tracker[i].arr[j];
-					/*
-					Collision Algo
-						: Iterate thru all other mobs
-						: If collide, reverse movement
-					*/
-					//Circle Collision
-					/*	Filter with radius first
-							: Width & Height defined with Img_Scale
-							: Rad = sqrt( Img_Scale / 2 **2 + Img_Scale / 2 ** 2)
-							: Diff Img Might have diff width -> Compare the squared version
-					*/
-					//Can dabble with separating axis theorem
-					//Bounce mechanics, priority = closer mob to player will proceed towards player, other will bounce random direction
-					tmRad = (pow(tm->w / 2, 2) + pow(tm->h / 2, 2));
-					dMtoTM = (pow(m->x - tm->x, 2) + pow(m->y - tm->y, 2));
-					if (dMtoTM <= mRad + tmRad) {
-						dTMtoP = (pow(p->x - tm->x, 2) + pow(p->y - tm->y, 2));
-						main = m;
-						bounce = tm;
-						if (dMtoP > dTMtoP) {
-							main = tm;
-							bounce = m;
-						}
+					tm = *j;
+					if (tm->Status == 1) {
 						/*
-						Require:
-							Vector bounce to main
-							Vector bounce to p
+						Collision:
+							->if M collide with another mob and is same vector direction pause
 						*/
-						CP_Vector vBounceToMain = CP_Vector_Set(main->x - bounce->x, main->y - bounce->y);
-						CP_Vector vBounceToP = CP_Vector_Set(p->x - bounce->x, p->y - bounce->y);
-						if (vBounceToMain.x == vBounceToP.x && vBounceToMain.y == vBounceToMain.y) {
+						tmRad = square(tm->w / 2, tm->h / 2);
+						dMtoTM = square(m->x - tm->x, m->y - tm->y);
+						dTMtoP = square(p->x - tm->x, p->y - tm->y);
+						if (dMtoTM <= mRad + tmRad && dMtoP < dTMtoP) {
+							main = m;
+							bounce = tm;
+							/*
+							Require:
+								Vector bounce to main
+								Vector bounce to p
+							*/
+							CP_Vector vBounceToMain = CP_Vector_Set(m->x - tm->x, m->y - tm->y);
+							CP_Vector vBounceToP = CP_Vector_Set(p->x - tm->x, p->y - tm->y);
+							if (vBounceToMain.x == vBounceToP.x && vBounceToMain.y == vBounceToMain.y) {
+								goto BasicMovement;
+							}
+							float BouncePAngle = CP_Vector_Angle(vBounceToMain, vBounceToP);
+							if (_isnanf(BouncePAngle)) {
+								goto BasicMovement;
+							}
+							float nAngle = CP_Random_RangeFloat(0, BouncePAngle);
+							//Using vBounceToP as main directional vector -> find new angle from it -> transform it -> move bounce in reverse direction
+							CP_Matrix rot = CP_Matrix_Set(
+								cos(nAngle), -sin(nAngle), 0,
+								sin(nAngle), cos(nAngle), 0,
+								0, 0, 0
+							);
+							CP_Vector nDirection = CP_Vector_Normalize(CP_Vector_MatrixMultiply(rot, vBounceToP));
+							CP_Vector mainDirection = CP_Vector_Scale(CP_Vector_Normalize(CP_Vector_Set(p->x - m->x, p->y - m->y)), m->CStats.Speed);
+							bounce->x -= nDirection.x;
+							bounce->y -= nDirection.y;
+							if (m != main) {
+								main->x += mainDirection.x;
+								main->y += mainDirection.y;
+								status = 1;
+							}
 							goto BasicMovement;
 						}
-						float BouncePAngle = CP_Vector_Angle(vBounceToMain, vBounceToP);
-						if (_isnanf(BouncePAngle)) {
-							goto BasicMovement;
-						}
-						float nAngle = CP_Random_RangeFloat(0, BouncePAngle);
-						//Using vBounceToP as main directional vector -> find new angle from it -> transform it -> move bounce in reverse direction
-						CP_Matrix rot = CP_Matrix_Set(
-							cos(nAngle), -sin(nAngle), 0,
-							sin(nAngle), cos(nAngle), 0,
-							0, 0, 0
-						);
-						CP_Vector nDirection = CP_Vector_Scale(CP_Vector_Normalize(CP_Vector_MatrixMultiply(rot, vBounceToP)), bounce->CStats.Speed);
-						CP_Vector mainDirection = CP_Vector_Scale(CP_Vector_Normalize(CP_Vector_Set(p->x - main->x, p->y - main->y)), main->CStats.Speed);
-						bounce->x -= nDirection.x;
-						bounce->y -= nDirection.y;
-						if (m != main) {
-							main->x += mainDirection.x;
-							main->y += mainDirection.y;
-							status = 1;
-						}
-						goto BasicMovement;
-
 					}
 				}
 			}
@@ -443,9 +432,6 @@ void MobTPlayerCollision(Mob* m, Player* p) {
 	if (m->CStats.HP <= 0) {
 		m->Status = 0;
 	}
-	CP_Settings_Fill(CP_Color_Create(255, 255, 0, 10));
-	CP_Graphics_DrawCircle(p->x, p->y, p->HITBOX * 2);
-
 }
 
  
@@ -489,88 +475,43 @@ void FreeMobResource(WaveTrack* wtracker,int noWaves, CP_Image* spritesheet, int
 			Old Code(Scraped)
 			  Ignore Below
 */
-//void GenerateWaves(WaveTrack *tracker, Player*player) {
-//	//gMobCount = Generated Mob Count throughout this func
-//	//waveCost = Amt of "currency" the func will take to generated random types of mobs per wave
-//	int gMobCount = 0, waveCost = tracker->waveCost;
-//	int Reused = 0;
-//	if (tracker->arr == NULL) {
-//		printf("Here\n");
-//	}
-//
-//	//int xLeft = 0, xRight = CP_System_GetWindowWidth(), yTop = 0, yBtm = CP_System_GetWindowHeight();
-//	while (waveCost > 0) {
-//		//Generate a random mob from mob types pool
-//		//Edit here to generated different Mob Types
-//		int randMobI = CP_Random_RangeInt(0, 2);
-//		int randMobCost = MobCosts[randMobI];
-//		//Algo to extend array size when nearing max capacity
-//		//Provides array with overhead for additional 100 Mobs.
-//		if (gMobCount >= tracker->arrSize) {
-//			int nQuantity = tracker->arrSize + 1000;
-//			
-//			Mob *temp = realloc(tracker->arr, sizeof(Mob) * nQuantity);
-//			if (temp != NULL) {
-//				//IF realloc is successful
-//				//Update tracker with new parameters
-//				//free(tracker->arr);
-//				tracker->arr = temp;
-//				tracker->arrSize = nQuantity;
-//			}
-//			else {
-//				Mob* nArr = malloc(sizeof(Mob) * nQuantity);
-//				for (int k = 0; k < tracker->arrSize; k++) {
-//					nArr[k] = tracker->arr[k];
-//				}
-//				free(tracker->arr);
-//				tracker->arr = nArr;
-//			}
-//			free(temp);
-//			printf("\n\tArray Expended");
-//			printf("\n\tNew Array Size: %d\n", tracker->arrSize);
-//			continue;
-//		}
-//		
-//		//Algo to add Mob generated to array.
-//		if (waveCost >= randMobCost) {
-//			if (tracker->MobCount > 0 && tracker->arr[gMobCount].Status == 0) {
-//				CreateBaseStat(&tracker->arr[gMobCount].BaseStats, randMobI);
-//				CreateMob(&tracker->arr[gMobCount], randMobI, &tracker->arr[gMobCount].BaseStats, player, tracker->spawnOffset);
-//				Reused += 1;
-//
-//			}
-//			else {
-//				Mob m;
-//				MobStats ms;
-//				CreateBaseStat(&ms, randMobI);
-//				CreateMob(&m, randMobI, &ms, player, tracker->spawnOffset);
-//				tracker->arr[gMobCount] = m;
-//			}
-//			//Generated a new mob at specified locations
-//			//printf("Pos: %d -> Title: %d | X: %d | Y: %d\n",gMobCount,m.Title,(int) m.coor.x,(int) m.coor.y);
-//			//printf("%p\n", &m);
-//			
-//			gMobCount += 1;
-//			waveCost -= randMobCost;
-//		}
-//	}
-//	tracker->MobCount = gMobCount;
-//	tracker->CurrentCount = gMobCount;
-//	printf("Mobs Resused: %d\n", Reused);
-//	printf("New Mobs Created: %d\n", gMobCount - Reused);
-//}
-
-//Depreceated 
-/*
-@brief		Function to draw mob
-@params		Mob	-> pointer to target mob
-			r, g, b	-> RGB values for CP_Color_Create //will change to image/sprite
-@returns	Nothing
-*/
-//void DrawMob(Mob* mob, int r, int g, int b)
-//{
-//	CP_Settings_StrokeWeight(0.5f);
-//	int alpha = (mob->CStats.HP / mob->BaseStats.HP) * 255;
-//	CP_Settings_Fill(CP_Color_Create(r,g,b, alpha));
-//	CP_Graphics_DrawCircle((double) mob->x, (double) mob->y, mob->CStats.size);
-//}
+					//tmRad = (pow(tm->w / 2, 2) + pow(tm->h / 2, 2));
+					//dMtoTM = (pow(m->x - tm->x, 2) + pow(m->y - tm->y, 2));
+					//dTMtoP = (pow(p->x - tm->x, 2) + pow(p->y - tm->y, 2));
+					//if (dMtoTM <= mRad + tmRad) {
+					//	goto BasicMovement;
+					//}
+					//if (dMtoP < dTMtoP ) {
+					//	main = m;
+					//	bounce = tm;
+					//	/*
+					//	Require:
+					//		Vector bounce to main
+					//		Vector bounce to p
+					//	*/
+					//	CP_Vector vBounceToMain = CP_Vector_Set(m->x - tm->x, m->y - tm->y);
+					//	CP_Vector vBounceToP = CP_Vector_Set(p->x - tm->x, p->y - tm->y);
+					//	if (vBounceToMain.x == vBounceToP.x && vBounceToMain.y == vBounceToMain.y) {
+					//		goto BasicMovement;
+					//	}
+					//	float BouncePAngle = CP_Vector_Angle(vBounceToMain, vBounceToP);
+					//	if (_isnanf(BouncePAngle)) {
+					//		goto BasicMovement;
+					//	}
+					//	float nAngle = CP_Random_RangeFloat(0, BouncePAngle);
+					//	//Using vBounceToP as main directional vector -> find new angle from it -> transform it -> move bounce in reverse direction
+					//	CP_Matrix rot = CP_Matrix_Set(
+					//		cos(nAngle), -sin(nAngle), 0,
+					//		sin(nAngle), cos(nAngle), 0,
+					//		0, 0, 0
+					//	);
+					//	CP_Vector nDirection = CP_Vector_Normalize(CP_Vector_MatrixMultiply(rot, vBounceToP));
+					//	CP_Vector mainDirection = CP_Vector_Scale(CP_Vector_Normalize(CP_Vector_Set(p->x - m->x, p->y - m->y)), m->CStats.Speed);
+					//	bounce->x -= nDirection.x;
+					//	bounce->y -= nDirection.y;
+					//	if (m != main) {
+					//		main->x += mainDirection.x;
+					//		main->y += mainDirection.y;
+					//		status = 1;
+					//	}
+					//	goto BasicMovement;

@@ -95,5 +95,5 @@ void PrintWaveStats(int*CWaveCount, int No_Waves, int*WaveIDQueue, int*MobCount)
 
 void FreeMobResource(WaveTrack* wtracker, int noWaves, CP_Image *spritesheet, int Mob_Img);
 
-
+float square(float one, float two);
 #endif
