@@ -30,11 +30,11 @@ CP_Color grey, black, red, green, blue, white;
 int StartMobQuantity = 10, StartItemQuantity = 1000;
 
 //Mob Stuff
-#define NO_WAVES 2
+#define NO_WAVES 4
 #define Spawn_Timer 1
 #define Wave_Timer 5
-#define MaxMobGrowthRate 10
-#define WaveCostGrowthRate 5
+#define MaxMobGrowthRate 30
+#define WaveCostGrowthRate 10
 #define SpawnAreaOffset 50
 
 Mob* cMob;
@@ -109,7 +109,8 @@ void map_Update(void) {
 		CameraDemo_Update(&P);
 		if ((int)CP_System_GetSeconds() != currentSec) {
 			currentSec = (int)CP_System_GetSeconds();
-			//printf("\n\tCurrent Sec: %d | Current FPS:%f\n", currentSec, CP_System_GetFrameRate());
+			printf("\n\tCurrent Sec: %d | Current FPS:%f\n", currentSec, CP_System_GetFrameRate());
+			printf("\tMax Mob: %d | Current Cost: %d\n", MaxMob, cWaveCost);
 			//Every SpawnTime interval spawn wave
 			if (currentSec % Wave_Timer == 0) {
 				//Growth Per Wave

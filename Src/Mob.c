@@ -415,8 +415,14 @@ void MobTMobCollision(Mob* m, Player* p, WaveTrack* tracker, int No_Waves) {
 						*/
 						CP_Vector vBounceToMain = CP_Vector_Set(main->x - bounce->x, main->y - bounce->y);
 						CP_Vector vBounceToP = CP_Vector_Set(p->x - bounce->x, p->y - bounce->y);
+						if (vBounceToMain.x == vBounceToP.x && vBounceToMain.y == vBounceToMain.y) {
+
+							goto BasicMovement;
+							break;
+						}
 						float BouncePAngle = CP_Vector_Angle(vBounceToMain, vBounceToP);
 						if (_isnanf(BouncePAngle)) {
+							goto BasicMovement;
 							break;
 						}
 						float nAngle = CP_Random_RangeFloat(0, BouncePAngle);
@@ -433,12 +439,16 @@ void MobTMobCollision(Mob* m, Player* p, WaveTrack* tracker, int No_Waves) {
 						if (m != main) {
 							main->x += mainDirection.x;
 							main->y += mainDirection.y;
+							status = 1;
 						}
-						break;
+						goto BasicMovement;
 
 					}
 				}
 			}
+		}
+		BasicMovement:
+		if (0 == status) {
 			m->x += BasePF.x;
 			m->y += BasePF.y;
 		}
@@ -446,13 +456,14 @@ void MobTMobCollision(Mob* m, Player* p, WaveTrack* tracker, int No_Waves) {
 }
 
 void MobTPlayerCollision(Mob* m, Player* p) {
-		if (CP_Vector_Length(CP_Vector_Set(p->x-m->x, p->y-m->y)) <= p->HITBOX) {
-			m->CStats.HP -= p->DAMAGE;
-			p->CURRENT_HP -= m->CStats.Dmg;
-		}
-		if (m->CStats.HP <= 0) {
-			m->Status = 0;
-		}
+
+	if (CP_Vector_Length(CP_Vector_Set(p->x-m->x, p->y-m->y)) <= p->HITBOX * 2) {
+		m->CStats.HP -= p->DAMAGE;
+		p->CURRENT_HP -= m->CStats.Dmg;
+	}
+	if (m->CStats.HP <= 0) {
+		m->Status = 0;
+	}
 
 }
 
