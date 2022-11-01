@@ -27,14 +27,14 @@ CP_Vector start_vector;
 CP_Color grey, black, red, green, blue, white;
 
 //Starting Quantity
-int StartMobQuantity = 10000, StartItemQuantity = 1000;
+int StartMobQuantity = 10, StartItemQuantity = 1000;
 
 //Mob Stuff
-#define NO_WAVES 6
+#define NO_WAVES 2
 #define Spawn_Timer 1
 #define Wave_Timer 5
-#define MaxMobGrowthRate 30
-#define WaveCostGrowthRate 10
+#define MaxMobGrowthRate 10
+#define WaveCostGrowthRate 5
 #define SpawnAreaOffset 50
 
 Mob* cMob;
@@ -77,10 +77,10 @@ void map_Init(void) {
 			0, //Wave Cost
 			StartMobQuantity, //Array Size 
 			SpawnAreaOffset, //Spawn offset
-			malloc(sizeof(Mob*) * StartMobQuantity), //Arr
-			white //Wave Color
-		};
-		InitWavesArr(&WaveTracker[i]);
+			malloc(sizeof(Mob*) * StartMobQuantity) }; //, //Arr
+	//		white //Wave Color
+	//	};
+		InitWavesArr(&WaveTracker[i], 0);
 		WaveIDQueue[i] = -1;
 	}
 	//ItemTracker = &(ItemTrack){malloc(sizeof(Item*) * StartItemQuantity), StartItemQuantity, 0};
@@ -135,11 +135,10 @@ void map_Update(void) {
 				*/
 				GenerateWaves(&P, &WaveTracker, &WaveIDQueue, NO_WAVES, cWaveCost, MaxMob, &totalWave, &MobCount);
 				//Used to print current wave statistics, can be removed :)
-				//PrintWaveStats(&totalWave,NO_WAVES, &WaveIDQueue, &MobCount);
+				PrintWaveStats(&totalWave,NO_WAVES, &WaveIDQueue, &MobCount);
 			}
 		}
 
-		int MobC = 0;
 		for (int w = 0; w < NO_WAVES; w++) {
 			cWave = &WaveTracker[w];
 			if (WaveIDQueue[w] != -1) {
@@ -158,9 +157,9 @@ void map_Update(void) {
 					if (cMob->Status == 0) {
 						continue;
 					}
-					MobC += 1;
-					MobCollision(cMob, &P);
 					MobTMobCollision(cMob, &P, &WaveTracker, NO_WAVES);
+					MobTPlayerCollision(cMob, &P);
+					//MobCollision(cMob, &P);
 					//MobPathFinding(cMob, P.x, P.y);
 
 					if (cMob->Status == 0) {

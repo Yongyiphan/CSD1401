@@ -8,7 +8,7 @@
 //#include "player.h"
 
 #define MOB_CAP 500
-
+#define Img_Scale 80
 
 
 //Pool of Mob Types
@@ -115,6 +115,8 @@ void CreateMob(Mob*m, MobStats *Base, Player*player, int offSet)
 	m->y = ny;
 	m->Status = 1;
 	m->AnimationCycle = 0;
+	m->w = 0;
+	m->h = 0;
 }
 
 /*
@@ -122,12 +124,12 @@ void CreateMob(Mob*m, MobStats *Base, Player*player, int offSet)
 @params		WaveTrack struct pointer to be filled with blank mobs
 @returns	WaveTrack's array to be filled with blank mobs (to be modified/updated when needed)
 */
-void InitWavesArr(WaveTrack* tracker) {
+void InitWavesArr(WaveTrack* tracker, int start) {
 	MobStats bs = (MobStats){
 		0,0,0,0,0,0
 	};
 
-	for (int w = 0; w < tracker->arrSize;w++) {
+	for (int w = start; w < tracker->arrSize; w++) {
 		//Allocate memory to it
 		tracker->arr[w] = malloc(sizeof(Mob));
 		//Fill each mob pointers with data
@@ -138,6 +140,8 @@ void InitWavesArr(WaveTrack* tracker) {
 		tracker->arr[w]->y = 0;
 		tracker->arr[w]->Status = 0;
 		tracker->arr[w]->AnimationCycle = 0;
+		tracker->arr[w]->w = 0;
+		tracker->arr[w]->h = 0;
 	}
 }
 
@@ -151,7 +155,7 @@ void InitWavesArr(WaveTrack* tracker) {
 @returns	Fills in a array of Mob pointers pointing to blank mob objects (created in InitWaveArr())
 */
 void GenerateMobs(WaveTrack* tracker, Player* player) {
-	int MobC = 0, cost = tracker->WaveCost, reused = 0, randM, randMCost;
+	int MobC = 0, cost = tracker->WaveCost, randM, randMCost;
 
 	while (cost > 0) {
 		//Generate N no of mobs based off wave cost
@@ -168,34 +172,27 @@ void GenerateMobs(WaveTrack* tracker, Player* player) {
 				tracker->arr = tArr;
 				tracker->arrSize = nQ;
 			}
-			MobStats bs = (MobStats){
-				0,0,0,0,0,0
-			};
-			for (int w = MobC; w < nQ; w++) {
-				tracker->arr[w] = malloc(sizeof(Mob));
-				tracker->arr[w]->Title = w;
-				tracker->arr[w]->BaseStats = bs;
-				tracker->arr[w]->CStats = bs;
-				tracker->arr[w]->x = 0;
-				tracker->arr[w]->y = 0;
-				tracker->arr[w]->Status = 0;
-				tracker->arr[w]->AnimationCycle = 0;
-			}
+			InitWavesArr(tracker, MobC);
 		}
 
 		if (MobC == tracker->MaxMob) {
 			//printf("\tMax Mob Limit\n");
 			break;
 		}
+		if (cost >= randMCost) {
+			Mob* cMob = tracker->arr[MobC];
+			cMob->Title = randM;
+			CreateBaseStat(&cMob->BaseStats, randM);
+			CreateMob(cMob, &cMob->BaseStats, player, tracker->spawnOffset);
+			cost -= randMCost;
+			MobC += 1;
 
-		Mob* cMob = tracker->arr[MobC];
-		cMob->Title = randM;
-		CreateBaseStat(&cMob->BaseStats, randM);
-		CreateMob(cMob, &cMob->BaseStats, player, tracker->spawnOffset);
-		reused += 1;
-		cost -= randMCost;
-		MobC += 1;
+		}
 	}
+
+	//for (int i = 0; i < MobC; i++) {
+	//	printf("%d (%f, %f)\n", tracker->arr[i]->Title, tracker->arr[i]->x, tracker->arr[i]->y);
+	//}
 	tracker->MobCount = MobC;
 	tracker->CurrentCount = MobC;
 }
@@ -228,13 +225,14 @@ void GenerateWaves(Player*P, WaveTrack* queue, int* queueID, int WavesNo, int Co
 			queue[i].WaveCost = CostGrowth;	//Update Value which allows spawning of mobs
 			//Generate Waves at avaiable slot 
 			GenerateMobs(&queue[i], P);
+			printf("\n\tCreated Wave: %d\n", *WaveCount);
 			//Edit increment to spawn more mob each waves
 			queueID[i] = *WaveCount; //Update waves of queue at [i]
 			MobCount[i] = queue[i].MobCount;
 
 			//Wave Color
 			//Assign random color to each wave
-			queue[i].waveColor = CP_Color_Create(CP_Random_RangeInt(100, 255), CP_Random_RangeInt(100, 255), CP_Random_RangeInt(100, 255), 255);
+			//queue[i].waveColor = CP_Color_Create(CP_Random_RangeInt(100, 255), CP_Random_RangeInt(100, 255), CP_Random_RangeInt(100, 255), 255);
 			break;
 		}
 	}
@@ -293,7 +291,7 @@ void MobLoadImage(CP_Image* Sprites, int No_Img) {
 }
 void DrawMobImage(CP_Image* Sprites, Mob*m, Player *p) {
 
-	int IHeight, IWidth, alpha = 255, scale = 160;
+	int IHeight, IWidth, alpha = 255;
 	int SizeDef, StartImgI = m->Title * 2, Step, targetFPS = 6;
 	m->AnimationCycle += 1;
 	int u0, v0, u1, v1;
@@ -316,25 +314,31 @@ void DrawMobImage(CP_Image* Sprites, Mob*m, Player *p) {
 		StartImgI += 1;
 	}
 	CP_Image* SImg = Sprites[StartImgI];
-
+	IHeight = CP_Image_GetHeight(SImg);
 
 	switch (m->Title) {
 	case SmallMob:
-		SizeDef = 5,IHeight = CP_Image_GetHeight(SImg), IWidth = CP_Image_GetWidth(SImg) / SizeDef;
+		SizeDef = 5, targetFPS = 6, IWidth = CP_Image_GetWidth(SImg) / SizeDef;
+		m->h = IHeight * Img_Scale / IHeight, m->w = m->h;
+
 		Step = (m->AnimationCycle / targetFPS) % SizeDef;
 		u0 = Step * IWidth, v0 = 0, u1 = Step * IWidth + IWidth, v1 = IHeight;
-		CP_Image_DrawSubImage(SImg, m->x, m->y, IHeight, IWidth, u0, v0, u1, v1, alpha);
+
+		CP_Image_DrawSubImage(SImg, m->x, m->y,m->w, m->h, u0, v0, u1, v1, alpha);
 		break;
 	case MediumMob:
-		SizeDef = 2,IHeight = CP_Image_GetHeight(SImg), IWidth = CP_Image_GetWidth(SImg) / SizeDef;
+		SizeDef = 2,targetFPS = 6, IWidth = CP_Image_GetWidth(SImg) / SizeDef;
+		m->h = IHeight * Img_Scale / IHeight, m->w = m->h;
+		
 		Step = ( m->AnimationCycle / targetFPS) % SizeDef;
-
 		u0 = Step * IWidth, v0 = 0, u1 = Step * IWidth + IWidth, v1 = IHeight;
-		CP_Image_DrawSubImage(SImg, m->x, m->y, IHeight, IWidth, u0, v0, u1, v1, alpha);
+	
+		CP_Image_DrawSubImage(SImg, m->x, m->y,m->w,m->h, u0, v0, u1, v1, alpha);
 		break;
 	default:
 		break;
 	}
+	//CP_Graphics_DrawCircle(m->x, m->y, CP_Vector_Distance(CP_Vector_Zero(), CP_Vector_Set(m->w / 2, m->h / 2)));
 }
 
 
@@ -344,17 +348,6 @@ void DrawMobImage(CP_Image* Sprites, Mob*m, Player *p) {
 			Player	-> target player location
 @returns	Nothing
 */
-void MobCollision(Mob* mob, Player *player) {
-	//Drop items?
-	//Drop HP?
-	if (CP_Math_Distance(mob->x, mob->y, player->x, player->y) <= mob->CStats.size + player->HITBOX) {
-		mob->CStats.HP -= player->DAMAGE;
-		player->CURRENT_HP -= mob->CStats.Dmg;
-	}
-	if (mob->CStats.HP <= 0) {
-		mob->Status = 0;
-	}
-}
 
 /*
 @brief		Function that check mob to mob collision
@@ -363,31 +356,107 @@ void MobCollision(Mob* mob, Player *player) {
 			tracker	-> Pointer to WaveTrack[No_Waves] (in map.c)
 @return		
 */
-void MobTMobCollision(Mob* mob,Player*p, WaveTrack *tracker, int No_Waves) {
-	int Gap, status = 0;
-	CP_Vector v = CP_Vector_Normalize(CP_Vector_Set(mob->x - p->x, mob->y - p->y));
-	for (int i = 0; i <No_Waves; i++) {
-		for (int j = 0; j < tracker[i].MobCount; j++) {
-			Mob* target = tracker[i].arr[j];
-			if (mob->x == target->x && mob->y == target->y) {
-				continue;
-			}
-			Gap = mob->CStats.size > target->CStats.size ? mob->CStats.size : target->CStats.size;
-			int dist = CP_Math_Distance(mob->x, mob->y, target->x, target->y);
+void MobTMobCollision(Mob* m, Player* p, WaveTrack* tracker, int No_Waves) {
+	if (m->h > 0) {
+		int Gap, status = 0;
+		//m's radius equivalent (squared version)
+		Mob* tm, * main, * bounce;
+		/*
+			3 Objs m, tm, p;
+			Vector, distance from m to p
+			Distance from m to tm
+			Distance from tm to p
 
-			if (dist <= Gap) {
-				if (CP_Math_Distance(mob->x, mob->y, p->x, p->y)  > CP_Math_Distance(target->x, target->y, p->x, p->y);
-				mob->x += v.x * mob->CStats.Speed;
-				mob->y += v.y * mob->CStats.Speed;
-				break;
-			}
+			radius of contact of m && tm
+			dist will be left in squared form
+		*/
+		float mRad = (pow(m->w / 2, 2) + pow(m->h / 2, 2)), tmRad;
+		float dMtoP = (pow(p->x - m->x, 2) + pow(p->y - m->y, 2)), dMtoTM, dTMtoP;
+		CP_Vector vMtoP = CP_Vector_Set(p->x - m->x, p->y - m->y);
+		CP_Vector BasePF = CP_Vector_Scale(CP_Vector_Normalize(vMtoP), m->CStats.Speed);
+		for (int i = 0; i < No_Waves; i++) {
+			for (int j = 0; j < tracker[i].MobCount; j++) {
+				if (m == tracker[i].arr[j]) {
+					continue;
+				}
 			
+				tm = tracker[i].arr[j];
+				if (tm->Status == 0) {
+					continue;
+				}
+				/*
+				Collision Algo
+					: Iterate thru all other mobs
+					: If collide, reverse movement
+				*/
+				//Circle Collision
+				/*	Filter with radius first
+						: Width & Height defined with Img_Scale
+						: Rad = sqrt( Img_Scale / 2 **2 + Img_Scale / 2 ** 2)
+						: Diff Img Might have diff width -> Compare the squared version
+				*/
+				//Can dabble with separating axis theorem
+				//Bounce mechanics, priority = closer mob to player will proceed towards player, other will bounce random direction
+				if (tm->h > 0) {
+					tmRad = (pow(tm->w / 2, 2) + pow(tm->h / 2, 2));
+					dMtoTM = (pow(m->x - tm->x, 2) + pow(m->y - tm->y, 2));
+					if (dMtoTM <= mRad + tmRad) {
+						dTMtoP = (pow(p->x - tm->x, 2) + pow(p->y - tm->y, 2));
+						main = m;
+						bounce = tm;
+						if (dMtoP > dTMtoP) {
+							main = tm;
+							bounce = m;
+						}
+						/*
+						Require:
+							Vector bounce to main
+							Vector bounce to p
+						*/
+						CP_Vector vBounceToMain = CP_Vector_Set(main->x - bounce->x, main->y - bounce->y);
+						CP_Vector vBounceToP = CP_Vector_Set(p->x - bounce->x, p->y - bounce->y);
+						float BouncePAngle = CP_Vector_Angle(vBounceToMain, vBounceToP);
+						if (_isnanf(BouncePAngle)) {
+							break;
+						}
+						float nAngle = CP_Random_RangeFloat(0, BouncePAngle);
+						//Using vBounceToP as main directional vector -> find new angle from it -> transform it -> move bounce in reverse direction
+						CP_Matrix rot = CP_Matrix_Set(
+							cos(nAngle), -sin(nAngle), 0,
+							sin(nAngle), cos(nAngle), 0,
+							0, 0, 0
+						);
+						CP_Vector nDirection = CP_Vector_Scale(CP_Vector_Normalize(CP_Vector_MatrixMultiply(rot, vBounceToP)), bounce->CStats.Speed);
+						CP_Vector mainDirection = CP_Vector_Scale(CP_Vector_Normalize(CP_Vector_Set(p->x - main->x, p->y - main->y)), main->CStats.Speed);
+						bounce->x -= nDirection.x;
+						bounce->y -= nDirection.y;
+						if (m != main) {
+							main->x += mainDirection.x;
+							main->y += mainDirection.y;
+						}
+						break;
+
+					}
+				}
+			}
+			m->x += BasePF.x;
+			m->y += BasePF.y;
+		}
+	}
+}
+
+void MobTPlayerCollision(Mob* m, Player* p) {
+		if (CP_Vector_Length(CP_Vector_Set(p->x-m->x, p->y-m->y)) <= p->HITBOX) {
+			m->CStats.HP -= p->DAMAGE;
+			p->CURRENT_HP -= m->CStats.Dmg;
+		}
+		if (m->CStats.HP <= 0) {
+			m->Status = 0;
 		}
 
-	}
-	mob->x -= v.x * mob->CStats.Speed;
-	mob->y -= v.y * mob->CStats.Speed;
 }
+
+ 
 
 
 void PrintWaveStats(int* CWaveCount,int NO_WAVES, int* WaveIDQueue, int* MobCount) {
