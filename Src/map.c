@@ -18,6 +18,9 @@
 #define DEFENSE 10
 #define PLAYER_HITBOX 50
 
+int wHeight, wWidth;
+
+
 //Sprite Stuff
 #define Mob_Img 4
 CP_Image** MobSprites;
@@ -33,9 +36,9 @@ int StartMobQuantity = 10, StartItemQuantity = 1000;
 #define NO_WAVES 4
 #define Spawn_Timer 1
 #define Wave_Timer 5
-#define MaxMobGrowthRate 30
-#define WaveCostGrowthRate 10
-#define SpawnAreaOffset 50
+#define MaxMobGrowthRate 100
+#define WaveCostGrowthRate 50
+#define SpawnAreaOffset 500
 
 Mob* cMob;
 int cWaveCost, MaxMob;
@@ -55,6 +58,8 @@ int isPaused;
 void map_Init(void) {
 	
 	CP_System_SetWindowSize(MAP_SIZEX, MAP_SIZEY);
+	wHeight = CP_System_GetWindowHeight() / 2;
+	wWidth = CP_System_GetWindowWidth() / 2;
 	//CP_System_Fullscreen();
 	isPaused = 0;
 
@@ -136,40 +141,44 @@ void map_Update(void) {
 				*/
 				GenerateWaves(&P, &WaveTracker, &WaveIDQueue, NO_WAVES, cWaveCost, MaxMob, &totalWave, &MobCount);
 				//Used to print current wave statistics, can be removed :)
-				PrintWaveStats(&totalWave,NO_WAVES, &WaveIDQueue, &MobCount);
+				PrintWaveStats(&totalWave, NO_WAVES, &WaveIDQueue, &MobCount);
 			}
 		}
 
 		for (int w = 0; w < NO_WAVES; w++) {
 			cWave = &WaveTracker[w];
-			if (WaveIDQueue[w] != -1) {
-				if (cWave->CurrentCount == 0) {
-					//if all mobs are dead
-					//return index to wave queue
-					WaveIDQueue[w] = -1;
-					//skip rest of algo
+			if (WaveIDQueue[w] == 0) {
+				continue;
+			}
+			if (cWave->CurrentCount == 0) {
+				//if all mobs are dead
+				//return index to wave queue
+				WaveIDQueue[w] = -1;
+				//skip rest of algo
+				continue;
+			}
+			//printf("Spawning wave: %d\n", w);
+			for (int i = 0; i < cWave->MobCount; i++) {
+				cMob = cWave->arr[i];
+				//Only bother handle mobs that are alive
+				//Dead = 0, Alive = 1
+				if (cMob->Status == 0) {
 					continue;
 				}
-				//printf("Spawning wave: %d\n", w);
-				for (int i = 0; i < cWave->MobCount; i++) {
-					cMob = cWave->arr[i];
-					//Only bother handle mobs that are alive
-					//Dead = 0, Alive = 1
-					if (cMob->Status == 0) {
-						continue;
-					}
-					MobTMobCollision(cMob, &P, &WaveTracker, NO_WAVES);
-					MobTPlayerCollision(cMob, &P);
-					//MobCollision(cMob, &P);
-					//MobPathFinding(cMob, P.x, P.y);
+				//MobTPlayerCollision(cMob, &P);
+				MobTMobCollision(cMob, &P, &WaveTracker, NO_WAVES);
+				MobTPlayerCollision(cMob, &P);
 
-					if (cMob->Status == 0) {
-						cWave->CurrentCount -= 1;
-						MobCount[w] -= 1;
-						continue;
-					}
+				if (cMob->Status == 0) {
+					cWave->CurrentCount -= 1;
+					MobCount[w] -= 1;
+					continue;
+				}
+
+				if (cMob->h == 0 || P.x - wWidth - cMob->w < cMob->x && cMob->x < P.x + wWidth + cMob->w && P.y - wHeight - cMob->h < cMob->y && cMob->y < P.y + wHeight + cMob->h) {
 					DrawMobImage(MobSprites, cMob, &P);
 				}
+
 			}
 		}
 	}

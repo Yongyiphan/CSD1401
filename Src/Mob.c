@@ -9,6 +9,7 @@
 
 #define MOB_CAP 500
 #define Img_Scale 80
+#define BoundScale 1.8f
 
 
 //Pool of Mob Types
@@ -90,11 +91,10 @@ void CreateBaseStat(MobStats* cStat, int type) {
 @return		Updated Mob struct
 */
 #include <math.h>
-
 const double PI = 22.0 / 7.0;
 void CreateMob(Mob*m, MobStats *Base, Player*player, int offSet)
 {
-	float BoundScale = 0.5f, MaxRadius = CP_Math_Distance(0, 0, CP_System_GetWindowWidth(), CP_System_GetWindowHeight())* BoundScale;
+	float MaxRadius = hypot(CP_System_GetWindowWidth()/2, CP_System_GetWindowHeight()/2) * BoundScale;
 	//Uncomment below if you want to manually set spawn radius
 	//MaxRadius = 600;
 	//Assume Player center of spawnable area
@@ -239,23 +239,6 @@ void GenerateWaves(Player*P, WaveTrack* queue, int* queueID, int WavesNo, int Co
 }
 
 
-/*
-@brief		Algo to determine how each mobs move
-@params		mob	-> target mob to update movement
-			tX	-> target Position on x axis
-			tY	-> target Position on y axis
-@returns	Update Mob with new coordinates values
-*/
-void MobPathFinding(Mob* mob, float tX, float tY) {
-	CP_Vector v;
-	switch (mob->Title) {
-	default:
-		v = CP_Vector_Normalize(CP_Vector_Set(mob->x - tX, mob->y - tY));
-		mob->x -= v.x * mob->CStats.Speed;
-		mob->y -= v.y * mob->CStats.Speed;
-		break;
-	}
-}
 
 /*
 @brief		Function To load images
@@ -289,18 +272,13 @@ void MobLoadImage(CP_Image* Sprites, int No_Img) {
 	}
 
 }
-void DrawMobImage(CP_Image* Sprites, Mob*m, Player *p) {
+void DrawMobImage(CP_Image* Sprites, Mob* m, Player* p) {
 
 	int IHeight, IWidth, alpha = 255;
-	int SizeDef, StartImgI = m->Title * 2, Step, targetFPS = 6;
+	int SizeDef = 5, StartImgI = m->Title * 2;
+	int FrameStep = 0, targetFPS = 6, targetSize = Img_Scale;
 	m->AnimationCycle += 1;
-	int u0, v0, u1, v1;
-		/*
-		u0 (float) - The left most pixel of the sub-image(far left = 0).
-		v0 (float) - The top most pixel of the sub-image (top = 0).
-		u1 (float) - The right most pixel for the sub-image (far right = image width).
-		v1 (float) - The bottom most pixel for the sub-image (bottom = image height).
-		*/
+	int u0 = 0, v0 = 0, u1 = 0, v1 = 0;
 	/*
 	SM = 0, 0 * 2 = 0
 	MM = 1, 1 * 2 = 2
@@ -317,28 +295,32 @@ void DrawMobImage(CP_Image* Sprites, Mob*m, Player *p) {
 	IHeight = CP_Image_GetHeight(SImg);
 
 	switch (m->Title) {
-	case SmallMob:
-		SizeDef = 5, targetFPS = 6, IWidth = CP_Image_GetWidth(SImg) / SizeDef;
-		m->h = IHeight * Img_Scale / IHeight, m->w = m->h;
+		case SmallMob:
+			SizeDef = 5, targetFPS = 6;
+			IWidth = CP_Image_GetWidth(SImg) / SizeDef;
+			m->h = IHeight * targetSize / IHeight, m->w = m->h;
 
-		Step = (m->AnimationCycle / targetFPS) % SizeDef;
-		u0 = Step * IWidth, v0 = 0, u1 = Step * IWidth + IWidth, v1 = IHeight;
+			FrameStep = (m->AnimationCycle / targetFPS) % SizeDef;
+			u0 = FrameStep * IWidth, v0 = 0, u1 = FrameStep * IWidth + IWidth, v1 = IHeight;
 
-		CP_Image_DrawSubImage(SImg, m->x, m->y,m->w, m->h, u0, v0, u1, v1, alpha);
-		break;
-	case MediumMob:
-		SizeDef = 2,targetFPS = 6, IWidth = CP_Image_GetWidth(SImg) / SizeDef;
-		m->h = IHeight * Img_Scale / IHeight, m->w = m->h;
-		
-		Step = ( m->AnimationCycle / targetFPS) % SizeDef;
-		u0 = Step * IWidth, v0 = 0, u1 = Step * IWidth + IWidth, v1 = IHeight;
-	
-		CP_Image_DrawSubImage(SImg, m->x, m->y,m->w,m->h, u0, v0, u1, v1, alpha);
-		break;
-	default:
-		break;
+			break;
+		case MediumMob:
+			SizeDef = 2, targetFPS = 6;
+			IWidth = CP_Image_GetWidth(SImg) / SizeDef;
+			m->h = IHeight * targetSize / IHeight, m->w = m->h;
+
+			FrameStep = (m->AnimationCycle / targetFPS) % SizeDef;
+			u0 = FrameStep * IWidth, v0 = 0, u1 = FrameStep * IWidth + IWidth, v1 = IHeight;
+
+			//CP_Image_DrawSubImage(SImg, m->x, m->y,m->w,m->h, u0, v0, u1, v1, alpha);
+			break;
+		default:
+			break;
 	}
-	//CP_Graphics_DrawCircle(m->x, m->y, CP_Vector_Distance(CP_Vector_Zero(), CP_Vector_Set(m->w / 2, m->h / 2)));
+	//if ( p->x - wWidth - m->w <= m->x && m->x <= p->x + wWidth + m->w && p->y - wHeight - m->h <= m->y && m->y <= p->y + wHeight + m->h) {
+		CP_Image_DrawSubImage(SImg, m->x, m->y,m->w, m->h, u0, v0, u1, v1, alpha);
+	//}
+	
 }
 
 
@@ -356,10 +338,9 @@ void DrawMobImage(CP_Image* Sprites, Mob*m, Player *p) {
 			tracker	-> Pointer to WaveTrack[No_Waves] (in map.c)
 @return		
 */
-void MobTMobCollision(Mob* m, Player* p, WaveTrack* tracker, int No_Waves) {
+void MobTMobCollision(Mob* m, Player* p, WaveTrack* tracker, int const No_Waves) {
 	if (m->h > 0) {
-		int Gap, status = 0;
-		//m's radius equivalent (squared version)
+		int status = 0;
 		Mob* tm, * main, * bounce;
 		/*
 			3 Objs m, tm, p;
@@ -374,30 +355,31 @@ void MobTMobCollision(Mob* m, Player* p, WaveTrack* tracker, int No_Waves) {
 		float dMtoP = (pow(p->x - m->x, 2) + pow(p->y - m->y, 2)), dMtoTM, dTMtoP;
 		CP_Vector vMtoP = CP_Vector_Set(p->x - m->x, p->y - m->y);
 		CP_Vector BasePF = CP_Vector_Scale(CP_Vector_Normalize(vMtoP), m->CStats.Speed);
-		for (int i = 0; i < No_Waves; i++) {
-			for (int j = 0; j < tracker[i].MobCount; j++) {
-				if (m == tracker[i].arr[j]) {
-					continue;
-				}
-			
-				tm = tracker[i].arr[j];
-				if (tm->Status == 0) {
-					continue;
-				}
-				/*
-				Collision Algo
-					: Iterate thru all other mobs
-					: If collide, reverse movement
-				*/
-				//Circle Collision
-				/*	Filter with radius first
-						: Width & Height defined with Img_Scale
-						: Rad = sqrt( Img_Scale / 2 **2 + Img_Scale / 2 ** 2)
-						: Diff Img Might have diff width -> Compare the squared version
-				*/
-				//Can dabble with separating axis theorem
-				//Bounce mechanics, priority = closer mob to player will proceed towards player, other will bounce random direction
-				if (tm->h > 0) {
+		if (CP_System_GetFrameRate() < 27) {
+			goto BasicMovement;
+		}
+		//for (int i = 0; i < No_Waves; i++) {
+		//	for (int j = 0; j < tracker[i].MobCount; j++) {
+		for (int i = No_Waves - 1; i--;) {
+			if (tracker[i].MobCount != 0) {
+				for (int j = tracker[i].MobCount - 1; j--;) {
+					if (m == tracker[i].arr[j] || tracker[i].arr[j]->Status == 0) {
+						continue;
+					}
+					tm = tracker[i].arr[j];
+					/*
+					Collision Algo
+						: Iterate thru all other mobs
+						: If collide, reverse movement
+					*/
+					//Circle Collision
+					/*	Filter with radius first
+							: Width & Height defined with Img_Scale
+							: Rad = sqrt( Img_Scale / 2 **2 + Img_Scale / 2 ** 2)
+							: Diff Img Might have diff width -> Compare the squared version
+					*/
+					//Can dabble with separating axis theorem
+					//Bounce mechanics, priority = closer mob to player will proceed towards player, other will bounce random direction
 					tmRad = (pow(tm->w / 2, 2) + pow(tm->h / 2, 2));
 					dMtoTM = (pow(m->x - tm->x, 2) + pow(m->y - tm->y, 2));
 					if (dMtoTM <= mRad + tmRad) {
@@ -416,14 +398,11 @@ void MobTMobCollision(Mob* m, Player* p, WaveTrack* tracker, int No_Waves) {
 						CP_Vector vBounceToMain = CP_Vector_Set(main->x - bounce->x, main->y - bounce->y);
 						CP_Vector vBounceToP = CP_Vector_Set(p->x - bounce->x, p->y - bounce->y);
 						if (vBounceToMain.x == vBounceToP.x && vBounceToMain.y == vBounceToMain.y) {
-
 							goto BasicMovement;
-							break;
 						}
 						float BouncePAngle = CP_Vector_Angle(vBounceToMain, vBounceToP);
 						if (_isnanf(BouncePAngle)) {
 							goto BasicMovement;
-							break;
 						}
 						float nAngle = CP_Random_RangeFloat(0, BouncePAngle);
 						//Using vBounceToP as main directional vector -> find new angle from it -> transform it -> move bounce in reverse direction
@@ -447,7 +426,7 @@ void MobTMobCollision(Mob* m, Player* p, WaveTrack* tracker, int No_Waves) {
 				}
 			}
 		}
-		BasicMovement:
+	BasicMovement:
 		if (0 == status) {
 			m->x += BasePF.x;
 			m->y += BasePF.y;
@@ -456,7 +435,7 @@ void MobTMobCollision(Mob* m, Player* p, WaveTrack* tracker, int No_Waves) {
 }
 
 void MobTPlayerCollision(Mob* m, Player* p) {
-
+	
 	if (CP_Vector_Length(CP_Vector_Set(p->x-m->x, p->y-m->y)) <= p->HITBOX * 2) {
 		m->CStats.HP -= p->DAMAGE;
 		p->CURRENT_HP -= m->CStats.Dmg;
@@ -464,6 +443,8 @@ void MobTPlayerCollision(Mob* m, Player* p) {
 	if (m->CStats.HP <= 0) {
 		m->Status = 0;
 	}
+	CP_Settings_Fill(CP_Color_Create(255, 255, 0, 10));
+	CP_Graphics_DrawCircle(p->x, p->y, p->HITBOX * 2);
 
 }
 
