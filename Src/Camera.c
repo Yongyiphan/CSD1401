@@ -28,13 +28,16 @@ void CameraDemo_Init(void)
 	CP_Settings_TextSize(FONT_SIZE);
 }
 
+void CameraDemo_Displace_Update(void) {
+	float dt = CP_System_GetDt();
+}
 
-void CameraDemo_Update(Player *player)
+void CameraDemo_Update(Player *player, CP_Matrix *trans)
 {
 	float dt = CP_System_GetDt();
 
 	// Inputs for increasing and reducing camera view
-	if (CP_Input_KeyDown(KEY_I))
+	/*if (CP_Input_KeyDown(KEY_I))
 	{
 		currentScale += dt * SCALE_QUANTUM;
 		scaleMatrix = CP_Matrix_Scale(CP_Vector_Set(currentScale, currentScale));
@@ -43,30 +46,30 @@ void CameraDemo_Update(Player *player)
 	{
 		currentScale += dt * -SCALE_QUANTUM;
 		scaleMatrix = CP_Matrix_Scale(CP_Vector_Set(currentScale, currentScale));
-	}
+	}*/
 
 	// THIS IS ALL CAMERA MOVEMENT, ARROW KEYS UP DOWN LEFT RIGHT FOR CAMERA CONTROL
 	if (CP_Input_KeyDown(KEY_W))
 	{
-		currentPosition.y += dt * player->SPEED;
+		currentPosition.y += dt * player->STATTOTAL.SPEED_TOTAL;
 		translationMatrix = CP_Matrix_Translate(currentPosition);
 		//printf("Current Pos: %f %f\n", currentPosition.x, currentPosition.y);
 	}
 	if (CP_Input_KeyDown(KEY_S))
 	{
-		currentPosition.y += dt * -player->SPEED;
+		currentPosition.y += dt * -player->STATTOTAL.SPEED_TOTAL;
 		translationMatrix = CP_Matrix_Translate(currentPosition);
 		//printf("Current Pos: %f %f\n", currentPosition.x, currentPosition.y);
 	}
 	if (CP_Input_KeyDown(KEY_D))
 	{
-		currentPosition.x += dt * -player->SPEED;
+		currentPosition.x += dt * -player->STATTOTAL.SPEED_TOTAL;
 		translationMatrix = CP_Matrix_Translate(currentPosition);
 		//printf("Current Pos: %f %f\n", currentPosition.x, currentPosition.y);
 	}
 	if (CP_Input_KeyDown(KEY_A))
 	{
-		currentPosition.x += dt * player->SPEED;
+		currentPosition.x += dt * player->STATTOTAL.SPEED_TOTAL;
 		translationMatrix = CP_Matrix_Translate(currentPosition);
 		//printf("Current Pos: %f %f\n", currentPosition.x, currentPosition.y);
 	}
@@ -88,6 +91,7 @@ void CameraDemo_Update(Player *player)
 	//translate objects in world space based on the current camera panning
 	transform = CP_Matrix_Multiply(translationMatrix, transform);
 
+	*trans = transform;
 	CP_Settings_ApplyMatrix(transform);
 
 	CP_Graphics_ClearBackground(CP_Color_Create(100, 100, 100, 255));
