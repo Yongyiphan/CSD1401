@@ -42,10 +42,10 @@ typedef struct Mob {
 
 typedef struct Node
 {
-    Mob* key;
+    Mob key;
     struct MobNode *left;
     struct MobNode *right;
-    int height;
+    int h;
 }MobNode;
  
 
@@ -56,8 +56,8 @@ typedef struct WaveTracker {
 	int WaveCost;
 	int arrSize;
 	int spawnOffset;
-	Mob** arr;
 	MobNode* tree;
+	Mob** arr;
 }WaveTrack;
 
 /*
@@ -80,7 +80,7 @@ Print Conditions
 
 */
 
-int height(MobNode* N);
+int treeheight(MobNode* N);
 int getBalance(MobNode* N);
 
 MobNode* newNode(Mob mob);
@@ -88,7 +88,6 @@ MobNode* insert(MobNode* node, Mob key);
 MobNode* rightRotate(Mob* m);
 MobNode* leftRotate(Mob* m);
 
-MobNode* FindDeadMob(MobNode* N);
 
 float getX(MobNode* N);
 void freeTree(MobNode* node);
@@ -101,9 +100,9 @@ void CreateBaseStat(MobStats* ms, int type);
 void CreateMob(Mob* m, MobStats *Base, Player*player, int offSet);
 void GenerateMobs(WaveTrack* tracker, Player* player);
 void GenerateWaves(Player* P, WaveTrack* queue, int* queueID, int WavesNo, int CostGrowth, int MaxMobGrowth,int *TotalWaveCount,  int* MobCount);
+void traverseTree(CP_Image* Sprites,MobNode*n, Player* p, WaveTrack* tracker);
 
 void DrawMobImage(CP_Image* Sprites, Mob* m, Player*p);
-
 
 void MobTPlayerCollision(Mob* m, Player* p);
 void MobTMobCollision(Mob* mob, Player* p, WaveTrack* tracker, int const No_Waves);

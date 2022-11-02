@@ -7,21 +7,17 @@
 
 //#include "player.h"
 
-#define MOB_CAP 500
 #define Img_Scale 80
 #define BoundScale 1.2f
 
 
 
 // A utility function to get the height of the tree
-int height(MobNode *N)
+int treeheight(MobNode *N)
 {
     if (N == NULL)
         return 0;
-    
-	
-	return 1+max(height(N->left), height(N->right));
-
+	return 1+max(treeheight(N->left), treeheight(N->right));
 }
 
 // A utility function to get maximum of two integers
@@ -29,10 +25,10 @@ int height(MobNode *N)
  MobNode* newNode(Mob mob)
 {
     MobNode* node = malloc(sizeof(MobNode));
-    node->key = &mob;
+	node->key = mob;
     node->left   = NULL;
     node->right  = NULL;
-    node->height = 0;  // new node is initially added at leaf
+    node->h = 0;  // new node is initially added at leaf
     return(node);
 }
 
@@ -51,8 +47,8 @@ MobNode *rightRotate(MobNode *y)
     y->left = T2;
  
     // Update heights
-    y->height = height(y);
-    x->height = height(x);
+    y->h = treeheight(y);
+    x->h = treeheight(x);
  
     // Return new root
     return x;
@@ -70,8 +66,8 @@ MobNode *leftRotate(MobNode *x)
     x->right = T2;
  
     //  Update heights
-    x->height = height(x);
-    y->height = height(y);
+    x->h = treeheight(x);
+    y->h = treeheight(y);
  
     // Return new root
     return y;
@@ -82,10 +78,10 @@ int getBalance(MobNode *N)
 {
     if (N == NULL)
         return 0;
-    return height(N->left) - height(N->right);
+    return treeheight(N->left) - treeheight(N->right);
 }
 float getX(MobNode* N) {
-    return N->key->x;
+    return N->key.x;
 }
 // Recursive function to insert a key in the subtree rooted
 // with node and returns the new root of the subtree.
@@ -95,22 +91,15 @@ MobNode* insert(MobNode* node, Mob key)
 	if (node == NULL)
 		return(newNode(key));
 
-	if (node->key->Status == 0) {
-		if((NULL !=  node->left && NULL != node->right) && (getX(node->left) < key.x && key.x < getX(node->right))){
-			node->key = &key;
-		}
-		else if (key.x == node->key->x) {
-			node->key = &key;
-		}
-	}
-	else if (key.x < node->key->x)
+	if (key.x < node->key.x)
 		node->left = insert(node->left, key);
-	else if (key.x > node->key->x)
+	else if (key.x > node->key.x)
 		node->right = insert(node->right, key);
 	else // Equal keys are not allowed in BST
 		return NULL;
+	//}
     /* 2. Update height of this ancestor node */
-    node->height = height(node);
+    node->h = treeheight(node);
  
     /* 3. Get the balance factor of this ancestor
           node to check whether this node became
@@ -146,13 +135,6 @@ MobNode* insert(MobNode* node, Mob key)
     return node;
 }
 
-MobNode* FindDead(MobNode *N) {
-	if (NULL != N && N->key->Status == 0) {
-		return N;
-	}
-	FindDead(N->left);
-	FindDead(N->right);
-}
 
 void freeTree(MobNode* node) {
 	if (NULL == node) {
@@ -249,6 +231,7 @@ void CreateBaseStat(MobStats* cStat, int type)
 const double PI = 22.0 / 7.0;
 void CreateMob(Mob*m, MobStats *Base, Player*player, int offSet)
 {
+
 	float MaxRadius = CP_Vector_Length(CP_Vector_Zero(), CP_Vector_Set(CP_System_GetWindowWidth()/2, CP_System_GetWindowHeight()/2)) * BoundScale;
 	//Uncomment below if you want to manually set spawn radius
 	//MaxRadius = 600;
@@ -257,12 +240,12 @@ void CreateMob(Mob*m, MobStats *Base, Player*player, int offSet)
 	//do {
 	//} while (Diff <= offSet);
 		/*Formula for generating points in circle*/
-		rTheta = CP_Random_RangeFloat(0, 1) * 2 * PI;
-		//eqn = sqrt( random() * (MaxRadius**2 - MinRadius**2) + MinRadius**2 ) <- MinRadius == offSet
-		r = sqrt(CP_Random_RangeFloat(0, 1) * (pow(MaxRadius, 2) - pow(offSet, 2)) + pow(offSet, 2));
-		nx = player->x + r * cos(rTheta);
-		ny = player->y + r * sin(rTheta);
-		Diff = CP_Math_Distance(nx, ny, player->x, player->y);
+	rTheta = CP_Random_RangeFloat(0, 1) * 2 * PI;
+	//eqn = sqrt( random() * (MaxRadius**2 - MinRadius**2) + MinRadius**2 ) <- MinRadius == offSet
+	r = sqrt(CP_Random_RangeFloat(0, 1) * (pow(MaxRadius, 2) - pow(offSet, 2)) + pow(offSet, 2));
+	nx = player->x + r * cos(rTheta);
+	ny = player->y + r * sin(rTheta);
+	Diff = CP_Math_Distance(nx, ny, player->x, player->y);
 
 	m->BaseStats = *Base;
 	m->CStats = *Base;
@@ -305,9 +288,13 @@ void InitWavesArr(WaveTrack* tracker, int start) {
 	}
 }
 
-
-
-
+void traverseTree(CP_Image *Sprites, MobNode *N, Player*p, WaveTrack *tracker) {
+	if (NULL == N) {
+			return;
+	}
+	traverseTree(Sprites, N->left, p, tracker);
+	traverseTree(Sprites, N->right,p, tracker);
+}
 
 ////Function that generated Mobs based off a cost system
 ///*
@@ -318,32 +305,17 @@ void InitWavesArr(WaveTrack* tracker, int start) {
 //			player	->	contains player's coordinates
 //@returns	Fills in a array of Mob pointers pointing to blank mob objects (created in InitWaveArr())
 //*/
-void GenerateMobs(WaveTrack* tracker, Player* player) {
+void GenerateMobs(WaveTrack* tracker, Player* p) {
 	int MobC = 0, cost = tracker->WaveCost, randM, randMCost;
-	//Mob* tarr = malloc(sizeof(Mob) * tracker->MaxMob);
-	//while (cost > 0) {
-	//	if (MobC == tracker->MaxMob) {
-	//		break;
-	//	}
-	//	randM = CP_Random_RangeInt(0, 1);
-	//	randMCost = MobCosts[randM];
-	//	
-	//}
-
-	//free(tarr);
-
+	//MobNode* root = tracker->tree, *current;
+	
 	while (cost > 0) {
 		if (MobC == tracker->MaxMob) {
-			//printf("\tMax Mob Limit\n");
 			break;
 		}
-		//Generate N no of mobs based off wave cost
-		//randM = CP_Random_RangeInt(0, MobTypes - 1);
-		randM = CP_Random_RangeInt(0,1);
-		//randM = 0;
-		randMCost = MobCosts[randM];
-
-		//Expand array
+		//randM = CP_Random_RangeInt(0, 1);
+		randM = 0;
+		randMCost = MobCosts[randM];		//Expand array
 		if (MobC >= tracker->arrSize) {
 			int nQ = tracker->arrSize * 2;
 			Mob** tArr = realloc(tracker->arr,sizeof(Mob*) * nQ);
@@ -359,12 +331,51 @@ void GenerateMobs(WaveTrack* tracker, Player* player) {
 			Mob* cMob = tracker->arr[MobC];
 			cMob->Title = randM;
 			CreateBaseStat(&cMob->BaseStats, randM);
-			CreateMob(cMob, &cMob->BaseStats, player, tracker->spawnOffset);
-			cost -= randMCost;
-			MobC += 1;
-
+			CreateMob(cMob, &cMob->BaseStats, p, tracker->spawnOffset);
 		}
+		cost -= randMCost;
+		MobC += 1;
+		
 	}
+	for (int i = 0; i < MobC; i++) {
+		tracker->tree = insert(tracker->tree, *tracker->arr[i]);
+	}
+
+	//free(tarr);
+
+//	while (cost > 0) {
+//		if (MobC == tracker->MaxMob) {
+//			//printf("\tMax Mob Limit\n");
+//			break;
+//		}
+//		//Generate N no of mobs based off wave cost
+//		//randM = CP_Random_RangeInt(0, MobTypes - 1);
+//		randM = CP_Random_RangeInt(0,1);
+//		//randM = 0;
+//		randMCost = MobCosts[randM];
+//
+//		//Expand array
+//		if (MobC >= tracker->arrSize) {
+//			int nQ = tracker->arrSize * 2;
+//			Mob** tArr = realloc(tracker->arr,sizeof(Mob*) * nQ);
+//			if (NULL != tArr) {
+//				tracker->arr = tArr;
+//				tracker->arrSize = nQ;
+//			}
+//			InitWavesArr(tracker, MobC);
+//			printf("\tNew Arr Size = %d", nQ);
+//		}
+//
+//		if (cost >= randMCost) {
+//			Mob* cMob = tracker->arr[MobC];
+//			cMob->Title = randM;
+//			CreateBaseStat(&cMob->BaseStats, randM);
+//			CreateMob(cMob, &cMob->BaseStats, player, tracker->spawnOffset);
+//			cost -= randMCost;
+//			MobC += 1;
+//
+//		}
+//	}
 
 	//for (int i = 0; i < MobC; i++) {
 	//	printf("%d (%f, %f)\n", tracker->arr[i]->Title, tracker->arr[i]->x, tracker->arr[i]->y);
@@ -396,16 +407,20 @@ void GenerateWaves(Player*P, WaveTrack* queue, int* queueID, int WavesNo, int Co
 		//At default WaveIDQueue = {-1,-1,-1,-1}
 		//Whereby each "-1" == to available slot to generate waves
 		if (queueID[i] == -1) {
+			if (queue[i].tree != NULL) {
+				freeTree(queue[i].tree);
+				queue[i].tree = NULL;
+			}
 			*WaveCount += 1; //Increment WaveCount
 			queue[i].MaxMob = MaxMobGrowth; //Update Max Mob limit
 			queue[i].WaveCost = CostGrowth;	//Update Value which allows spawning of mobs
 			//Generate Waves at avaiable slot 
 			GenerateMobs(&queue[i], P);
-			printf("\n\tCreated Wave: %d\n", *WaveCount);
+			//printf("\n\tCreated Wave: %d\n", *WaveCount);
 			//Edit increment to spawn more mob each waves
 			queueID[i] = *WaveCount; //Update waves of queue at [i]
 			MobCount[i] = queue[i].MobCount;
-
+			
 			//Wave Color
 			//Assign random color to each wave
 			//queue[i].waveColor = CP_Color_Create(CP_Random_RangeInt(100, 255), CP_Random_RangeInt(100, 255), CP_Random_RangeInt(100, 255), 255);
@@ -531,6 +546,7 @@ void MobTMobCollision(Mob* m, Player* p, WaveTrack* tracker, int const No_Waves)
 		CP_Vector vMtoP = CP_Vector_Set(p->x - m->x, p->y - m->y);
 		CP_Vector NormBase = CP_Vector_Normalize(vMtoP);
 		CP_Vector BasePF = CP_Vector_Scale(NormBase, m->CStats.Speed);
+		goto BasicMovement;
 		if (CP_System_GetFrameRate() < 27.0f) {
 			goto BasicMovement;
 		}
@@ -634,6 +650,7 @@ void FreeMobResource(WaveTrack* wtracker,int noWaves, CP_Image* spritesheet, int
 			free(wtracker[i].arr[a]);
 		}
 		free(wtracker[i].arr);
+		free(wtracker[i].tree);
 	}
 	for (int i = 0; i < Mob_Img; i++) {
 		CP_Image* c = spritesheet[i];
