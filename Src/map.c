@@ -96,7 +96,6 @@ void map_Init(void) {
 	P = (Player) { start_vector.x, start_vector.y, 90, P_stats, P_stats_mult, P_stats_total, PLAYER_HITBOX, level};
 	cWaveCost = 10;
 	MaxMob = 200;
-	P = (Player){ start_vector.x, start_vector.y, 90, PLAYER_HP, PLAYER_SPEED, PLAYER_DAMAGE, ATK_SPEED, PLAYER_DEFENSE, PLAYER_HITBOX}; //Initialise empty arrays of possible waves
 	cWaveCost = WaveCostGrowthRate;
 	MaxMob = MaxMobGrowthRate;
 	for (int i = 0; i < NO_WAVES; i++) {
@@ -153,7 +152,7 @@ void map_Update(void) {
 	create the map in a 3 x 3 dimension starting from the center
 	everytime the player moves to more than half of the width or height of the image
 	generate images in that direction*/
-	CP_Settings_ResetMatrix();
+	//CP_Settings_ResetMatrix();
 
 	
 	if (isPaused) {
