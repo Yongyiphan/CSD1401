@@ -79,3 +79,4 @@ When "exp" reaches the value of "exp_req":
 	"exp_req" will increase, making it harder to level up
 */
 void level_up(int *exp, int *exp_req, int *level);
+void show_healthbar(Player);

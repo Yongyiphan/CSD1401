@@ -4,6 +4,7 @@
 #include "player.h"
 #include "game.h"
 #include "map.h"
+#include "Items.h"
 
 
 // Player hitbox is a circle
@@ -33,6 +34,9 @@ void show_healthbar(Player *p) {
 	float x_coord = (float) CP_System_GetWindowWidth() * 1 / 10;
 	float y_coord = (float) CP_System_GetWindowHeight() * 0.65 / 10;
 
+void show_healthbar(Player p) {
+	float x_coord = 50;
+	float y_coord = 40;
 	int rectWidth = 300;
 	int rectHeight = 30;
 	/*CP_Settings_TextSize(40.0f);

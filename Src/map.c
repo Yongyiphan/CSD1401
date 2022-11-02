@@ -6,6 +6,7 @@
 #include "player.h"
 #include "utils.h"
 #include "Mob.h"
+#include "bullet.h"
 #include "Items.h"
 
 
@@ -51,6 +52,7 @@ WaveTrack WaveTracker[NO_WAVES], *cWave; // pause state for the game when paused
 
 //Might be useful variable for Waves Tracking
 int totalWave = 0, MobCount[NO_WAVES];
+float mousex, mousey;
 int isPaused, isMenu, isDead;
 
 //Images
@@ -121,6 +123,7 @@ void map_Init(void) {
 	
 	
 	CameraDemo_Init();
+	Bulletinit();
 }
 
 void map_Update(void) {
@@ -270,6 +273,34 @@ void map_Update(void) {
 					MobTMobCollision(cMob, &P, &WaveTracker, NO_WAVES);
 					MobTPlayerCollision(cMob, &P);
 
+			cWave = &waveTrack[w];
+			if (WaveIDQueue[w] != -1) {
+				if (cWave->CurrentCount == 0) {
+					//if all mobs are dead
+					//return index to wave queue
+					WaveIDQueue[w] = -1;
+					//skip rest of algo
+					continue;
+				}
+				//printf("Spawning wave: %d\n", w);
+				for (int i = 0; i < cWave->MobCount; i++) {
+					cMob = cWave->arr[i];
+					//Only bother handle mobs that are alive
+					//Dead = 0, Alive = 1
+					if (cMob->Status == 0) {
+						continue;
+					}
+					MobC += 1;
+					MobPathFinding(cMob, P.x, P.y);
+					MobCollision(cMob, &P);
+					int bchecker;
+					if ((bchecker = BulletCollision(cMob->x, cMob->y, cMob->CStats.size)) >= 0 && bullet[bchecker].friendly == BULLET_PLAYER)
+					{
+						cMob->CStats.HP -= bullet[bchecker].damage;
+						if (cMob->CStats.HP <= 0)
+							cMob->Status = 0;
+						bullet[bchecker].exist = FALSE;
+					}
 					if (cMob->Status == 0) {
 						cWave->CurrentCount -= 1;
 						MobCount[w] -= 1;
@@ -283,6 +314,17 @@ void map_Update(void) {
 
 			}
 		}
+		//printf("MobCount: %d |\tFPS: %f \n", MobC, CP_System_GetFrameRate());
+		
+		if (CP_Input_MouseDown(MOUSE_BUTTON_LEFT))
+		{
+			mousex = CP_Input_GetMouseWorldX();
+			mousey = CP_Input_GetMouseWorldY();
+			float bulletangle = 0;
+			bulletangle = point_point_angle(P.x, P.y, mousex, mousey);
+			BulletShoot(P.x, P.y, bulletangle, 1, BULLET_PLAYER);
+		}
+		BulletDraw();
 		CP_Settings_ResetMatrix();
 
 		// Time, returns and draws text

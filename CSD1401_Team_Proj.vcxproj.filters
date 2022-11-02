@@ -9,6 +9,7 @@
     <ClCompile Include="Src\utils.c" />
     <ClCompile Include="Src\Mob.c" />
     <ClCompile Include="Src\Playground.c" />
+    <ClCompile Include="Src\bullet.c" />
     <ClCompile Include="Src\mainmenu.c" />
     <ClCompile Include="Src\upgrades.c" />
     <ClCompile Include="Src\options.c" />
@@ -28,6 +29,7 @@
       <Filter>Header Files</Filter>
     </ClInclude>
     <Image Include="Assets\background.png" />
+    <ClInclude Include="Inc\bullet.h" />
   </ItemGroup>
     <Filter Include="source">
       <UniqueIdentifier>{8fbe0212-ba85-48b8-8d8c-19621f03f4e7}</UniqueIdentifier>

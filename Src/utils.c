@@ -3,6 +3,7 @@
 #include "game.h"
 #include "mainmenu.h"
 #include "player.h"
+#include <math.h>
 
 #define _countof(array) (sizeof(array) / sizeof(array[0]))
 
@@ -100,7 +101,22 @@ float timer(int reset, int isDead) {
 		CP_Font_DrawText("Time: ", x - 50, y);
 		CP_Font_DrawText(buffer, x + 50, y);
 	}
+	
+}
+
+
+
+
 
 
 	return totalElapsedTime;
+}
+float point_point_angle(float x1, float y1, float x2, float y2)
+{
+	float tempx=0, tempy=0, temp=0;
+	tempx = x2 - x1;
+	tempy = y2 - y1;
+	temp = atan2(tempy, tempx);
+	temp = CP_Math_Degrees(temp);
+	return temp;
 }
