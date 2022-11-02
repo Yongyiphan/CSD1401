@@ -10,6 +10,8 @@
     <ClCompile Include="Src\Mob.c" />
     <ClCompile Include="Src\Playground.c" />
     <ClCompile Include="Src\mainmenu.c" />
+    <ClCompile Include="Src\upgrades.c" />
+    <ClCompile Include="Src\options.c" />
   </ItemGroup>
   <ItemGroup>
     <ClInclude Include="Inc\Camera.h" />
@@ -20,6 +22,8 @@
     <ClInclude Include="Inc\Mob.h" />
     <ClInclude Include="Inc\Playground.h" />
     <ClInclude Include="Inc\mainmenu.h" />
+    <ClInclude Include="Inc\upgrades.h" />
+    <ClInclude Include="Inc\options.h" />
   </ItemGroup>
   <ItemGroup>
     <Image Include="Assests\DigiPen_Singapore_WEB_RED.png" />
