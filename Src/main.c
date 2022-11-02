@@ -1,7 +1,6 @@
 #include "cprocessing.h"
-#include "game.h"
-#include "map.h"
 #include "mainmenu.h"
+
 
 int main(void)
 {

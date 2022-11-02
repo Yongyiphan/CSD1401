@@ -35,11 +35,11 @@ CP_Matrix transform;
 int StartMobQuantity = 1000, StartItemQuantity = 1000;
 
 //Mob Stuff
-#define NO_WAVES 4
+#define NO_WAVES 5
 #define Spawn_Timer 1
 #define Wave_Timer 5
-#define MaxMobGrowthRate 50
-#define WaveCostGrowthRate 20
+#define MaxMobGrowthRate 550
+#define WaveCostGrowthRate 140
 #define SpawnAreaOffset 1500
 
 Mob* cMob;
@@ -106,7 +106,6 @@ void map_Init(void) {
 			0, //Wave Cost
 			StartMobQuantity, //Array Size 
 			SpawnAreaOffset, //Spawn offset
-			NULL,
 			malloc(sizeof(Mob*) * StartMobQuantity) //, //Arr
 		};
 	//		white //Wave Color
@@ -218,7 +217,6 @@ void map_Update(void) {
 		if ((int)CP_System_GetSeconds() != currentSec) {
 			currentSec = (int)CP_System_GetSeconds();
 			printf("\n\tCurrent Sec: %d | Current FPS:%f\n", currentSec, CP_System_GetFrameRate());
-			//printf("\tMax Mob: %d | Current Cost: %d\n", MaxMob, cWaveCost);
 			//Every SpawnTime interval spawn wave
 			if (currentSec % Wave_Timer == 0) {
 				//Growth Per Wave
@@ -244,7 +242,7 @@ void map_Update(void) {
 				*/
 				GenerateWaves(&P, &WaveTracker, &WaveIDQueue, NO_WAVES, cWaveCost, MaxMob, &totalWave, &MobCount);
 				//Used to print current wave statistics, can be removed :)
-				PrintWaveStats(&totalWave, NO_WAVES, &WaveIDQueue, &MobCount);
+				//PrintWaveStats(&totalWave, NO_WAVES, &WaveIDQueue, &MobCount);
 			}
 		}
 
