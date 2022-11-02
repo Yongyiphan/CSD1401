@@ -600,7 +600,7 @@ void MobTMobCollision(Mob* m, Player* p, WaveTrack* tracker, int const No_Waves)
 void MobTPlayerCollision(Mob* m, Player* p) {
 	
 	if (CP_Vector_Length(CP_Vector_Set(p->x-m->x, p->y-m->y)) <= p->HITBOX * 2) {
-		m->CStats.HP -= p->DAMAGE;
+		m->CStats.HP -= p->STATTOTAL.DAMAGE_TOTAL;
 		p->CURRENT_HP -= m->CStats.Dmg;
 	}
 	if (m->CStats.HP <= 0) {

@@ -65,7 +65,6 @@ void map_Init(void) {
 	isPaused = 0;
 	isMenu = 0;
 	isDead = 0;
-	currentWaveCost = 50;
 	// initialize the timer to start from 0 
 	timer(1, isPaused);
 
@@ -95,9 +94,9 @@ void map_Init(void) {
 	level = (LEVEL){ 0, 0, 10 };
 	
 	P = (Player) { start_vector.x, start_vector.y, 90, P_stats, P_stats_mult, P_stats_total, PLAYER_HITBOX, level};
-	currentWaveCost = 10;
+	cWaveCost = 10;
 	MaxMob = 200;
-	P = (Player){ start_vector.x, start_vector.y, 90, PLAYER_HP, PLAYER_SPEED, PLAYER_DAMAGE, ATK_SPEED, DEFENSE, PLAYER_HITBOX}; //Initialise empty arrays of possible waves
+	P = (Player){ start_vector.x, start_vector.y, 90, PLAYER_HP, PLAYER_SPEED, PLAYER_DAMAGE, ATK_SPEED, PLAYER_DEFENSE, PLAYER_HITBOX}; //Initialise empty arrays of possible waves
 	cWaveCost = WaveCostGrowthRate;
 	MaxMob = MaxMobGrowthRate;
 	for (int i = 0; i < NO_WAVES; i++) {
