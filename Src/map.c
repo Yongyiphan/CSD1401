@@ -94,12 +94,10 @@ void map_Update(void) {
 		CameraDemo_Update(&P);
 		if ((int)CP_System_GetSeconds() != currentSec) {
 			currentSec = (int)CP_System_GetSeconds();
-			printf("\n\tCurrent Sec: %d | Current FPS:%f\n", currentSec, CP_System_GetFrameRate());
 			//Every SpawnTime interval spawn wave
 			if (currentSec % Wave_Timer == 0) {
 				//Growth Per Wave
 				MaxMob += 50;
-				//printf("Max Mobs Increased to %d\n", MaxMob);
 			}
 			if (currentSec % Spawn_Timer == 0) {
 				//Growth Per Wave
@@ -119,8 +117,6 @@ void map_Update(void) {
 					-> Mob Count (Update)
 				*/
 				GenerateWaves(&P, &waveTrack, &WaveIDQueue, NO_WAVES, currentWaveCost, MaxMob, &totalWave, &MobCount);
-				//Used to print current wave statistics, can be removed :)
-				PrintWaveStats(&totalWave,NO_WAVES, &WaveIDQueue, &MobCount);
 			}
 		}
 
@@ -147,7 +143,7 @@ void map_Update(void) {
 					MobPathFinding(cMob, P.x, P.y);
 					MobCollision(cMob, &P);
 					int bchecker;
-					if ((bchecker = BulletCollision(cMob->coor.x, cMob->coor.y, cMob->CStats.size)) >= 0 && bullet[bchecker].friendly == BULLET_PLAYER)
+					if ((bchecker = BulletCollision(cMob->x, cMob->y, cMob->CStats.size)) >= 0 && bullet[bchecker].friendly == BULLET_PLAYER)
 					{
 						cMob->CStats.HP -= bullet[bchecker].damage;
 						if (cMob->CStats.HP <= 0)
