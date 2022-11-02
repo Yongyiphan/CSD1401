@@ -1,6 +1,7 @@
 #include "cprocessing.h"
 #include <stdio.h>
 #include "game.h"
+#include "mainmenu.h"
 #include "player.h"
 
 #define _countof(array) (sizeof(array) / sizeof(array[0]))
@@ -70,7 +71,7 @@ void option_screen(int* isPaused) {
 			*isPaused = 0;
 		}
 		if (IsAreaClicked(middle.x, middle.y + height + padding, width, height, CP_Input_GetMouseX(), CP_Input_GetMouseY())) {
-			CP_Engine_SetNextGameState(game_Init, game_Update, game_Exit);
+			CP_Engine_SetNextGameState(Main_Menu_Init, Main_Menu_Update, Main_Menu_Exit);
 		}
 	}
 }
