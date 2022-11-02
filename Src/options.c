@@ -8,7 +8,7 @@
 
 CP_Color white, black, grey;
 float width, height;
-int isClicked_SFX, isClicked_BGM;
+float SFX_length, BGM_length;
 
 void options_Init(void)
 {
@@ -19,8 +19,6 @@ void options_Init(void)
 	CP_Graphics_ClearBackground(grey);
 	width = CP_System_GetWindowWidth();
 	height = CP_System_GetWindowHeight();
-	isClicked_SFX = 0;
-	isClicked_BGM = 0;
 }
 
 void options_Update(void)
@@ -46,32 +44,25 @@ void options_Update(void)
 	{
 		CP_Graphics_DrawRectAdvanced(width / 2, (height / 2) - (height / 10) + (height / 10 * i), width / 3, height / 16, 0, 0);
 	}
-	//SFX slider
 	CP_Settings_RectMode(CP_POSITION_CORNER);
 	CP_Settings_Fill(white);
 	if (CP_Input_MouseClicked())
 	{
+		//SFX slider
 		if (IsAreaClicked(width / 2, (height / 2) - (height / 10) + (height / 10 * 0), width / 3, height / 16, CP_Input_GetMouseX(), CP_Input_GetMouseY()))
 		{
-			isClicked_SFX = 1;
-			if (isClicked_SFX = 1)
-			{
-				CP_Graphics_DrawRectAdvanced(width / 2 - (width / 3 / 2), (height / 2) - (height / 10) - (height / 16 / 2), CP_Input_GetMouseX() - (width / 3), height / 16, 0, 0);
-			}
+			SFX_length = CP_Input_GetMouseX() - (width / 3);
 		}
-	}
-	//BGM slider
-	if (CP_Input_MouseClicked())
-	{
+		//BGM slider
 		if (IsAreaClicked(width / 2, (height / 2) - (height / 10) + (height / 10), width / 3, height / 16, CP_Input_GetMouseX(), CP_Input_GetMouseY()))
 		{
-			isClicked_BGM = 1;
-			if (isClicked_BGM = 1)
-			{
-				CP_Graphics_DrawRectAdvanced(width / 2 - (width / 3 / 2), (height / 2) - (height / 10) + (height / 10) - (height / 16 / 2), CP_Input_GetMouseX() - (width / 3), height / 16, 0, 0);
-			}
-		}	
+			BGM_length = CP_Input_GetMouseX() - (width / 3);
+		}
 	}
+	
+	CP_Graphics_DrawRectAdvanced(width / 2 - (width / 3 / 2), (height / 2) - (height / 10) - (height / 16 / 2), SFX_length, height / 16, 0, 0);
+	CP_Graphics_DrawRectAdvanced(width / 2 - (width / 3 / 2), (height / 2) - (height / 10) + (height / 10) - (height / 16 / 2), BGM_length, height / 16, 0, 0);
+
 
 	CP_Settings_RectMode(CP_POSITION_CENTER);
 	//exit rectangle
