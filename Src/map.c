@@ -36,8 +36,8 @@ int StartMobQuantity = 1000, StartItemQuantity = 1000;
 #define NO_WAVES 4
 #define Spawn_Timer 1
 #define Wave_Timer 5
-#define MaxMobGrowthRate 100
-#define WaveCostGrowthRate 50
+#define MaxMobGrowthRate 10
+#define WaveCostGrowthRate 5
 #define SpawnAreaOffset 1300
 
 Mob* cMob;
@@ -82,7 +82,9 @@ void map_Init(void) {
 			0, //Wave Cost
 			StartMobQuantity, //Array Size 
 			SpawnAreaOffset, //Spawn offset
-			malloc(sizeof(Mob*) * StartMobQuantity) }; //, //Arr
+			malloc(sizeof(Mob*) * StartMobQuantity), //, //Arr
+		NULL
+	};
 	//		white //Wave Color
 	//	};
 		InitWavesArr(&WaveTracker[i], 0);

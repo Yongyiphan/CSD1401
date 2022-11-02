@@ -12,6 +12,157 @@
 #define BoundScale 1.2f
 
 
+
+// A utility function to get the height of the tree
+int height(MobNode *N)
+{
+    if (N == NULL)
+        return 0;
+    
+	
+	return 1+max(height(N->left), height(N->right));
+
+}
+
+// A utility function to get maximum of two integers
+//int max(int a, int b);
+ MobNode* newNode(Mob mob)
+{
+    MobNode* node = malloc(sizeof(MobNode));
+    node->key = &mob;
+    node->left   = NULL;
+    node->right  = NULL;
+    node->height = 0;  // new node is initially added at leaf
+    return(node);
+}
+
+/* Helper function that allocates a new node with the given key and
+    NULL left and right pointers. */
+ 
+// A utility function to right rotate subtree rooted with y
+// See the diagram given above.
+MobNode *rightRotate(MobNode *y)
+{
+    MobNode *x = y->left;
+    MobNode *T2 = x->right;
+ 
+    // Perform rotation
+    x->right = y;
+    y->left = T2;
+ 
+    // Update heights
+    y->height = height(y);
+    x->height = height(x);
+ 
+    // Return new root
+    return x;
+}
+ 
+// A utility function to left rotate subtree rooted with x
+// See the diagram given above.
+MobNode *leftRotate(MobNode *x)
+{
+    MobNode *y = x->right;
+    MobNode *T2 = y->left;
+ 
+    // Perform rotation
+    y->left = x;
+    x->right = T2;
+ 
+    //  Update heights
+    x->height = height(x);
+    y->height = height(y);
+ 
+    // Return new root
+    return y;
+}
+ 
+// Get Balance factor of node N
+int getBalance(MobNode *N)
+{
+    if (N == NULL)
+        return 0;
+    return height(N->left) - height(N->right);
+}
+float getX(MobNode* N) {
+    return N->key->x;
+}
+// Recursive function to insert a key in the subtree rooted
+// with node and returns the new root of the subtree.
+MobNode* insert(MobNode* node, Mob key)
+{
+	/* 1.  Perform the normal BST insertion */
+	if (node == NULL)
+		return(newNode(key));
+
+	if (node->key->Status == 0) {
+		if((NULL !=  node->left && NULL != node->right) && (getX(node->left) < key.x && key.x < getX(node->right))){
+			node->key = &key;
+		}
+		else if (key.x == node->key->x) {
+			node->key = &key;
+		}
+	}
+	else if (key.x < node->key->x)
+		node->left = insert(node->left, key);
+	else if (key.x > node->key->x)
+		node->right = insert(node->right, key);
+	else // Equal keys are not allowed in BST
+		return NULL;
+    /* 2. Update height of this ancestor node */
+    node->height = height(node);
+ 
+    /* 3. Get the balance factor of this ancestor
+          node to check whether this node became
+          unbalanced */
+    int balance = getBalance(node);
+ 
+    // If this node becomes unbalanced, then
+    // there are 4 cases
+ 
+    // Left Left Case
+    //if (balance > 1 && key.x < node->left->key->x)
+    if (balance > 1 && key.x < getX(node->left))
+        return rightRotate(node);
+ 
+    // Right Right Case
+    if (balance < -1 && key.x > getX(node->right))
+        return leftRotate(node);
+ 
+    // Left Right Case
+    if (balance > 1 && key.x > getX(node->left))
+    {
+        node->left =  leftRotate(node->left);
+        return rightRotate(node);
+    }
+ 
+    // Right Left Case
+	if (balance < -1 && key.x < getX(node->right))
+	{
+		node->right = rightRotate(node->right);
+		return leftRotate(node);
+	}
+    /* return the (unchanged) node pointer */
+    return node;
+}
+
+MobNode* FindDead(MobNode *N) {
+	if (NULL != N && N->key->Status == 0) {
+		return N;
+	}
+	FindDead(N->left);
+	FindDead(N->right);
+}
+
+void freeTree(MobNode* node) {
+	if (NULL == node) {
+		return;
+	}
+	freeTree(node->left);
+	freeTree(node->right);
+	free(node);
+}
+
 //Pool of Mob Types
 //Edit here for different Mob Types
 /*
@@ -21,8 +172,9 @@
 @returns	Updated base stats with new values
 */
 int MobCosts[MobTypes] = { 1,2,3, 4, 5};
-void CreateBaseStat(MobStats* cStat, int type) {
-	switch (type) {
+void CreateBaseStat(MobStats* cStat, int type)
+{
+    switch (type) {
 		//Mob Format:
 		//int HP;
 		//int DEF;
@@ -82,6 +234,9 @@ void CreateBaseStat(MobStats* cStat, int type) {
 			break;
 	}
 }
+
+
+
 /*
 @brief		Function to Update mob with relevant information
 @brief		m	-> target mob to update values with
@@ -119,11 +274,15 @@ void CreateMob(Mob*m, MobStats *Base, Player*player, int offSet)
 	m->h = 0;
 }
 
-/*
-@brief		Initialise Mob arrays with Blank Mobs with blank MobStats
-@params		WaveTrack struct pointer to be filled with blank mobs
-@returns	WaveTrack's array to be filled with blank mobs (to be modified/updated when needed)
-*/
+
+
+
+
+///*
+//@brief		Initialise Mob arrays with Blank Mobs with blank MobStats
+//@params		WaveTrack struct pointer to be filled with blank mobs
+//@returns	WaveTrack's array to be filled with blank mobs (to be modified/updated when needed)
+//*/
 void InitWavesArr(WaveTrack* tracker, int start) {
 	MobStats bs = (MobStats){
 		0,0,0,0,0,0
@@ -146,17 +305,32 @@ void InitWavesArr(WaveTrack* tracker, int start) {
 	}
 }
 
-//Function that generated Mobs based off a cost system
-/*
-@brief		Generates Mobs, Fills up a single array with mobs
-@params		tracker ->	a struct containing wave details, 
-						wave array for mobs and 
-						spawn offset area around player
-			player	->	contains player's coordinates
-@returns	Fills in a array of Mob pointers pointing to blank mob objects (created in InitWaveArr())
-*/
+
+
+
+
+////Function that generated Mobs based off a cost system
+///*
+//@brief		Generates Mobs, Fills up a single array with mobs
+//@params		tracker ->	a struct containing wave details, 
+//						wave array for mobs and 
+//						spawn offset area around player
+//			player	->	contains player's coordinates
+//@returns	Fills in a array of Mob pointers pointing to blank mob objects (created in InitWaveArr())
+//*/
 void GenerateMobs(WaveTrack* tracker, Player* player) {
 	int MobC = 0, cost = tracker->WaveCost, randM, randMCost;
+	//Mob* tarr = malloc(sizeof(Mob) * tracker->MaxMob);
+	//while (cost > 0) {
+	//	if (MobC == tracker->MaxMob) {
+	//		break;
+	//	}
+	//	randM = CP_Random_RangeInt(0, 1);
+	//	randMCost = MobCosts[randM];
+	//	
+	//}
+
+	//free(tarr);
 
 	while (cost > 0) {
 		if (MobC == tracker->MaxMob) {
@@ -469,49 +643,51 @@ void FreeMobResource(WaveTrack* wtracker,int noWaves, CP_Image* spritesheet, int
 
 	//free(spritesheet);
 }
-
+//
+//
+//
 
 /*
-			Old Code(Scraped)
-			  Ignore Below
-*/
-					//tmRad = (pow(tm->w / 2, 2) + pow(tm->h / 2, 2));
-					//dMtoTM = (pow(m->x - tm->x, 2) + pow(m->y - tm->y, 2));
-					//dTMtoP = (pow(p->x - tm->x, 2) + pow(p->y - tm->y, 2));
-					//if (dMtoTM <= mRad + tmRad) {
-					//	goto BasicMovement;
-					//}
-					//if (dMtoP < dTMtoP ) {
-					//	main = m;
-					//	bounce = tm;
-					//	/*
-					//	Require:
-					//		Vector bounce to main
-					//		Vector bounce to p
-					//	*/
-					//	CP_Vector vBounceToMain = CP_Vector_Set(m->x - tm->x, m->y - tm->y);
-					//	CP_Vector vBounceToP = CP_Vector_Set(p->x - tm->x, p->y - tm->y);
-					//	if (vBounceToMain.x == vBounceToP.x && vBounceToMain.y == vBounceToMain.y) {
-					//		goto BasicMovement;
-					//	}
-					//	float BouncePAngle = CP_Vector_Angle(vBounceToMain, vBounceToP);
-					//	if (_isnanf(BouncePAngle)) {
-					//		goto BasicMovement;
-					//	}
-					//	float nAngle = CP_Random_RangeFloat(0, BouncePAngle);
-					//	//Using vBounceToP as main directional vector -> find new angle from it -> transform it -> move bounce in reverse direction
-					//	CP_Matrix rot = CP_Matrix_Set(
-					//		cos(nAngle), -sin(nAngle), 0,
-					//		sin(nAngle), cos(nAngle), 0,
-					//		0, 0, 0
-					//	);
-					//	CP_Vector nDirection = CP_Vector_Normalize(CP_Vector_MatrixMultiply(rot, vBounceToP));
-					//	CP_Vector mainDirection = CP_Vector_Scale(CP_Vector_Normalize(CP_Vector_Set(p->x - m->x, p->y - m->y)), m->CStats.Speed);
-					//	bounce->x -= nDirection.x;
-					//	bounce->y -= nDirection.y;
-					//	if (m != main) {
-					//		main->x += mainDirection.x;
-					//		main->y += mainDirection.y;
-					//		status = 1;
-					//	}
-					//	goto BasicMovement;
+//			Old Code(Scraped)
+//			  Ignore Below
+//*/
+//					//tmRad = (pow(tm->w / 2, 2) + pow(tm->h / 2, 2));
+//					//dMtoTM = (pow(m->x - tm->x, 2) + pow(m->y - tm->y, 2));
+//					//dTMtoP = (pow(p->x - tm->x, 2) + pow(p->y - tm->y, 2));
+//					//if (dMtoTM <= mRad + tmRad) {
+//					//	goto BasicMovement;
+//					//}
+//					//if (dMtoP < dTMtoP ) {
+//					//	main = m;
+//					//	bounce = tm;
+//					//	/*
+//					//	Require:
+//					//		Vector bounce to main
+//					//		Vector bounce to p
+//					//	*/
+//					//	CP_Vector vBounceToMain = CP_Vector_Set(m->x - tm->x, m->y - tm->y);
+//					//	CP_Vector vBounceToP = CP_Vector_Set(p->x - tm->x, p->y - tm->y);
+//					//	if (vBounceToMain.x == vBounceToP.x && vBounceToMain.y == vBounceToMain.y) {
+//					//		goto BasicMovement;
+//					//	}
+//					//	float BouncePAngle = CP_Vector_Angle(vBounceToMain, vBounceToP);
+//					//	if (_isnanf(BouncePAngle)) {
+//					//		goto BasicMovement;
+//					//	}
+//					//	float nAngle = CP_Random_RangeFloat(0, BouncePAngle);
+//					//	//Using vBounceToP as main directional vector -> find new angle from it -> transform it -> move bounce in reverse direction
+//					//	CP_Matrix rot = CP_Matrix_Set(
+//					//		cos(nAngle), -sin(nAngle), 0,
+//					//		sin(nAngle), cos(nAngle), 0,
+//					//		0, 0, 0
+//					//	);
+//					//	CP_Vector nDirection = CP_Vector_Normalize(CP_Vector_MatrixMultiply(rot, vBounceToP));
+//					//	CP_Vector mainDirection = CP_Vector_Scale(CP_Vector_Normalize(CP_Vector_Set(p->x - m->x, p->y - m->y)), m->CStats.Speed);
+//					//	bounce->x -= nDirection.x;
+//					//	bounce->y -= nDirection.y;
+//					//	if (m != main) {
+//					//		main->x += mainDirection.x;
+//					//		main->y += mainDirection.y;
+//					//		status = 1;
+//					//	}
+//					//	goto BasicMovement;

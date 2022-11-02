@@ -40,6 +40,15 @@ typedef struct Mob {
 	//Dead = 0 | Alive = 1
 } Mob;
 
+typedef struct Node
+{
+    Mob* key;
+    struct MobNode *left;
+    struct MobNode *right;
+    int height;
+}MobNode;
+ 
+
 typedef struct WaveTracker {
 	int MaxMob;
 	int MobCount;
@@ -48,13 +57,8 @@ typedef struct WaveTracker {
 	int arrSize;
 	int spawnOffset;
 	Mob** arr;
+	MobNode* tree;
 }WaveTrack;
-
-typedef struct FrameDef {
-	int AtkFC;
-	int WalkFC;
-	int DieFC;
-}FrameDef;
 
 /*
 Mob C Flow
@@ -76,6 +80,19 @@ Print Conditions
 
 */
 
+int height(MobNode* N);
+int getBalance(MobNode* N);
+
+MobNode* newNode(Mob mob);
+MobNode* insert(MobNode* node, Mob key);
+MobNode* rightRotate(Mob* m);
+MobNode* leftRotate(Mob* m);
+
+MobNode* FindDeadMob(MobNode* N);
+
+float getX(MobNode* N);
+void freeTree(MobNode* node);
+
 
 void MobLoadImage(CP_Image *Sprites, int No_Img);
 void InitWavesArr(WaveTrack* tracker, int start);
@@ -96,4 +113,18 @@ void PrintWaveStats(int*CWaveCount, int No_Waves, int*WaveIDQueue, int*MobCount)
 void FreeMobResource(WaveTrack* wtracker, int noWaves, CP_Image *spritesheet, int Mob_Img);
 
 float square(float one, float two);
+
+
+
+
+
+
+
+
+
+
+
+
+
+
 #endif
