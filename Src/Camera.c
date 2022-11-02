@@ -49,6 +49,7 @@ void CameraDemo_Update(Player *player, CP_Matrix *trans)
 	}*/
 
 	// THIS IS ALL CAMERA MOVEMENT, ARROW KEYS UP DOWN LEFT RIGHT FOR CAMERA CONTROL
+	
 	if (CP_Input_KeyDown(KEY_W))
 	{
 		currentPosition.y += dt * player->STATTOTAL.SPEED_TOTAL;
@@ -74,7 +75,7 @@ void CameraDemo_Update(Player *player, CP_Matrix *trans)
 		//printf("Current Pos: %f %f\n", currentPosition.x, currentPosition.y);
 	}
 
-	printf("Current Pos: %f %f\n", currentPosition.x, currentPosition.y);
+	//printf("Current Pos: %f %f\n", currentPosition.x, currentPosition.y);
 	CP_Vector offsetOrigin = CP_Vector_Scale(currentPosition, -1.0f);
 	CP_Vector offsetVector = CP_Vector_Add(offsetOrigin, centerOffset);
 	CP_Matrix offsetMatrix = CP_Matrix_Translate(CP_Vector_Scale(offsetVector, -1.0f));

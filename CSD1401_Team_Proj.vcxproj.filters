@@ -3,9 +3,13 @@
   <ItemGroup>
     <ClCompile Include="Src\Camera.c" />
     <ClCompile Include="Src\game.c" />
+    <ClCompile Include="Src\Items.c" />
     <ClCompile Include="Src\main.c" />
+    <ClCompile Include="Src\mainmenu.c" />
     <ClCompile Include="Src\map.c" />
+    <ClCompile Include="Src\options.c" />
     <ClCompile Include="Src\player.c" />
+    <ClCompile Include="Src\upgrades.c" />
     <ClCompile Include="Src\utils.c" />
     <ClCompile Include="Src\Mob.c" />
     <ClCompile Include="Src\Playground.c" />
@@ -14,10 +18,17 @@
     <ClCompile Include="Src\upgrades.c" />
     <ClCompile Include="Src\options.c" />
     <ClCompile Include="Src\Items.c" />
+    <ClCompile Include="Src\UnUsedMobTree.c" />
+  </ItemGroup>
+  <ItemGroup>
     <ClInclude Include="Inc\Camera.h" />
     <ClInclude Include="Inc\game.h" />
+    <ClInclude Include="Inc\mainmenu.h" />
+    <ClInclude Include="Inc\Items.h" />
     <ClInclude Include="Inc\map.h" />
+    <ClInclude Include="Inc\options.h" />
     <ClInclude Include="Inc\player.h" />
+    <ClInclude Include="Inc\upgrades.h" />
     <ClInclude Include="Inc\utils.h" />
     <ClInclude Include="Inc\Mob.h" />
     <ClInclude Include="Inc\Playground.h" />
@@ -40,11 +51,10 @@
     <None Include="Extern\CProcessing\lib\x64\CProcessingd.dll" />
     <None Include="Extern\CProcessing\lib\x64\fmod.dll" />
     <None Include="Extern\CProcessing\lib\x64\fmodL.dll" />
+    <ClInclude Include="Inc\UnUsedMobTree.h" />
   </ItemGroup>
   <ItemGroup>
     <Image Include="Assests\DigiPen_Singapore_WEB_RED.png" />
     <Image Include="Assets\background.png" />
-    <Library Include="Extern\CProcessing\lib\x64\CProcessing.lib" />
-    <Library Include="Extern\CProcessing\lib\x64\CProcessingd.lib" />
   </ItemGroup>
 </Project>
