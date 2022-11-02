@@ -12,17 +12,18 @@
 #define MAP_SIZEX 1300
 #define MAP_SIZEY 900
 #define PLAYER_HP 100.0f
-#define PLAYER_SPEED 200.0f
+#define PLAYER_SPEED 300.0f
 #define PLAYER_DAMAGE 1.0f
 #define ATK_SPEED 2.0f
-#define DEFENSE 10
+#define PLAYER_DEFENSE 10
 #define PLAYER_HITBOX 50
 
 
-
-Player P;
+//Declaring player variables
+Player P; Stats P_stats; StatsMult P_stats_mult; StatsTotal P_stats_total; LEVEL level;
 CP_Vector start_vector;
 CP_Color grey, black, red, green, blue, white;
+CP_Matrix transform;
 
 //Mob Stuff
 #define NO_WAVES 6
@@ -36,10 +37,13 @@ int currentSec = 0;
 int WaveIDQueue[NO_WAVES];
 WaveTrack waveTrack[NO_WAVES], *cWave; // pause state for the game when paused.
 
+
 //Might be useful variable for Waves Tracking
 int totalWave = 0, MobCount[NO_WAVES];
-int isPaused, isMenu;
+int isPaused, isMenu, isDead;
 
+//Images
+CP_Image background = NULL;
 
 void map_Init(void) {
 	
@@ -47,7 +51,11 @@ void map_Init(void) {
 	//CP_System_Fullscreen();
 	isPaused = 0;
 	isMenu = 0;
+	isDead = 0;
 	currentWaveCost = 50;
+	// initialize the timer to start from 0 
+	timer(1, isPaused);
+
 
 	grey = CP_Color_Create(111, 111, 111, 255);
 	white = CP_Color_Create(255, 255, 255, 255);
@@ -55,9 +63,25 @@ void map_Init(void) {
 	green = CP_Color_Create(0, 255, 0, 255);
 	blue = CP_Color_Create(0, 0, 255, 255);
 
+	background = CP_Image_Load("./Assets/background.png");
+
 	start_vector = CP_Vector_Zero();
 	// Initialize the coordinates and stats of the player
-	P = (Player){ start_vector.x, start_vector.y, 90, PLAYER_HP, PLAYER_SPEED, PLAYER_DAMAGE, ATK_SPEED, DEFENSE, PLAYER_HITBOX}; //Initialise empty arrays of possible waves
+
+	/*
+	P_stats: Base stats of the player, can only be altered outside of the game.
+	P_stats_mult: In-game stats upgrade. Player stats are increased by multiplying its value against the player base stats
+	P_stats_total: The total amount of stats by multiplying its value with player base stats.
+	E.G. P_stats's MAX_HP = 100, P_stats_mult's MAX_HP_MULT = 1.2
+	P_stats_total's MAX_HP_TOTAL = MAX_HP * MAX_HP_MULT
+								 = 100 * 1.2 = 120
+	*/
+	P_stats = (Stats){ PLAYER_HP, PLAYER_SPEED, PLAYER_DAMAGE, ATK_SPEED, PLAYER_DEFENSE };
+	P_stats_mult = (StatsMult){ 1, 1, 1, 1, 1 };
+	P_stats_total = (StatsTotal){ PLAYER_HP, PLAYER_SPEED, PLAYER_DAMAGE, ATK_SPEED, PLAYER_DEFENSE };
+	level = (LEVEL){ 0, 0, 10 };
+	
+	P = (Player) { start_vector.x, start_vector.y, 90, P_stats, P_stats_mult, P_stats_total, PLAYER_HITBOX, level};
 	currentWaveCost = 10;
 	MaxMob = 200;
 	for (int i = 0; i < NO_WAVES; i++) {
@@ -78,38 +102,96 @@ void map_Init(void) {
 }
 
 void map_Update(void) {
+	P.STATTOTAL.MAX_HP_TOTAL = P.STAT.MAX_HP * P.STATMULT.MAX_HP_MULT;
+	P.STATTOTAL.SPEED_TOTAL = P.STAT.SPEED * P.STATMULT.SPEED_MULT;
+	P.STATTOTAL.DAMAGE_TOTAL = P.STAT.DAMAGE * P.STATMULT.DAMAGE_MULT;
+	P.STATTOTAL.DEFENSE_TOTAL = P.STAT.DEFENSE * P.STATMULT.DEFENSE_MULT;
+	/*
+	CP_Settings_ApplyMatrix(transform);
+	CP_Settings_StrokeWeight(0.0);
+	for (int x_pos = -1; x_pos < 2; x_pos++) {
+		for (int y_pos = -1; y_pos < 2; y_pos++) {
+			//if (P.x)
+			float mapX = MAP_SIZEX / 2;
+			float mapY = MAP_SIZEY / 2;
+
+			int playerMapx = P.x / MAP_SIZEX - 650;
+			int playerMapy = P.y / MAP_SIZEY - 450;
+			
+			/*CP_Image_Draw(background, playerMapx * mapX * x_pos, playerMapy * mapY * y_pos, MAP_SIZEX, MAP_SIZEY, 255);
+			printf("playerMapx: %d\tmap coords: %f\tplayer coords:%f\t%f\n", playerMapx, playerMapx * mapX * x_pos, P.x, P.y);
+
+			// center of the map
+	CP_Image_DrawAdvanced(background, mapX + (MAP_SIZEX * x_pos), mapY + (MAP_SIZEY * y_pos), MAP_SIZEX, MAP_SIZEY, 255, 0);
+}
+	}*/
+
+	/*Check the player coordinates
+	create the map in a 3 x 3 dimension starting from the center
+	everytime the player moves to more than half of the width or height of the image
+	generate images in that direction*/
+	CP_Settings_ResetMatrix();
+
 	
-	show_healthbar(&P);
 	if (isPaused) {
-		/*if (P.CURRENT_HP > 0)	option_screen(checkPause);
-		else death_screen(&isPaused);*/
+		// Opens up the Upgrade Screen for players to pick their upgrades
 		if (isMenu) {
 			upgrade_screen(&P, &isMenu, &isPaused);
-			printf("Player Stats: %f\n", P.MAX_HP);
+			//printf("Player max hp: %f\n", P.MAX_HP);
 		}
+		// Opens up the Pause Screen
 		else if (P.CURRENT_HP > 0) {
 			option_screen(&isPaused);
 		}
 		// temporarily paused the death_screen function to allow the game to continue running
-		// else death_screen(&isPaused);
+		if (isDead) {
+			//float elapsedTime = timer(0);
+			death_screen(timer(0, isDead));
+		}
 	
-		// if you press "escape"
+		// Resume the game
 		if (CP_Input_KeyTriggered(KEY_ESCAPE))
 			isPaused = 0;
 	}
 	// if game is not paused
 	else {
+		
+		
 		if (CP_Input_KeyTriggered(KEY_ESCAPE))
 			isPaused = 1;
-		if (CP_Input_KeyDown(KEY_H)) {
-			P.SPEED *= 1.1f;
+
+		// Increase speed of the player
+		if (CP_Input_KeyTriggered(KEY_H)) {
+			P.STATMULT.SPEED_MULT *= 1.1f;
 		}
-		if (CP_Input_KeyDown(KEY_U)) {
+
+		// Open up the Upgrade Screen
+		if (CP_Input_KeyTriggered(KEY_U) && isMenu == 0) {
 			isMenu = 1;
 			isPaused = 1;
 		}
-		CameraDemo_Update(&P);
 
+		// Testing for leveling up
+		if (CP_Input_KeyDown(KEY_L)) {
+			P.LEVEL.P_EXP += 5;
+			level_up(&P.LEVEL.P_EXP, &P.LEVEL.EXP_REQ, &P.LEVEL.VAL);
+		}
+
+		// Manually control the HP of the player for testing
+		if (CP_Input_KeyDown(KEY_Q)) {
+			P.CURRENT_HP -= 4;
+		}
+		else if (CP_Input_KeyDown(KEY_E)) {
+			P.CURRENT_HP += 4;
+		}
+
+		if (P.CURRENT_HP <= 0) {
+			isDead = 1;
+			isPaused = 1;
+		}
+
+		// Any objects below this function will be displaced by the camera movement
+		CameraDemo_Update(&P, &transform);
 
 		if ((int)CP_System_GetSeconds() != currentSec) {
 			currentSec = (int)CP_System_GetSeconds();
@@ -174,8 +256,15 @@ void map_Update(void) {
 				}
 			}
 		}
+		CP_Settings_ResetMatrix();
+
+		// Time, returns and draws text
+		timer(0, isPaused);
 	}
 	
+	
+	show_healthbar(&P);
+	show_level(&P);
 
 	if (CP_Input_KeyTriggered(KEY_SPACE))
 		CP_Engine_Terminate();
@@ -187,4 +276,5 @@ void map_Exit(void) {
 	for (int i = 0; i < NO_WAVES; i++) {
 		free(waveTrack[i].arr);
 	}
+	CP_Image_Free(&background);
 }

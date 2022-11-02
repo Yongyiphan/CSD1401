@@ -102,6 +102,7 @@ xcopy "$(SolutionDir)Assets\*" "$(OutDir)Assets\" /s /r /y /q
   </ItemDefinitionGroup>
   <ItemGroup>
     <Image Include="Assests\DigiPen_Singapore_WEB_RED.png" />
+    <Image Include="Assets\background.png" />
   </ItemGroup>
   <ItemGroup>
     <ClCompile Include="Src\Camera.c" />

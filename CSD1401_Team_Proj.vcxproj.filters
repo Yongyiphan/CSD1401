@@ -23,5 +23,6 @@
   </ItemGroup>
   <ItemGroup>
     <Image Include="Assests\DigiPen_Singapore_WEB_RED.png" />
+    <Image Include="Assets\background.png" />
   </ItemGroup>
 </Project>

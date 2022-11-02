@@ -293,7 +293,7 @@ void MobCollision(Mob* mob, Player *player) {
 	//Drop items?
 	//Drop HP?
 	if (CP_Math_Distance(mob->x, mob->y, player->x, player->y) <= mob->CStats.size + player->HITBOX) {
-		mob->CStats.HP -= player->DAMAGE;
+		mob->CStats.HP -= player->STATTOTAL.DAMAGE_TOTAL;
 		player->CURRENT_HP -= mob->CStats.Dmg;
 	}
 	if (mob->CStats.HP <= 0) {

@@ -3,6 +3,8 @@
 #include "game.h"
 #include "player.h"
 
+#define _countof(array) (sizeof(array) / sizeof(array[0]))
+
 int IsAreaClicked(float area_center_x, float area_center_y, float area_width, float area_height, float click_x, float click_y)
 {
 	// TODO
@@ -28,7 +30,7 @@ void option_screen(int* isPaused) {
 	int width = 300;
 	int height = 60;
 	int padding = 30;
-	float cornerRadius = 30;
+	float cornerRadius = 20;
 
 	float textSize = 30.0;
 
@@ -44,15 +46,11 @@ void option_screen(int* isPaused) {
 	CP_Settings_Fill(CP_Color_Create(255, 100, 100, 255));
 	CP_Graphics_DrawRect(middle.x, middle.y, width, height);
 	CP_Graphics_DrawRect(middle.x, middle.y + height + padding, width, height);
-
-	// Align text to the center vertically and horizontally
-	CP_TEXT_ALIGN_HORIZONTAL centerHor = CP_TEXT_ALIGN_H_CENTER;
-	CP_TEXT_ALIGN_VERTICAL centerVert = CP_TEXT_ALIGN_V_MIDDLE;
 	CP_Settings_Fill(CP_Color_Create(0, 0, 0, 255));		// text is black
 
 	// Draw text of respective boxes at respective coordinates.
 	CP_Settings_TextSize(40.0f);
-	CP_Settings_TextAlignment(centerHor, centerVert);
+	CP_Settings_TextAlignment(CP_TEXT_ALIGN_H_CENTER, CP_TEXT_ALIGN_V_MIDDLE);
 	//CP_Font_DrawTextBox("Upgrades", middle.x, middle.y - height - padding, width);
 	CP_Font_DrawText("Resume Game", middle.x, middle.y);
 	CP_Font_DrawText("Exit to main menu", middle.x, middle.y + height + padding);
@@ -77,3 +75,31 @@ void option_screen(int* isPaused) {
 	}
 }
 	
+
+float timer(int reset, int isDead) {
+	float x = CP_System_GetWindowWidth() / 2;
+	float y = CP_System_GetWindowHeight() * 0.8 / 10;
+	
+	float currentElapsedTime = CP_System_GetDt();
+	static float totalElapsedTime = 0;
+	
+	// Draw text of respective boxes at respective coordinates.
+	CP_Settings_TextSize(40.0f);
+	CP_Settings_TextAlignment(CP_TEXT_ALIGN_H_CENTER, CP_TEXT_ALIGN_V_MIDDLE);
+	CP_Settings_Fill(CP_Color_Create(0, 0, 0, 255));
+
+	if (reset) {
+		totalElapsedTime = 0;
+	}
+	if (!isDead) {
+		totalElapsedTime += currentElapsedTime;
+		//CP_Font_DrawTextBox("Upgrades", middle.x, middle.y - height - padding, width);
+		char buffer[16] = { 0 };
+		sprintf_s(buffer, _countof(buffer), "%.2f", totalElapsedTime);
+		CP_Font_DrawText("Time: ", x - 50, y);
+		CP_Font_DrawText(buffer, x + 50, y);
+	}
+
+
+	return totalElapsedTime;
+}
