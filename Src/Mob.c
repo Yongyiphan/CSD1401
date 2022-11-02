@@ -14,13 +14,13 @@
 
 
 // A utility function to get the height of the tree
-int height(MobNode *N)
+int treeheight(MobNode *N)
 {
     if (N == NULL)
         return 0;
     
 	
-	return 1+max(height(N->left), height(N->right));
+	return 1+max(treeheight(N->left), treeheight(N->right));
 
 }
 
@@ -32,7 +32,7 @@ int height(MobNode *N)
     node->key = &mob;
     node->left   = NULL;
     node->right  = NULL;
-    node->height = 0;  // new node is initially added at leaf
+    node->h = 0;  // new node is initially added at leaf
     return(node);
 }
 
@@ -51,8 +51,8 @@ MobNode *rightRotate(MobNode *y)
     y->left = T2;
  
     // Update heights
-    y->height = height(y);
-    x->height = height(x);
+    y->h = treeheight(y);
+    x->h = treeheight(x);
  
     // Return new root
     return x;
@@ -70,8 +70,8 @@ MobNode *leftRotate(MobNode *x)
     x->right = T2;
  
     //  Update heights
-    x->height = height(x);
-    y->height = height(y);
+    x->h = treeheight(x);
+    y->h = treeheight(y);
  
     // Return new root
     return y;
@@ -82,7 +82,7 @@ int getBalance(MobNode *N)
 {
     if (N == NULL)
         return 0;
-    return height(N->left) - height(N->right);
+    return treeheight(N->left) - treeheight(N->right);
 }
 float getX(MobNode* N) {
     return N->key->x;
@@ -110,7 +110,7 @@ MobNode* insert(MobNode* node, Mob key)
 	else // Equal keys are not allowed in BST
 		return NULL;
     /* 2. Update height of this ancestor node */
-    node->height = height(node);
+    node->h = height(node);
  
     /* 3. Get the balance factor of this ancestor
           node to check whether this node became

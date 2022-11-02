@@ -45,7 +45,7 @@ typedef struct Node
     Mob* key;
     struct MobNode *left;
     struct MobNode *right;
-    int height;
+    int h;
 }MobNode;
  
 
@@ -80,7 +80,7 @@ Print Conditions
 
 */
 
-int height(MobNode* N);
+int treeheight(MobNode* N);
 int getBalance(MobNode* N);
 
 MobNode* newNode(Mob mob);

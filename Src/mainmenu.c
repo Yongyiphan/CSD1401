@@ -10,7 +10,8 @@
 
 CP_Image logo;
 CP_Color white, black, grey; 
-float width, height;
+float width = 0;
+float height = 0;
 void Main_Menu_Init()
 {
 	logo = CP_Image_Load(". /Assets/DigiPen_Singapore_WEB_RED.png");
