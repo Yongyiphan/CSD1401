@@ -12,17 +12,8 @@
     <ClCompile Include="Src\mainmenu.c" />
     <ClCompile Include="Src\upgrades.c" />
     <ClCompile Include="Src\options.c" />
-    <ClCompile Include="Src\Camera.c" />
-    <ClCompile Include="Src\game.c" />
-    <ClCompile Include="Src\main.c" />
-    <ClCompile Include="Src\map.c" />
-    <ClCompile Include="Src\player.c" />
-    <ClCompile Include="Src\utils.c" />
-    <ClCompile Include="Src\Mob.c" />
-    <ClCompile Include="Src\Playground.c" />
     <ClCompile Include="Src\Items.c" />
     </ClCompile>
-    <ClCompile Include="Src\Camera.c">
     <ClInclude Include="Inc\Camera.h" />
     <ClInclude Include="Inc\game.h" />
     <ClInclude Include="Inc\map.h" />
@@ -33,13 +24,6 @@
     <ClInclude Include="Inc\mainmenu.h" />
     <ClInclude Include="Inc\upgrades.h" />
     <ClInclude Include="Inc\options.h" />
-    <ClInclude Include="Inc\Camera.h" />
-    <ClInclude Include="Inc\game.h" />
-    <ClInclude Include="Inc\map.h" />
-    <ClInclude Include="Inc\player.h" />
-    <ClInclude Include="Inc\utils.h" />
-    <ClInclude Include="Inc\Mob.h" />
-    <ClInclude Include="Inc\Playground.h" />
     <ClInclude Include="Inc\Items.h" />
     <ClInclude Include="Extern\CProcessing\inc\cprocessing_common.h">
       <Filter>Header Files</Filter>
