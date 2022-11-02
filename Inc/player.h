@@ -1,6 +1,8 @@
 #pragma once
+#ifndef PLAYER_H
+#define PLAYER_H
 
-
+#include "bullet.h"
 
 typedef struct PlayerStats {
 	float MAX_HP;
@@ -44,12 +46,6 @@ typedef struct Player{
 	
 }Player;
 
-typedef struct Bullet {
-	float hitbox;
-	float x;
-	float y;
-
-}Bullet;
 
 //int collide_mob(Player, Mob);
 int collide_bullet(Player, Bullet);
@@ -79,4 +75,8 @@ When "exp" reaches the value of "exp_req":
 	"exp_req" will increase, making it harder to level up
 */
 void level_up(int *exp, int *exp_req, int *level);
-void show_healthbar(Player);
+
+
+
+
+#endif

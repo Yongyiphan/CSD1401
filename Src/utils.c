@@ -101,14 +101,6 @@ float timer(int reset, int isDead) {
 		CP_Font_DrawText("Time: ", x - 50, y);
 		CP_Font_DrawText(buffer, x + 50, y);
 	}
-	
-}
-
-
-
-
-
-
 	return totalElapsedTime;
 }
 float point_point_angle(float x1, float y1, float x2, float y2)

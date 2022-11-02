@@ -14,7 +14,7 @@
 
 
 int collide_bullet(Player p, Bullet bullet) {
-	if (CP_Math_Distance(p.x, p.y, bullet.x, bullet.y) < p.HITBOX / 2 + bullet.hitbox / 2) {
+	if (CP_Math_Distance(p.x, p.y, bullet.x, bullet.y) < p.HITBOX / 2 + bullet.maxdistance / 2) {
 		p.CURRENT_HP -= 5;
 		return 1;
 	}
@@ -33,10 +33,6 @@ void show_healthbar(Player *p) {
 	CP_Settings_RectMode(CP_POSITION_CORNER);
 	float x_coord = (float) CP_System_GetWindowWidth() * 1 / 10;
 	float y_coord = (float) CP_System_GetWindowHeight() * 0.65 / 10;
-
-void show_healthbar(Player p) {
-	float x_coord = 50;
-	float y_coord = 40;
 	int rectWidth = 300;
 	int rectHeight = 30;
 	/*CP_Settings_TextSize(40.0f);

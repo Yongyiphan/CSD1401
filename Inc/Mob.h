@@ -12,10 +12,6 @@
 #define RangedMob 3
 #define BigBoss 4
 
-typedef struct Coordinates {
-	float x;
-	float y;
-}Coor;
 
 typedef struct MobBase {
 	float HP;

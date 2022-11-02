@@ -253,7 +253,7 @@ void map_Update(void) {
 
 		for (int w = 0; w < NO_WAVES; w++) {
 			cWave = &WaveTracker[w];
-			if (WaveIDQueue[w] == 0) {
+			if (WaveIDQueue[w] == -1) {
 				continue;
 			}
 			if (cWave->CurrentCount == 0) {
@@ -273,26 +273,6 @@ void map_Update(void) {
 					MobTMobCollision(cMob, &P, &WaveTracker, NO_WAVES);
 					MobTPlayerCollision(cMob, &P);
 
-			cWave = &waveTrack[w];
-			if (WaveIDQueue[w] != -1) {
-				if (cWave->CurrentCount == 0) {
-					//if all mobs are dead
-					//return index to wave queue
-					WaveIDQueue[w] = -1;
-					//skip rest of algo
-					continue;
-				}
-				//printf("Spawning wave: %d\n", w);
-				for (int i = 0; i < cWave->MobCount; i++) {
-					cMob = cWave->arr[i];
-					//Only bother handle mobs that are alive
-					//Dead = 0, Alive = 1
-					if (cMob->Status == 0) {
-						continue;
-					}
-					MobC += 1;
-					MobPathFinding(cMob, P.x, P.y);
-					MobCollision(cMob, &P);
 					int bchecker;
 					if ((bchecker = BulletCollision(cMob->x, cMob->y, cMob->CStats.size)) >= 0 && bullet[bchecker].friendly == BULLET_PLAYER)
 					{

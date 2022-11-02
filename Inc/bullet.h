@@ -1,3 +1,8 @@
+#pragma once
+#ifndef BULLET_H
+#define BULLET_H
+
+
 #define BULLET_CAP 50
 #define BULLET_MOB 0
 #define BULLET_PLAYER 1
@@ -48,3 +53,6 @@ void BulletDraw(void);
 // Check existing bullets collision against a target
 int BulletCollision(float, float, float);
 
+
+
+#endif

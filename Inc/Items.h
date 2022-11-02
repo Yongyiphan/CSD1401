@@ -1,6 +1,7 @@
 #pragma once
 #ifndef ITEMS_H
 #define ITEMS_H
+
 #include "player.h"
 
 #define Empty -1
@@ -53,4 +54,6 @@ void CreateItemEffect(Item* i);
 void IAffectPlayer(Item* i, Player* p, int currentSec);
 
 void FreeItemResource(ItemTrack* tracker);
+
+
 #endif
