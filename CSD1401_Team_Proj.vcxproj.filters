@@ -13,7 +13,6 @@
     <ClCompile Include="Src\upgrades.c" />
     <ClCompile Include="Src\options.c" />
     <ClCompile Include="Src\Items.c" />
-    </ClCompile>
     <ClInclude Include="Inc\Camera.h" />
     <ClInclude Include="Inc\game.h" />
     <ClInclude Include="Inc\map.h" />
@@ -30,7 +29,6 @@
     </ClInclude>
     <Image Include="Assets\background.png" />
   </ItemGroup>
-    </Filter>
     <Filter Include="source">
       <UniqueIdentifier>{8fbe0212-ba85-48b8-8d8c-19621f03f4e7}</UniqueIdentifier>
     </Filter>
