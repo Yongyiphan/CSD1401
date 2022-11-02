@@ -1,8 +1,8 @@
 #include "cprocessing.h"
 #include <stdio.h>
 #include "game.h"
-#include "player.h"
 #include "mainmenu.h"
+#include "player.h"
 
 #define _countof(array) (sizeof(array) / sizeof(array[0]))
 
