@@ -231,7 +231,6 @@ void CreateBaseStat(MobStats* cStat, int type)
 const double PI = 22.0 / 7.0;
 void CreateMob(Mob*m, MobStats *Base, Player*player, int offSet)
 {
-
 	float MaxRadius = CP_Vector_Length(CP_Vector_Zero(), CP_Vector_Set(CP_System_GetWindowWidth()/2, CP_System_GetWindowHeight()/2)) * BoundScale;
 	//Uncomment below if you want to manually set spawn radius
 	//MaxRadius = 600;
@@ -616,7 +615,7 @@ void MobTMobCollision(Mob* m, Player* p, WaveTrack* tracker, int const No_Waves)
 void MobTPlayerCollision(Mob* m, Player* p) {
 	
 	if (CP_Vector_Length(CP_Vector_Set(p->x-m->x, p->y-m->y)) <= p->HITBOX * 2) {
-		m->CStats.HP -= p->DAMAGE;
+		m->CStats.HP -= p->STATTOTAL.DAMAGE_TOTAL;
 		p->CURRENT_HP -= m->CStats.Dmg;
 	}
 	if (m->CStats.HP <= 0) {
