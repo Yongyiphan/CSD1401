@@ -7,7 +7,7 @@
 
 //#include "player.h"
 
-#define MaxUpperLimit 4000
+#define MaxUpperLimit 8000
 #define Img_Scale 80
 #define BoundScale 1.2f
 
@@ -58,14 +58,6 @@ void CreateBaseStat(MobStats* cStat, int type)
 			cStat->Dmg = 1;
 			cStat->size = 25;
 			break;
-		case RangedMob:
-			cStat->HP = 5;
-			cStat->DEF = 10;
-			cStat->Speed = 5;
-			cStat->Range = 0;
-			cStat->Dmg = 1;
-			cStat->size = 10;
-			break;
 		case BigBoss:
 			cStat->HP = 5;
 			cStat->DEF = 10;
@@ -98,7 +90,6 @@ void CreateBaseStat(MobStats* cStat, int type)
 */
 #include <math.h>
 const double PI = 22.0 / 7.0;
-int wHeight, wWidth;
 void CreateMob(Mob*m, MobStats *Base, Player*player, int offSet)
 {
 	float MaxRadius = (float) CP_System_GetWindowHeight() * BoundScale;
@@ -136,11 +127,9 @@ void CreateMob(Mob*m, MobStats *Base, Player*player, int offSet)
 //@returns	WaveTrack's array to be filled with blank mobs (to be modified/updated when needed)
 //*/
 void InitWavesArr(WaveTrack* tracker, int start) {
-	wHeight = CP_System_GetWindowHeight(), wWidth = CP_System_GetWindowWidth();
 	MobStats bs = (MobStats){
 		0,0,0,0,0,0
 	};
-
 	for (int w = start; w < tracker->arrSize; w++) {
 		//Allocate memory to it
 		tracker->arr[w] = malloc(sizeof(Mob));
@@ -248,10 +237,6 @@ void GenerateWaves(Player*P, WaveTrack* queue, int* queueID, int WavesNo, int Co
 			//Edit increment to spawn more mob each waves
 			queueID[i] = *WaveCount; //Update waves of queue at [i]
 			MobCount[i] = queue[i].MobCount;
-			
-			//Wave Color
-			//Assign random color to each wave
-			//queue[i].waveColor = CP_Color_Create(CP_Random_RangeInt(100, 255), CP_Random_RangeInt(100, 255), CP_Random_RangeInt(100, 255), 255);
 			break;
 		}
 	}
@@ -274,9 +259,9 @@ void MobLoadImage(CP_Image* Sprites, int No_Img) {
 	};
 	/*
 	(Walk = +0, Flipped = +1)
-	Small Mob => 0 ~ 1
+	Small Mob  => 0 ~ 1
 	Medium Mob => 2 ~ 3
-	Big Mob => 4 ~ 5
+	Big Mob    => 4 ~ 5
 	*/
 
 	int Img_C = (sizeof(FilePaths) / sizeof(FilePaths[0]));

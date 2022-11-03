@@ -80,3 +80,68 @@ void FreeItemResource(ItemTrack *tracker) {
 	}
 }
 
+
+/*Tree Implementation*/
+int TreeHeight(ItemNode* item) {
+	if (NULL == item)
+		return 0;
+	//return 1 + max(TreeHeight(item->left), TreeHeight(item.right));
+	return 1 + max(TreeHeight(item->left), TreeHeight(item->right));
+}
+
+int getBalance(ItemNode* item) {
+	if (item == NULL)
+		return 0;
+	return TreeHeight(item->left) - TreeHeight(item->right);
+}
+
+ItemNode* newNode(Item i) {
+	ItemNode* n = malloc(sizeof(ItemNode));
+	n->key = i;
+	n->left = NULL;
+	n->right = NULL;
+	n->h = 0;
+
+}
+ItemNode* insert(ItemNode* root, Item i) {
+	return root;
+}
+ItemNode* rightRotate(ItemNode* i) {
+	ItemNode* x = i->left;
+	ItemNode* T2 = x->right;
+	
+	x->right = i;
+	i->left = T2;
+
+	i->h = TreeHeight(i);
+	x->h = TreeHeight(x);
+
+	return x;
+}
+ItemNode* leftRotate(ItemNode* i) {
+	ItemNode* x = i->right;
+	ItemNode* T2 = x->left;
+
+	x->left = i;
+	i->right = T2;
+
+	i->h = TreeHeight(i);
+	x->h = TreeHeight(x);
+	return x;
+}
+
+void freeTree(ItemNode* root) {
+	if (NULL == root) {
+		return NULL;
+	}
+	freeTree(root->left);
+	freeTree(root->right);
+	free(root);
+}
+float getX(ItemNode* current) {
+	return current->key.x;
+}
+
+
+
+

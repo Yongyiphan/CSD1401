@@ -41,7 +41,7 @@ void BulletType(int type) //Sets type of bullet and stats
 	{
 		bullet[bulletcounter].size = 10 * 1;
 		bullet[bulletcounter].speed = 10 * 1;
-		bullet[bulletcounter].maxdistance = 100 * 1;
+		bullet[bulletcounter].maxdistance = 500 * 1;
 		bullet[bulletcounter].damage = 10 * 1;
 	}
 }

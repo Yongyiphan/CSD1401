@@ -36,12 +36,12 @@ CP_Matrix transform;
 int StartMobQuantity = 1000, StartItemQuantity = 1000;
 
 //Mob Stuff
-#define NO_WAVES 5
+#define NO_WAVES 6
 #define Spawn_Timer 1
 #define Wave_Timer 5
-#define MaxMobGrowthRate 550
-#define WaveCostGrowthRate 140
-#define SpawnAreaOffset 1500
+#define MaxMobGrowthRate 50
+#define WaveCostGrowthRate 5
+#define SpawnAreaOffset 1000
 
 Mob* cMob;
 int cWaveCost, MaxMob;

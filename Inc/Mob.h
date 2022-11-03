@@ -1,6 +1,4 @@
 #pragma once
-#ifndef MOB_H
-#define MOB_H
 
 #include "player.h"
 #include "cprocessing.h"
@@ -104,4 +102,3 @@ float square(float one, float two);
 
 
 
-#endif

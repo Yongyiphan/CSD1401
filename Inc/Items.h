@@ -1,6 +1,5 @@
 #pragma once
-#ifndef ITEMS_H
-#define ITEMS_H
+
 
 #include "player.h"
 
@@ -11,6 +10,7 @@
 
 
 typedef struct ItemStat {
+	char* StatusEffect; //char arr -> string :)
 	int Hitbox;
 	int Start;
 	/*
@@ -26,11 +26,34 @@ typedef struct ItemStat {
 	double y;
 }Item;
 
+typedef struct ItemNode {
+	Item key;
+	ItemNode* left;
+	ItemNode* right;
+	int h; //height of current node;
+}ItemNode;
+
 typedef struct ItemTracker {
 	Item** arr;
 	int arrSize;
 	int itemCount;
+	ItemNode* tree;
 }ItemTrack;
+
+
+
+
+int TreeHeight(ItemNode* current);
+int getBalance(ItemNode* current);
+
+ItemNode* newNode(Item i);
+ItemNode* insert(ItemNode* root, Item i);
+ItemNode* rightRotate(ItemNode* i);
+ItemNode* leftRotate(ItemNode* i);
+
+void freeTree(ItemNode* root);
+float getX(ItemNode* current);
+
 
 
 /*
@@ -40,7 +63,7 @@ Player will not know what the item's effect:
 
 
 Player Stat Boost -> Limited Duration
-Exp -> Dropped by Mobs
+Exp -> Dropped by Mobs (Mitigation -> 
 Magnet -> Moves Exp to Player's location
 Bullet Augm
 
@@ -56,4 +79,5 @@ void IAffectPlayer(Item* i, Player* p, int currentSec);
 void FreeItemResource(ItemTrack* tracker);
 
 
-#endif
+
+
