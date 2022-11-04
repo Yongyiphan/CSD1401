@@ -131,6 +131,10 @@ xcopy "$(SolutionDir)Assets\*" "$(OutDir)Assets\" /s /r /y /q
     <ClInclude Include="Inc\Mob.h" />
     <ClInclude Include="Inc\Playground.h" />
   </ItemGroup>
+  <ItemGroup>
+    <Media Include="Assets\static.mp3" />
+    <Media Include="Assets\thememusic.mp3" />
+  </ItemGroup>
   <Import Project="$(VCTargetsPath)\Microsoft.Cpp.targets" />
   <ImportGroup Label="ExtensionTargets">
   </ImportGroup>
