@@ -49,6 +49,7 @@ void CameraDemo_Update(Player *player, CP_Matrix *trans)
 	}*/
 
 	// THIS IS ALL CAMERA MOVEMENT, ARROW KEYS UP DOWN LEFT RIGHT FOR CAMERA CONTROL
+	
 	if (CP_Input_KeyDown(KEY_W))
 	{
 		currentPosition.y += dt * player->STATTOTAL.SPEED_TOTAL;

@@ -6,6 +6,7 @@
 #include "player.h"
 #include "utils.h"
 #include "Mob.h"
+#include "bullet.h"
 #include "Items.h"
 
 
@@ -18,41 +19,54 @@
 #define PLAYER_DEFENSE 10
 #define PLAYER_HITBOX 50
 
+int wHeight, wWidth;
 
 //Declaring player variables
 Player P; Stats P_stats; StatsMult P_stats_mult; StatsTotal P_stats_total; LEVEL level;
+
+//Sprite Stuff
+#define Mob_Img 4
+CP_Image** MobSprites;
+
 CP_Vector start_vector;
 CP_Color grey, black, red, green, blue, white;
 CP_Matrix transform;
 
+//Starting Quantity
+int StartMobQuantity = 1000, StartItemQuantity = 1000;
+
 //Mob Stuff
-#define NO_WAVES 6
+#define NO_WAVES 5
 #define Spawn_Timer 1
 #define Wave_Timer 5
-#define SpawnAreaOffset 300
+#define MaxMobGrowthRate 550
+#define WaveCostGrowthRate 140
+#define SpawnAreaOffset 1500
 
 Mob* cMob;
-int StartMobQuantity = 100, cWaveID = 0,currentWaveCost, MaxMob;
+int cWaveCost, MaxMob;
 int currentSec = 0;
 int WaveIDQueue[NO_WAVES];
-WaveTrack waveTrack[NO_WAVES], *cWave; // pause state for the game when paused.
+WaveTrack WaveTracker[NO_WAVES], *cWave; // pause state for the game when paused.
 
 
 //Might be useful variable for Waves Tracking
 int totalWave = 0, MobCount[NO_WAVES];
+float mousex, mousey;
 int isPaused, isMenu, isDead;
 
 //Images
 CP_Image background = NULL;
 
 void map_Init(void) {
-	
+	//CP_System_SetFrameRate(60);
 	CP_System_SetWindowSize(MAP_SIZEX, MAP_SIZEY);
+	wHeight = CP_System_GetWindowHeight() / 2;
+	wWidth = CP_System_GetWindowWidth() / 2;
 	//CP_System_Fullscreen();
 	isPaused = 0;
 	isMenu = 0;
 	isDead = 0;
-	currentWaveCost = 50;
 	// initialize the timer to start from 0 
 	timer(1, isPaused);
 
@@ -82,23 +96,33 @@ void map_Init(void) {
 	level = (LEVEL){ 0, 0, 10 };
 	
 	P = (Player) { start_vector.x, start_vector.y, 90, P_stats, P_stats_mult, P_stats_total, PLAYER_HITBOX, level};
-	currentWaveCost = 10;
+	cWaveCost = 10;
 	MaxMob = 200;
+	cWaveCost = WaveCostGrowthRate;
+	MaxMob = MaxMobGrowthRate;
 	for (int i = 0; i < NO_WAVES; i++) {
-		waveTrack[i] = (WaveTrack){
-			MaxMob,
-			0,
-			0,
-			0, 
-			malloc(sizeof(Mob*) * StartMobQuantity), 
-			StartMobQuantity, 
-			SpawnAreaOffset,
-			white
+		WaveTracker[i] = (WaveTrack){
+			MaxMob, //Max Mob
+			0, //MobCount
+			0, //Current Mob Count
+			0, //Wave Cost
+			StartMobQuantity, //Array Size 
+			SpawnAreaOffset, //Spawn offset
+			malloc(sizeof(Mob*) * StartMobQuantity) //, //Arr
 		};
-		InitWavesArr(&waveTrack[i]);
+	//		white //Wave Color
+	//	};
+		InitWavesArr(&WaveTracker[i], 0);
 		WaveIDQueue[i] = -1;
 	}
+	//ItemTracker = &(ItemTrack){malloc(sizeof(Item*) * StartItemQuantity), StartItemQuantity, 0};
+	//InitItemArr(ItemTracker);
+	MobSprites = malloc(sizeof(CP_Image*) * Mob_Img);
+	MobLoadImage(MobSprites, Mob_Img);
+	
+	
 	CameraDemo_Init();
+	Bulletinit();
 }
 
 void map_Update(void) {
@@ -130,7 +154,7 @@ void map_Update(void) {
 	create the map in a 3 x 3 dimension starting from the center
 	everytime the player moves to more than half of the width or height of the image
 	generate images in that direction*/
-	CP_Settings_ResetMatrix();
+	//CP_Settings_ResetMatrix();
 
 	
 	if (isPaused) {
@@ -199,12 +223,12 @@ void map_Update(void) {
 			//Every SpawnTime interval spawn wave
 			if (currentSec % Wave_Timer == 0) {
 				//Growth Per Wave
-				MaxMob += 50;
+				MaxMob += MaxMobGrowthRate;
 				//printf("Max Mobs Increased to %d\n", MaxMob);
 			}
 			if (currentSec % Spawn_Timer == 0) {
 				//Growth Per Wave
-				currentWaveCost += 20;
+				cWaveCost += WaveCostGrowthRate;
 				/*
 				Generate Waves
 				-) Update/ Reference == Require Pointers
@@ -219,43 +243,65 @@ void map_Update(void) {
 					-> Total Wave Count (Update)
 					-> Mob Count (Update)
 				*/
-				GenerateWaves(&P, &waveTrack, &WaveIDQueue, NO_WAVES, currentWaveCost, MaxMob, &totalWave, &MobCount);
+				GenerateWaves(&P, &WaveTracker, &WaveIDQueue, NO_WAVES, cWaveCost, MaxMob, &totalWave, &MobCount);
 				//Used to print current wave statistics, can be removed :)
-				PrintWaveStats(&totalWave,NO_WAVES, &WaveIDQueue, &MobCount);
+				//PrintWaveStats(&totalWave, NO_WAVES, &WaveIDQueue, &MobCount);
 			}
 		}
 
-		int MobC = 0;
 		for (int w = 0; w < NO_WAVES; w++) {
-			cWave = &waveTrack[w];
-			if (WaveIDQueue[w] != -1) {
-				if (cWave->CurrentCount == 0) {
-					//if all mobs are dead
-					//return index to wave queue
-					WaveIDQueue[w] = -1;
-					//skip rest of algo
-					continue;
-				}
-				//printf("Spawning wave: %d\n", w);
-				for (int i = 0; i < cWave->MobCount; i++) {
-					cMob = cWave->arr[i];
-					//Only bother handle mobs that are alive
-					//Dead = 0, Alive = 1
-					if (cMob->Status == 0) {
-						continue;
+			cWave = &WaveTracker[w];
+			if (WaveIDQueue[w] == -1) {
+				continue;
+			}
+			if (cWave->CurrentCount == 0) {
+				//if all mobs are dead
+				//return index to wave queue
+				WaveIDQueue[w] = -1;
+				//skip rest of algo
+				continue;
+			}
+			for (int i = 0; i < cWave->MobCount; i++) {
+				cMob = cWave->arr[i];
+				//Only bother handle mobs that are alive
+				//Dead = 0, Alive = 1
+				if (cMob->Status == 1) {
+					//MobTPlayerCollision(cMob, &P);
+					MobTMobCollision(cMob, &P, &WaveTracker, NO_WAVES);
+					MobTPlayerCollision(cMob, &P);
+
+					int bchecker;
+					if ((bchecker = BulletCollision(cMob->x, cMob->y, cMob->CStats.size)) >= 0 && bullet[bchecker].friendly == BULLET_PLAYER)
+					{
+						cMob->CStats.HP -= bullet[bchecker].damage;
+						if (cMob->CStats.HP <= 0)
+							cMob->Status = 0;
+						bullet[bchecker].exist = FALSE;
 					}
-					MobC += 1;
-					MobPathFinding(cMob, P.x, P.y);
-					MobCollision(cMob, &P);
 					if (cMob->Status == 0) {
 						cWave->CurrentCount -= 1;
 						MobCount[w] -= 1;
 						continue;
 					}
-					DrawMob(cMob, cWave->waveColor.r, cWave->waveColor.g, cWave->waveColor.b);
+					//cMob->h == 0 means haven drawn before. / assigned image to it yet
+					if (P.x - wWidth - cMob->w < cMob->x && cMob->x < P.x + wWidth + cMob->w && P.y - wHeight - cMob->h < cMob->y && cMob->y < P.y + wHeight + cMob->h || cMob->h == 0) {
+						DrawMobImage(MobSprites, cMob, &P);
+					}
 				}
+
 			}
 		}
+		//printf("MobCount: %d |\tFPS: %f \n", MobC, CP_System_GetFrameRate());
+		
+		if (CP_Input_MouseDown(MOUSE_BUTTON_LEFT))
+		{
+			mousex = CP_Input_GetMouseWorldX();
+			mousey = CP_Input_GetMouseWorldY();
+			float bulletangle = 0;
+			bulletangle = point_point_angle(P.x, P.y, mousex, mousey);
+			BulletShoot(P.x, P.y, bulletangle, 1, BULLET_PLAYER);
+		}
+		BulletDraw();
 		CP_Settings_ResetMatrix();
 
 		// Time, returns and draws text
@@ -273,8 +319,9 @@ void map_Update(void) {
 }
 
 void map_Exit(void) {
-	for (int i = 0; i < NO_WAVES; i++) {
-		free(waveTrack[i].arr);
-	}
-	CP_Image_Free(&background);
+	FreeMobResource(&WaveTracker, NO_WAVES, MobSprites, Mob_Img);
+	free(MobSprites);
+	
+	//FreeItemResource(&ItemTracker);
+	//free(ItemTracker);
 }

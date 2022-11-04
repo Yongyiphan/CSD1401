@@ -1,6 +1,7 @@
 #pragma once
 #ifndef ITEMS_H
 #define ITEMS_H
+
 #include "player.h"
 
 #define Empty -1
@@ -26,22 +27,33 @@ typedef struct ItemStat {
 }Item;
 
 typedef struct ItemTracker {
-	Item* arr;
+	Item** arr;
 	int arrSize;
 	int itemCount;
-}ItemTracker;
+}ItemTrack;
 
 
 /*
 Item Planning
+
+Player will not know what the item's effect:
+
+
 Player Stat Boost -> Limited Duration
 Exp -> Dropped by Mobs
 Magnet -> Moves Exp to Player's location
 Bullet Augm
-*/
 
+Item Storage
+1 Continuous Array of ? items
+Mobs have a chance to drop items upon death
+*/
+void InitItemArr(ItemTrack* tracker);
 
 void CreateItemEffect(Item* i);
 void IAffectPlayer(Item* i, Player* p, int currentSec);
+
+void FreeItemResource(ItemTrack* tracker);
+
 
 #endif
