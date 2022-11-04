@@ -5,8 +5,6 @@
 #include <stdio.h>
 
 
-CP_Sound BGM = NULL;
-
 int main(void)
 {
 	/*BGM = CP_Sound_Load("./Assets/thememusic.mp3");
