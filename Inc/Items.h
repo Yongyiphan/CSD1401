@@ -1,4 +1,6 @@
 #pragma once
+#ifndef ITEMS_H
+#define ITEMS_H
 
 
 #include "player.h"
@@ -9,8 +11,9 @@
 
 
 
+
 typedef struct ItemStat {
-	char* StatusEffect; //char arr -> string :)
+	int AffectedBaseStat;
 	int Hitbox;
 	int Start;
 	/*
@@ -26,10 +29,12 @@ typedef struct ItemStat {
 	double y;
 }Item;
 
-typedef struct ItemNode {
+static const Item EmptyItem;
+
+typedef struct ItemTreeNode {
 	Item key;
-	ItemNode* left;
-	ItemNode* right;
+	struct ItemNode* left;
+	struct ItemNode* right;
 	int h; //height of current node;
 }ItemNode;
 
@@ -42,17 +47,8 @@ typedef struct ItemTracker {
 
 
 
-
-int TreeHeight(ItemNode* current);
-int getBalance(ItemNode* current);
-
-ItemNode* newNode(Item i);
-ItemNode* insert(ItemNode* root, Item i);
-ItemNode* rightRotate(ItemNode* i);
-ItemNode* leftRotate(ItemNode* i);
-
-void freeTree(ItemNode* root);
-float getX(ItemNode* current);
+#define StartItemQuantity 1000
+extern ItemTrack* ItemTracker;
 
 
 
@@ -71,13 +67,32 @@ Item Storage
 1 Continuous Array of ? items
 Mobs have a chance to drop items upon death
 */
+void CreateItemTracker(void);
 void InitItemArr(ItemTrack* tracker);
 
-void CreateItemEffect(Item* i);
+Item* CreateItemEffect(float x, float y);
 void IAffectPlayer(Item* i, Player* p, int currentSec);
+
+void GenerateItem(ItemTrack* tracker, int currentSec);
 
 void FreeItemResource(ItemTrack* tracker);
 
+ItemNode* DrawItemTree(ItemNode* node);
+
+int TreeHeight(ItemNode* current);
+int getBalance(ItemNode* current);
+
+ItemNode* newNode(Item item);
+ItemNode* insertItemNode(ItemNode* root, Item item);
+ItemNode* deleteItemNode(ItemNode* root, Item item);
+ItemNode* minValueNode(ItemNode* node);
+ItemNode* rightRotate(ItemNode* item);
+ItemNode* leftRotate(ItemNode* item);
+
+
+void freeTree(ItemNode* root);
+float getX(ItemNode* current);
 
 
 
+#endif

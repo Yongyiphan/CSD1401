@@ -1,4 +1,4 @@
-
+#pragma once
 #include "cprocessing.h"
 #include <stdio.h>
 #include <math.h>

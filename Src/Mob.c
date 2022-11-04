@@ -1,11 +1,10 @@
+#pragma once
 #include "cprocessing.h"
 #include <stdlib.h>
 #include <stdio.h>
 #include <math.h>
-#include "player.h"
 #include "Mob.h"
 
-//#include "player.h"
 
 #define MaxUpperLimit 8000
 #define Img_Scale 80

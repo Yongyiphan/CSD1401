@@ -1,9 +1,10 @@
+#pragma once
 #include "cprocessing.h"
 #include <stdio.h>
+#include <math.h>
+#include "player.h"
 #include "game.h"
 #include "mainmenu.h"
-#include "player.h"
-#include <math.h>
 
 #define _countof(array) (sizeof(array) / sizeof(array[0]))
 

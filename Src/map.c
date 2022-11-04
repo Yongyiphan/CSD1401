@@ -1,3 +1,4 @@
+#pragma once
 #include "map.h"
 #include "cprocessing.h"
 #include <stdlib.h>
@@ -33,15 +34,14 @@ CP_Color grey, black, red, green, blue, white;
 CP_Matrix transform;
 
 //Starting Quantity
-int StartMobQuantity = 1000, StartItemQuantity = 1000;
-
+int StartMobQuantity = 1000; 
 //Mob Stuff
 #define NO_WAVES 6
 #define Spawn_Timer 1
 #define Wave_Timer 5
-#define MaxMobGrowthRate 50
-#define WaveCostGrowthRate 5
-#define SpawnAreaOffset 1000
+#define MaxMobGrowthRate 5
+#define WaveCostGrowthRate 2
+#define SpawnAreaOffset 500
 
 Mob* cMob;
 int cWaveCost, MaxMob;
@@ -49,11 +49,11 @@ int currentSec = 0;
 int WaveIDQueue[NO_WAVES];
 WaveTrack WaveTracker[NO_WAVES], *cWave; // pause state for the game when paused.
 
-
 //Might be useful variable for Waves Tracking
 int totalWave = 0, MobCount[NO_WAVES];
 float mousex, mousey;
 int isPaused, isMenu, isDead;
+
 
 //Images
 CP_Image background = NULL;
@@ -115,8 +115,7 @@ void map_Init(void) {
 		InitWavesArr(&WaveTracker[i], 0);
 		WaveIDQueue[i] = -1;
 	}
-	//ItemTracker = &(ItemTrack){malloc(sizeof(Item*) * StartItemQuantity), StartItemQuantity, 0};
-	//InitItemArr(ItemTracker);
+	CreateItemTracker();
 	MobSprites = malloc(sizeof(CP_Image*) * Mob_Img);
 	MobLoadImage(MobSprites, Mob_Img);
 	
@@ -130,31 +129,6 @@ void map_Update(void) {
 	P.STATTOTAL.SPEED_TOTAL = P.STAT.SPEED * P.STATMULT.SPEED_MULT;
 	P.STATTOTAL.DAMAGE_TOTAL = P.STAT.DAMAGE * P.STATMULT.DAMAGE_MULT;
 	P.STATTOTAL.DEFENSE_TOTAL = P.STAT.DEFENSE * P.STATMULT.DEFENSE_MULT;
-	/*
-	CP_Settings_ApplyMatrix(transform);
-	CP_Settings_StrokeWeight(0.0);
-	for (int x_pos = -1; x_pos < 2; x_pos++) {
-		for (int y_pos = -1; y_pos < 2; y_pos++) {
-			//if (P.x)
-			float mapX = MAP_SIZEX / 2;
-			float mapY = MAP_SIZEY / 2;
-
-			int playerMapx = P.x / MAP_SIZEX - 650;
-			int playerMapy = P.y / MAP_SIZEY - 450;
-			
-			/*CP_Image_Draw(background, playerMapx * mapX * x_pos, playerMapy * mapY * y_pos, MAP_SIZEX, MAP_SIZEY, 255);
-			printf("playerMapx: %d\tmap coords: %f\tplayer coords:%f\t%f\n", playerMapx, playerMapx * mapX * x_pos, P.x, P.y);
-
-			// center of the map
-	CP_Image_DrawAdvanced(background, mapX + (MAP_SIZEX * x_pos), mapY + (MAP_SIZEY * y_pos), MAP_SIZEX, MAP_SIZEY, 255, 0);
-}
-	}*/
-
-	/*Check the player coordinates
-	create the map in a 3 x 3 dimension starting from the center
-	everytime the player moves to more than half of the width or height of the image
-	generate images in that direction*/
-	//CP_Settings_ResetMatrix();
 
 	
 	if (isPaused) {
@@ -244,7 +218,6 @@ void map_Update(void) {
 					-> Mob Count (Update)
 				*/
 				GenerateWaves(&P, &WaveTracker, &WaveIDQueue, NO_WAVES, cWaveCost, MaxMob, &totalWave, &MobCount);
-				//Used to print current wave statistics, can be removed :)
 				//PrintWaveStats(&totalWave, NO_WAVES, &WaveIDQueue, &MobCount);
 			}
 		}
@@ -281,6 +254,8 @@ void map_Update(void) {
 					if (cMob->Status == 0) {
 						cWave->CurrentCount -= 1;
 						MobCount[w] -= 1;
+						Item *dropI = CreateItemEffect(cMob->x, cMob->y);
+						ItemTracker->tree = insertItemNode(ItemTracker->tree, *dropI);
 						continue;
 					}
 					//cMob->h == 0 means haven drawn before. / assigned image to it yet
@@ -291,7 +266,7 @@ void map_Update(void) {
 
 			}
 		}
-		//printf("MobCount: %d |\tFPS: %f \n", MobC, CP_System_GetFrameRate());
+		DrawItemTree(ItemTracker->tree);
 		
 		if (CP_Input_MouseDown(MOUSE_BUTTON_LEFT))
 		{
@@ -322,6 +297,6 @@ void map_Exit(void) {
 	FreeMobResource(&WaveTracker, NO_WAVES, MobSprites, Mob_Img);
 	free(MobSprites);
 	
-	//FreeItemResource(&ItemTracker);
+	FreeItemResource(&ItemTracker);
 	//free(ItemTracker);
 }
