@@ -193,7 +193,7 @@ void map_Update(void) {
 						cWave->CurrentCount -= 1;
 						MobCount[w] -= 1;
 						Item *dropI = CreateItemEffect(cMob->x, cMob->y);
-						ItemTracker->tree = insertItemNode(ItemTracker->tree, *dropI, 0);
+						ItemTracker->tree = insertItemNode(ItemTracker->tree, dropI, 0);
 						ItemTracker->itemCount += 1;
 						continue;
 					}
@@ -206,8 +206,8 @@ void map_Update(void) {
 			}
 		}
 		ItemPlayerCollision(&P);
-		DrawItemTree(ItemTracker->tree);
-		
+		//DrawItemTree(ItemTracker->tree);
+	
 		if (CP_Input_MouseDown(MOUSE_BUTTON_LEFT))
 		{
 			mousex = CP_Input_GetMouseWorldX();

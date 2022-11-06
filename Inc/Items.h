@@ -35,7 +35,7 @@ typedef struct ItemStat {
 static const Item EmptyItem;
 
 typedef struct ItemTreeNode {
-	Item key;
+	Item *key;
 	CP_Vector point;
 	struct ItemNode* left;
 	struct ItemNode* right;
@@ -95,13 +95,15 @@ void FreeItemResource(void);
 #define Dimension 2
 int arePointsSame(CP_Vector p1, CP_Vector p2);
 ItemNode* closest(ItemNode* n0, ItemNode* n1, CP_Vector point);
-ItemNode* newNode(Item item);
-ItemNode* insertItemNode(ItemNode* root, Item item, unsigned depth);
-ItemNode* deleteItemNode(ItemNode* root, Item item, unsigned depth);
+ItemNode* newNode(Item *item);
+ItemNode* insertItemNode(ItemNode* root, Item *item, unsigned depth);
+ItemNode* minNode(ItemNode* root, ItemNode* left, ItemNode* right, int d);
+ItemNode* findMin(ItemNode* root, int d, unsigned int depth);
+ItemNode* deleteItemNode(ItemNode* root, CP_Vector point, unsigned int depth);
 
-
+void copyItem(Item* dst, Item* src);
 //returns the searched item node
-ItemNode* nearestNeighbour(ItemNode* root, CP_Vector point, unsigned depth);
+ItemNode* nearestNeighbour(ItemNode* root, CP_Vector point, unsigned int depth);
 
 void ItemPlayerCollision(Player* p);
 

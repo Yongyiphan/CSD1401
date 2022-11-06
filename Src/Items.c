@@ -124,6 +124,7 @@ void ItemLoadImage(void) {
 }
 void DrawItemImage(Item* item) {
 
+	printf("Key: %p\n",item);
 	CP_Image* SImg = ItemSprites[item->Type + item->AffectedBaseStat];
 	int targetScale;
 	int IHeight = CP_Image_GetHeight(SImg), IWidth = CP_Image_GetHeight(SImg);
@@ -142,27 +143,41 @@ void DrawItemImage(Item* item) {
 void DrawItemTree(ItemNode* node) {
 	if (node == NULL)
 		return;
-	DrawItemImage(&node->key);
+	printf("\tItem: Node: %p | Key: %p\n", node, node->key);
+	//DrawItemImage(&node->key);
+	DrawItemImage(node->key);
 	DrawItemTree(node->left);
 	DrawItemTree(node->right);
 }
 
+#include <math.h>
 void ItemPlayerCollision(Player*p) {
 	if (ItemTracker->tree != NULL) {
 		CP_Vector target = CP_Vector_Set(p->x, p->y);
+		int collected = 0;
 		ItemNode* nearest = nearestNeighbour(ItemTracker->tree, target, 0);
-		float dist1 = squareDist(nearest->point.x - target.x, nearest->point.y - target.y);
+		float dist1 = sqrt(squareDist(nearest->point.x - target.x, nearest->point.y - target.y));
+
+		
 		CP_Graphics_DrawLine(target.x, target.y, nearest->point.x, nearest->point.y);
-		printf("Dist %f \n", dist1);
+		if (dist1 < p->HITBOX) {
+			ItemTracker->tree = deleteItemNode(ItemTracker->tree, nearest->point, 0);
+			collected -= 1;
+			printf("Here\n");
+		}
+		
+		//printf("Dist %f | From Player: %d\n", dist1, p->HITBOX);
+		DrawItemTree(ItemTracker->tree);
 	}
 }
 
-ItemNode* newNode(Item item) {
+ItemNode* newNode(Item *item) {
 	ItemNode* result = malloc(sizeof(ItemNode));
 	result->key = item;
-	result->point = CP_Vector_Set(item.x, item.y);
+	//result->point = CP_Vector_Set(item.x, item.y);
+	result->point = CP_Vector_Set(item->x, item->y);
 	result->left = NULL, result->right = NULL;
-	
+	return result;
 }
 
 int arePointsSame(CP_Vector p1, CP_Vector p2) {
@@ -170,13 +185,15 @@ int arePointsSame(CP_Vector p1, CP_Vector p2) {
 }
 
 
-ItemNode* insertItemNode(ItemNode* root, Item item, unsigned depth) {
+ItemNode* insertItemNode(ItemNode* root, Item *item, unsigned depth) {
 	if(root == NULL)
 		return newNode(item);
 	unsigned cd = depth % Dimension;
 	
-	CP_Vector point = CP_Vector_Set(item.x, item.y);
-	if (point.v[cd] < root->point.v[cd])
+	//CP_Vector point = CP_Vector_Set(item.x, item.y);
+	CP_Vector point = CP_Vector_Set(item->x, item->y);
+
+	if (point.v[cd] < (root->point.v[cd]))
 		root->left = insertItemNode(root->left, item, depth + 1);
 	else
 		root->right = insertItemNode(root->right, item, depth + 1);
@@ -193,54 +210,100 @@ ItemNode* minNode(ItemNode* root, ItemNode* left, ItemNode* right, int d) {
 	return res;
 }
 
-ItemNode* findMin(ItemNode* root,unsigned d, unsigned depth) {
+ItemNode* findMin(ItemNode* root, int d, unsigned int depth) {
 	if (root == NULL)
 		return NULL;
-	unsigned cd = depth  % Dimension;
+	unsigned int cd = depth  % Dimension;
 	if (cd == d) {
 		if (root->left == NULL)
 			return root;
 		return findMin(root->left, d, depth + 1);
 	}
-	return minNode(root,
-		findMin(root->left, d, depth + 1),
-		findMin(root->right, d, depth + 1), d);
+	return minNode(
+		root,
+		findMin(root->left,  d, depth + 1),
+		findMin(root->right, d, depth + 1), 
+		d);
+}
+
+void copyItem(Item* dst, Item* src) {
+	dst->AffectedBaseStat = src->AffectedBaseStat;
+	dst->Duration = src->Duration;
+	dst->collected = src->collected;
+	dst->Start = src->Start;
+	dst->Hitbox = src->Hitbox;
+	dst->Type = src->Type;
+	dst->x = src->x;
+	dst->y = src->y;
+	dst->Modifier = src->Modifier;
 }
 
 
-ItemNode* deleteItemNode(ItemNode* root, Item item, unsigned depth) {
+
+ItemNode* deleteItemNode(ItemNode* root, CP_Vector point, unsigned int depth) {
 	if (root == NULL)
 		return NULL;
-	
-	CP_Vector point = CP_Vector_Set(item.x, item.y);
-	unsigned cd = depth % Dimension;
-	if (arePointsSame(point, root->point)) {
+	unsigned int cd = depth % Dimension;
+	printf("Current: %p | Left: %p | Right: %p\n", root, root->left, root->right);
+	if (point.x == root->point.x && point.y == root->point.y) {
 		if (root->right != NULL) {
 			ItemNode* min = findMin(root->right, cd, 0);
 			root->point = CP_Vector_Set(min->point.x, min->point.y);
-			root->right = deleteItemNode(root->right, min->key, depth + 1);
+			printf("\tRigt > Before %p | %p\n", root->key, min->key);
+			//root->key = min->key;
+			//copyItem(root->key, min->key);
+			Item* temp = root->key;
+			root->key = &min->key;
+			free(temp);
+			
+			root->right = deleteItemNode(root->right, min->point, depth + 1);
+			printf("\tRight > After %p | %p\n", root->key, min->key);
 		}
 		else if (root->left != NULL) {
 			ItemNode* min = findMin(root->left, cd, 0);
 			root->point = CP_Vector_Set(min->point.x, min->point.y);
-			root->right = deleteItemNode(root->left, min->key, depth + 1);
+			printf("\tLeft > Before %p | %p\n", root->key, min->key);
+			//root->key = min->key;
+			//copyItem(root->key, min->key);
+			Item* temp = root->key;
+			root->key = &min->key;
+			free(temp);
+
+			root->right = deleteItemNode(root->left, min->point, depth + 1);
+			printf("\tLeft > After %p | %p\n", root->key, min->key);
 		}
 		else {
+					
+			printf("\tFreeing: %p\n", root);
+			//free(root->key);
+			//root->key = NULL;
 			free(root);
+			root = NULL;
 			return NULL;
 		}
+		printf("\tRoot: %p\n", root->key);
 		return root;
 	}
+
+	if (point.v[cd] < root->point.v[cd]) {
+		root->left = deleteItemNode(root->left, point, depth + 1);
+	}
+	else {
+		root->right = deleteItemNode(root->right, point, depth + 1);
+	}
+	printf("\tReturn: Root: %p | Key: %p\n",root, root->key);
+	return root;
 }
 
 //returns the searched item node
-ItemNode* nearestNeighbour(ItemNode* root, CP_Vector point, unsigned depth) {
+ItemNode* nearestNeighbour(ItemNode* root, CP_Vector point, unsigned int depth) {
 	if (root == NULL)
 		return NULL;
+
 	if (root->left == NULL && root->right == NULL)
 		return root;
 
-	unsigned cd = depth % Dimension;
+	unsigned int cd = depth % Dimension;
 	ItemNode* nextbranch, *otherbranch;
 	if (point.v[cd] < root->point.v[cd]) {
 		nextbranch = root->left;
@@ -250,10 +313,16 @@ ItemNode* nearestNeighbour(ItemNode* root, CP_Vector point, unsigned depth) {
 		nextbranch = root->right;
 		otherbranch = root->left;
 	}
-	ItemNode* best = nearestNeighbour(nextbranch, point, depth + 1);
-	ItemNode* nearest = closest(best, otherbranch, point);
-	if (nearest != best)
-		best = nearestNeighbour(otherbranch, point, depth + 1);
+
+	ItemNode* temp = nearestNeighbour(nextbranch, point, depth + 1);
+	ItemNode* best = closest(temp, root, point);
+
+	float r = squareDist(best->point.x - point.x, best->point.y - point.y);
+	float rprime = point.v[cd] - root->point.v[cd];
+	if (r >= squareDist(rprime, 0)) {
+		temp = nearestNeighbour(otherbranch, point, depth + 1);
+		best = closest(temp, best, point);
+	}
 
 	return best;
 }
@@ -265,8 +334,8 @@ ItemNode* closest(ItemNode* n0, ItemNode* n1, CP_Vector point) {
 		return n1;
 	if (n1 == NULL)
 		return n0;
-	float d0 = squareDist(point.x - n0->key.x, point.y - n0->key.y);
-	float d1 = squareDist(point.x - n1->key.x, point.y - n1->key.y);
+	float d0 = squareDist(point.x - n0->point.x, point.y - n0->point.y);
+	float d1 = squareDist(point.x - n1->point.x, point.y - n1->point.y);
 	return d0 < d1 ? n0 : n1;
 }
 
@@ -295,162 +364,8 @@ void freeTree(ItemNode* root) {
 	freeTree(root->left);
 	freeTree(root->right);
 	free(root);
+	root = NULL;
 }
 
 
 
-
-
-/*
-//Tree Implementation
-#pragma region
-int TreeHeight(ItemNode* item) {
-	if (NULL == item)
-		return 0;
-	return 1 + max(TreeHeight(item->left), TreeHeight(item->right));
-}
-
-int getBalance(ItemNode* item) {
-	if (item == NULL)
-		return 0;
-	return TreeHeight(item->left) - TreeHeight(item->right);
-}
-
-ItemNode* newNode(Item item) {
-	ItemNode* result = malloc(sizeof(ItemNode));
-	result->key = item;
-	result->left = NULL;
-	result->right = NULL;
-	result->h = 0;
-
-}
-
-ItemNode* insertItemNode(ItemNode* node, Item item) {
-	if (node == NULL) {
-		return newNode(item);
-	}
-	if (item.x < node->key.x)
-		node->left = insertItemNode(node->left, item);
-	else if (item.x > node->key.x)
-		node->right = insertItemNode(node->right, item);
-	else 	
-		return NULL;
-    node->h = TreeHeight(node);
-    int balance = getBalance(node);
- 
-    if (balance > 1 && item.x < getX(node->left))
-        return rightRotate(node);
-    if (balance < -1 && item.x > getX(node->right))
-        return leftRotate(node);
-    if (balance > 1 && item.x > getX(node->left))
-    {
-        node->left =  leftRotate(node->left);
-        return rightRotate(node);
-    }
-	if (balance < -1 && item.x < getX(node->right))
-	{
-		node->right = rightRotate(node->right);
-		return leftRotate(node);
-	}
-    return node;
-}
-
-ItemNode* deleteItemNode(ItemNode* root, Item key)
-{ 
-    if (root == NULL)
-        return root;
-  
-    if ( key.x < root->key.x )
-        root->left = deleteItemNode(root->left, key);
-  
-    else if( key.x > root->key.x )
-        root->right = deleteItemNode(root->right, key);
-    else
-    {
-        if( (root->left == NULL) || (root->right == NULL) )
-        {
-            ItemNode *temp = root->left ? root->left : root->right;
-            if (temp == NULL)
-            {
-                temp = root;
-                root = NULL;
-            }
-            else // One child case
-             *root = *temp;  
-			free(temp);
-        }
-        else
-        {
-            ItemNode* temp = minValueNode(root->right);
-            root->key = temp->key;
-            root->right = deleteItemNode(root->right, temp->key);
-        }
-    }
-    if (root == NULL)
-      return root;
-    root->h = 1 + max(TreeHeight(root->left),
-                           TreeHeight(root->right));
-  
-    int balance = getBalance(root);
-    if (balance > 1 && getBalance(root->left) >= 0)
-        return rightRotate(root);
-  
-    if (balance > 1 && getBalance(root->left) < 0)
-    {
-        root->left =  leftRotate(root->left);
-        return rightRotate(root);
-    }
-    if (balance < -1 && getBalance(root->right) <= 0)
-        return leftRotate(root);
-    if (balance < -1 && getBalance(root->right) > 0)
-    {
-        root->right = rightRotate(root->right);
-        return leftRotate(root);
-    }
-    return root;
-}
-
-ItemNode * minValueNode(ItemNode* node)
-{
-    ItemNode* current = node;
-    while (current->left != NULL)
-        current = current->left;
-    return current;
-}
-
-ItemNode* rightRotate(ItemNode* y) {
-	ItemNode* x = y->left;
-	ItemNode* T2 = x->right;
-	x->right = y;
-	y->left = T2;
-	y->h = TreeHeight(y);
-	x->h = TreeHeight(x);
-	return x;
-}
-ItemNode* leftRotate(ItemNode* y) {
-	ItemNode* x = y->right;
-	ItemNode* T2 = x->left;
-	x->left = y;
-	y->right = T2;
-	y->h = TreeHeight(y);
-	x->h = TreeHeight(x);
-	return x;
-}
-
-void freeTree(ItemNode* root) {
-	if (NULL == root) {
-		return NULL;
-	}
-	freeTree(root->left);
-	freeTree(root->right);
-	free(root);
-}
-
-float getX(ItemNode* current) {
-	if (current == NULL)
-		return;
-	return current->key.x;
-}
-
-#pragma endregion
-*/
