@@ -20,37 +20,22 @@
 #define PLAYER_DEFENSE 10
 #define PLAYER_HITBOX 50
 
-int wHeight, wWidth;
+int WHeight, WWidth;
 
 //Declaring player variables
 Player P; Stats P_stats; StatsMult P_stats_mult; StatsTotal P_stats_total; LEVEL level;
 
-//Sprite Stuff
-#define Mob_Img 4
-CP_Image** MobSprites;
 
 CP_Vector start_vector;
 CP_Color grey, black, red, green, blue, white;
 CP_Matrix transform;
 
-//Starting Quantity
-int StartMobQuantity = 1000; 
-//Mob Stuff
-#define NO_WAVES 6
-#define Spawn_Timer 1
-#define Wave_Timer 5
-#define MaxMobGrowthRate 5
-#define WaveCostGrowthRate 2
-#define SpawnAreaOffset 500
 
 Mob* cMob;
-int cWaveCost, MaxMob;
-int currentSec = 0;
-int WaveIDQueue[NO_WAVES];
-WaveTrack WaveTracker[NO_WAVES], *cWave; // pause state for the game when paused.
+WaveTrack *cWave; // pause state for the game when paused.
 
 //Might be useful variable for Waves Tracking
-int totalWave = 0, MobCount[NO_WAVES];
+int totalWave = 0;
 float mousex, mousey;
 int isPaused, isMenu, isDead;
 
@@ -61,8 +46,8 @@ CP_Image background = NULL;
 void map_Init(void) {
 	//CP_System_SetFrameRate(60);
 	CP_System_SetWindowSize(MAP_SIZEX, MAP_SIZEY);
-	wHeight = CP_System_GetWindowHeight() / 2;
-	wWidth = CP_System_GetWindowWidth() / 2;
+	WHeight = CP_System_GetWindowHeight();
+	WWidth = CP_System_GetWindowWidth();
 	//CP_System_Fullscreen();
 	isPaused = 0;
 	isMenu = 0;
@@ -96,28 +81,10 @@ void map_Init(void) {
 	level = (LEVEL){ 0, 0, 10 };
 	
 	P = (Player) { start_vector.x, start_vector.y, 90, P_stats, P_stats_mult, P_stats_total, PLAYER_HITBOX, level};
-	cWaveCost = 10;
-	MaxMob = 200;
-	cWaveCost = WaveCostGrowthRate;
-	MaxMob = MaxMobGrowthRate;
-	for (int i = 0; i < NO_WAVES; i++) {
-		WaveTracker[i] = (WaveTrack){
-			MaxMob, //Max Mob
-			0, //MobCount
-			0, //Current Mob Count
-			0, //Wave Cost
-			StartMobQuantity, //Array Size 
-			SpawnAreaOffset, //Spawn offset
-			malloc(sizeof(Mob*) * StartMobQuantity) //, //Arr
-		};
-	//		white //Wave Color
-	//	};
-		InitWavesArr(&WaveTracker[i], 0);
-		WaveIDQueue[i] = -1;
-	}
+	CreateWaveTracker();
 	CreateItemTracker();
-	MobSprites = malloc(sizeof(CP_Image*) * Mob_Img);
-	MobLoadImage(MobSprites, Mob_Img);
+	MobLoadImage();
+	ItemLoadImage();
 	
 	
 	CameraDemo_Init();
@@ -190,38 +157,9 @@ void map_Update(void) {
 
 		// Any objects below this function will be displaced by the camera movement
 		CameraDemo_Update(&P, &transform);
-
-		if ((int)CP_System_GetSeconds() != currentSec) {
-			currentSec = (int)CP_System_GetSeconds();
-			printf("\n\tCurrent Sec: %d | Current FPS:%f\n", currentSec, CP_System_GetFrameRate());
-			//Every SpawnTime interval spawn wave
-			if (currentSec % Wave_Timer == 0) {
-				//Growth Per Wave
-				MaxMob += MaxMobGrowthRate;
-				//printf("Max Mobs Increased to %d\n", MaxMob);
-			}
-			if (currentSec % Spawn_Timer == 0) {
-				//Growth Per Wave
-				cWaveCost += WaveCostGrowthRate;
-				/*
-				Generate Waves
-				-) Update/ Reference == Require Pointers
-				===== Params ================
-					-> Player (Reference)
-					-> WaveTrack Arr (Update)
-					-> WaveID Queue (Update)
-					-> No of spawnable Waves
-					-> WaveCost Growth
-					-> MaxMob Growth
-				===== Optional =============== (May be deleted accordingly if unnecessary)
-					-> Total Wave Count (Update)
-					-> Mob Count (Update)
-				*/
-				GenerateWaves(&P, &WaveTracker, &WaveIDQueue, NO_WAVES, cWaveCost, MaxMob, &totalWave, &MobCount);
-				//PrintWaveStats(&totalWave, NO_WAVES, &WaveIDQueue, &MobCount);
-			}
-		}
-
+		
+		GenerateWaves(&P);
+		
 		for (int w = 0; w < NO_WAVES; w++) {
 			cWave = &WaveTracker[w];
 			if (WaveIDQueue[w] == -1) {
@@ -255,17 +193,19 @@ void map_Update(void) {
 						cWave->CurrentCount -= 1;
 						MobCount[w] -= 1;
 						Item *dropI = CreateItemEffect(cMob->x, cMob->y);
-						ItemTracker->tree = insertItemNode(ItemTracker->tree, *dropI);
+						ItemTracker->tree = insertItemNode(ItemTracker->tree, *dropI, 0);
+						ItemTracker->itemCount += 1;
 						continue;
 					}
 					//cMob->h == 0 means haven drawn before. / assigned image to it yet
-					if (P.x - wWidth - cMob->w < cMob->x && cMob->x < P.x + wWidth + cMob->w && P.y - wHeight - cMob->h < cMob->y && cMob->y < P.y + wHeight + cMob->h || cMob->h == 0) {
-						DrawMobImage(MobSprites, cMob, &P);
+					if (P.x - WWidth/2 - cMob->w < cMob->x && cMob->x < P.x + WWidth/2 + cMob->w && P.y - WHeight/2 - cMob->h < cMob->y && cMob->y < P.y + WHeight/2 + cMob->h || cMob->h == 0) {
+						DrawMobImage(cMob, &P);
 					}
 				}
 
 			}
 		}
+		ItemPlayerCollision(&P);
 		DrawItemTree(ItemTracker->tree);
 		
 		if (CP_Input_MouseDown(MOUSE_BUTTON_LEFT))
@@ -290,13 +230,11 @@ void map_Update(void) {
 	if (CP_Input_KeyTriggered(KEY_SPACE))
 		CP_Engine_Terminate();
 
-	
 }
 
 void map_Exit(void) {
-	FreeMobResource(&WaveTracker, NO_WAVES, MobSprites, Mob_Img);
-	free(MobSprites);
+	FreeMobResource();
 	
-	FreeItemResource(&ItemTracker);
+	FreeItemResource();
 	//free(ItemTracker);
 }

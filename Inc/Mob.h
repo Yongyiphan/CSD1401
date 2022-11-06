@@ -13,6 +13,7 @@
 #define BigBoss 4
 
 
+
 typedef struct MobBase {
 	float HP;
 	float DEF;
@@ -48,6 +49,26 @@ typedef struct WaveTracker {
 	Mob** arr;
 }WaveTrack;
 
+//Mob Image
+#define Img_Scale 80
+#define BoundScale 1.2f
+
+extern CP_Image** MobSprites;
+extern int Mob_Img;
+// --------------------------- //
+
+//Mob Stuff
+#define NO_WAVES 5
+#define Spawn_Timer 5
+#define Wave_Timer 20
+#define MaxMobGrowthRate 5
+#define MaxUpperLimit 8000
+#define WaveCostGrowthRate 1
+#define SpawnAreaOffset 1500
+#define StartMobQuantity 1000
+
+extern int WaveIDQueue[NO_WAVES], MobCount[NO_WAVES], CWave, CWaveCost, CMaxMob;
+extern WaveTrack WaveTracker[NO_WAVES];
 /*
 Mob C Flow
 : Generate N amt of mobs at random locations
@@ -72,24 +93,26 @@ Print Conditions
 
 
 
-void MobLoadImage(CP_Image *Sprites, int No_Img);
+void MobLoadImage(void);
+void CreateWaveTracker(void);
 void InitWavesArr(WaveTrack* tracker, int start);
 
 void CreateBaseStat(MobStats* ms, int type);
 void CreateMob(Mob* m, MobStats *Base, Player*player, int offSet);
 void GenerateMobs(WaveTrack* tracker, Player* player);
-void GenerateWaves(Player* P, WaveTrack* queue, int* queueID, int WavesNo, int CostGrowth, int MaxMobGrowth,int *TotalWaveCount,  int* MobCount);
+//void GenerateWaves(Player* P, WaveTrack* queue, int* queueID, int WavesNo, int CostGrowth, int MaxMobGrowth,int *TotalWaveCount,  int* MobCount);
+void GenerateWaves(Player* P);
 
-void DrawMobImage(CP_Image* Sprites, Mob* m, Player*p);
+void DrawMobImage(Mob* m, Player*p);
 
 void MobTPlayerCollision(Mob* m, Player* p);
 void MobTMobCollision(Mob* mob, Player* p, WaveTrack* tracker, int const No_Waves);
 
-void PrintWaveStats(int*CWaveCount, int No_Waves, int*WaveIDQueue, int*MobCount);
+void PrintWaveStats(int*CWaveCount);
 
-void FreeMobResource(WaveTrack* wtracker, int noWaves, CP_Image *spritesheet, int Mob_Img);
+void FreeMobResource();
 
-float square(float one, float two);
+float squareDist(float one, float two);
 
 
 
