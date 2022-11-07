@@ -105,7 +105,7 @@ void copyItem(Item* dst, Item* src);
 //returns the searched item node
 ItemNode* nearestNeighbour(ItemNode* root, CP_Vector point, unsigned int depth);
 
-void ItemPlayerCollision(Player* p);
+void ItemPlayerCollision(void);
 
 void freeTree(ItemNode* root);
 

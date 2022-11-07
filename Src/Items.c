@@ -105,9 +105,6 @@ void IAffectPlayer(Item* item, Player* p) {
 }
 
 
-
-
-
 CP_Image** ItemSprites;
 int Img_C;
 void ItemLoadImage(void) {
@@ -123,7 +120,8 @@ void ItemLoadImage(void) {
 	}
 }
 void DrawItemImage(Item* item) {
-
+	if (item == NULL)
+		return;
 	printf("Key: %p\n",item);
 	CP_Image* SImg = ItemSprites[item->Type + item->AffectedBaseStat];
 	int targetScale;
@@ -151,23 +149,23 @@ void DrawItemTree(ItemNode* node) {
 }
 
 #include <math.h>
-void ItemPlayerCollision(Player*p) {
+void ItemPlayerCollision(void) {
 	if (ItemTracker->tree != NULL) {
-		CP_Vector target = CP_Vector_Set(p->x, p->y);
+		CP_Vector target = CP_Vector_Set(P.x, P.y);
 		int collected = 0;
 		ItemNode* nearest = nearestNeighbour(ItemTracker->tree, target, 0);
 		float dist1 = sqrt(squareDist(nearest->point.x - target.x, nearest->point.y - target.y));
 
-		
 		CP_Graphics_DrawLine(target.x, target.y, nearest->point.x, nearest->point.y);
-		if (dist1 < p->HITBOX) {
+	
+		if (dist1 < P.HITBOX) {
 			ItemTracker->tree = deleteItemNode(ItemTracker->tree, nearest->point, 0);
 			collected -= 1;
 			printf("Here\n");
 		}
+		printf("\n\n");
 		
 		//printf("Dist %f | From Player: %d\n", dist1, p->HITBOX);
-		DrawItemTree(ItemTracker->tree);
 	}
 }
 
@@ -236,62 +234,43 @@ void copyItem(Item* dst, Item* src) {
 	dst->x = src->x;
 	dst->y = src->y;
 	dst->Modifier = src->Modifier;
+	printf("Copying from %p to %p\n", src, dst);
 }
-
 
 
 ItemNode* deleteItemNode(ItemNode* root, CP_Vector point, unsigned int depth) {
 	if (root == NULL)
 		return NULL;
 	unsigned int cd = depth % Dimension;
-	printf("Current: %p | Left: %p | Right: %p\n", root, root->left, root->right);
 	if (point.x == root->point.x && point.y == root->point.y) {
 		if (root->right != NULL) {
 			ItemNode* min = findMin(root->right, cd, 0);
 			root->point = CP_Vector_Set(min->point.x, min->point.y);
-			printf("\tRigt > Before %p | %p\n", root->key, min->key);
-			//root->key = min->key;
-			//copyItem(root->key, min->key);
-			Item* temp = root->key;
-			root->key = &min->key;
-			free(temp);
-			
-			root->right = deleteItemNode(root->right, min->point, depth + 1);
-			printf("\tRight > After %p | %p\n", root->key, min->key);
+			copyItem(root->key, min->key);
+			ItemNode* temp = deleteItemNode(root->right, min->point, depth + 1);	
+			root->right = temp;
 		}
 		else if (root->left != NULL) {
 			ItemNode* min = findMin(root->left, cd, 0);
 			root->point = CP_Vector_Set(min->point.x, min->point.y);
-			printf("\tLeft > Before %p | %p\n", root->key, min->key);
-			//root->key = min->key;
-			//copyItem(root->key, min->key);
-			Item* temp = root->key;
-			root->key = &min->key;
-			free(temp);
-
-			root->right = deleteItemNode(root->left, min->point, depth + 1);
-			printf("\tLeft > After %p | %p\n", root->key, min->key);
+			copyItem(root->key, min->key);
+			ItemNode* temp = deleteItemNode(root->left, min->point, depth + 1);
+			root->right = temp;
 		}
 		else {
-					
-			printf("\tFreeing: %p\n", root);
-			//free(root->key);
-			//root->key = NULL;
+			free(root->key);
+			root->key = NULL;
 			free(root);
 			root = NULL;
 			return NULL;
 		}
-		printf("\tRoot: %p\n", root->key);
 		return root;
 	}
 
-	if (point.v[cd] < root->point.v[cd]) {
-		root->left = deleteItemNode(root->left, point, depth + 1);
-	}
-	else {
+	if (point.v[cd] < root->point.v[cd])  
+		root->left  = deleteItemNode(root->left, point, depth + 1);
+	else
 		root->right = deleteItemNode(root->right, point, depth + 1);
-	}
-	printf("\tReturn: Root: %p | Key: %p\n",root, root->key);
 	return root;
 }
 
@@ -361,8 +340,12 @@ void FreeItemResource(void) {
 void freeTree(ItemNode* root) {
 	if (root == NULL)
 		return NULL;
+	free(root->key);
+	root->key = NULL;
 	freeTree(root->left);
+	root->left = NULL;
 	freeTree(root->right);
+	root->right = NULL;
 	free(root);
 	root = NULL;
 }

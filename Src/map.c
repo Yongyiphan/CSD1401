@@ -86,7 +86,12 @@ void map_Init(void) {
 	MobLoadImage();
 	ItemLoadImage();
 	
-	
+	Item* one = CreateItemEffect(P.x + 100, P.y + 100);
+	Item* two = CreateItemEffect(P.x + 150, P.y + 150);
+	Item* three = CreateItemEffect(P.x + 50, P.y + 150);
+	ItemTracker->tree = insertItemNode(ItemTracker->tree, one, 0);
+	ItemTracker->tree = insertItemNode(ItemTracker->tree, two, 0);
+	ItemTracker->tree = insertItemNode(ItemTracker->tree, three, 0);
 	CameraDemo_Init();
 	Bulletinit();
 }
@@ -158,55 +163,54 @@ void map_Update(void) {
 		// Any objects below this function will be displaced by the camera movement
 		CameraDemo_Update(&P, &transform);
 		
-		GenerateWaves(&P);
+		//GenerateWaves(&P);
 		
-		for (int w = 0; w < NO_WAVES; w++) {
-			cWave = &WaveTracker[w];
-			if (WaveIDQueue[w] == -1) {
-				continue;
-			}
-			if (cWave->CurrentCount == 0) {
-				//if all mobs are dead
-				//return index to wave queue
-				WaveIDQueue[w] = -1;
-				//skip rest of algo
-				continue;
-			}
-			for (int i = 0; i < cWave->MobCount; i++) {
-				cMob = cWave->arr[i];
-				//Only bother handle mobs that are alive
-				//Dead = 0, Alive = 1
-				if (cMob->Status == 1) {
-					//MobTPlayerCollision(cMob, &P);
-					MobTMobCollision(cMob, &P, &WaveTracker, NO_WAVES);
-					MobTPlayerCollision(cMob, &P);
+		//for (int w = 0; w < NO_WAVES; w++) {
+		//	cWave = &WaveTracker[w];
+		//	if (WaveIDQueue[w] == -1) {
+		//		continue;
+		//	}
+		//	if (cWave->CurrentCount == 0) {
+		//		//if all mobs are dead
+		//		//return index to wave queue
+		//		WaveIDQueue[w] = -1;
+		//		//skip rest of algo
+		//		continue;
+		//	}
+		//	for (int i = 0; i < cWave->MobCount; i++) {
+		//		cMob = cWave->arr[i];
+		//		//Only bother handle mobs that are alive
+		//		//Dead = 0, Alive = 1
+		//		if (cMob->Status == 1) {
+		//			//MobTPlayerCollision(cMob, &P);
+		//			MobTMobCollision(cMob, &P, &WaveTracker, NO_WAVES);
+		//			MobTPlayerCollision(cMob, &P);
 
-					int bchecker;
-					if ((bchecker = BulletCollision(cMob->x, cMob->y, cMob->CStats.size)) >= 0 && bullet[bchecker].friendly == BULLET_PLAYER)
-					{
-						cMob->CStats.HP -= bullet[bchecker].damage;
-						if (cMob->CStats.HP <= 0)
-							cMob->Status = 0;
-						bullet[bchecker].exist = FALSE;
-					}
-					if (cMob->Status == 0) {
-						cWave->CurrentCount -= 1;
-						MobCount[w] -= 1;
-						Item *dropI = CreateItemEffect(cMob->x, cMob->y);
-						ItemTracker->tree = insertItemNode(ItemTracker->tree, dropI, 0);
-						ItemTracker->itemCount += 1;
-						continue;
-					}
-					//cMob->h == 0 means haven drawn before. / assigned image to it yet
-					if (P.x - WWidth/2 - cMob->w < cMob->x && cMob->x < P.x + WWidth/2 + cMob->w && P.y - WHeight/2 - cMob->h < cMob->y && cMob->y < P.y + WHeight/2 + cMob->h || cMob->h == 0) {
-						DrawMobImage(cMob, &P);
-					}
-				}
+		//			int bchecker;
+		//			if ((bchecker = BulletCollision(cMob->x, cMob->y, cMob->CStats.size)) >= 0 && bullet[bchecker].friendly == BULLET_PLAYER)
+		//			{
+		//				cMob->CStats.HP -= bullet[bchecker].damage;
+		//				if (cMob->CStats.HP <= 0)
+		//					cMob->Status = 0;
+		//				bullet[bchecker].exist = FALSE;
+		//			}
+		//			if (cMob->Status == 0) {
+		//				cWave->CurrentCount -= 1;
+		//				MobCount[w] -= 1;
+		//				ItemTracker->tree = insertItemNode(ItemTracker->tree, CreateItemEffect(cMob->x, cMob->y), 0);
+		//				ItemTracker->itemCount += 1;
+		//				continue;
+		//			}
+		//			//cMob->h == 0 means haven drawn before. / assigned image to it yet
+		//			if (P.x - WWidth/2 - cMob->w < cMob->x && cMob->x < P.x + WWidth/2 + cMob->w && P.y - WHeight/2 - cMob->h < cMob->y && cMob->y < P.y + WHeight/2 + cMob->h || cMob->h == 0) {
+		//				DrawMobImage(cMob, &P);
+		//			}
+		//		}
 
-			}
-		}
+		//	}
+		//}
 		ItemPlayerCollision(&P);
-		//DrawItemTree(ItemTracker->tree);
+		DrawItemTree(ItemTracker->tree);
 	
 		if (CP_Input_MouseDown(MOUSE_BUTTON_LEFT))
 		{
