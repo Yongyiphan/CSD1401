@@ -122,7 +122,7 @@ void ItemLoadImage(void) {
 void DrawItemImage(Item* item) {
 	if (item == NULL)
 		return;
-	printf("Key: %p\n",item);
+	//printf("Key: %p\n",item);
 	CP_Image* SImg = ItemSprites[item->Type + item->AffectedBaseStat];
 	int targetScale;
 	int IHeight = CP_Image_GetHeight(SImg), IWidth = CP_Image_GetHeight(SImg);
@@ -141,7 +141,7 @@ void DrawItemImage(Item* item) {
 void DrawItemTree(ItemNode* node) {
 	if (node == NULL)
 		return;
-	printf("\tItem: Node: %p | Key: %p\n", node, node->key);
+	//printf("\tItem: Node: %p | Key: %p\n", node, node->key);
 	//DrawItemImage(&node->key);
 	DrawItemImage(node->key);
 	DrawItemTree(node->left);
@@ -161,10 +161,8 @@ void ItemPlayerCollision(void) {
 		if (dist1 < P.HITBOX) {
 			ItemTracker->tree = deleteItemNode(ItemTracker->tree, nearest->point, 0);
 			collected -= 1;
-			printf("Here\n");
+			//printf("Here\n");
 		}
-		printf("\n\n");
-		
 		//printf("Dist %f | From Player: %d\n", dist1, p->HITBOX);
 	}
 }
@@ -175,6 +173,7 @@ ItemNode* newNode(Item *item) {
 	//result->point = CP_Vector_Set(item.x, item.y);
 	result->point = CP_Vector_Set(item->x, item->y);
 	result->left = NULL, result->right = NULL;
+	result->prev = NULL;
 	return result;
 }
 
@@ -183,19 +182,23 @@ int arePointsSame(CP_Vector p1, CP_Vector p2) {
 }
 
 
-ItemNode* insertItemNode(ItemNode* root, Item *item, unsigned depth) {
-	if(root == NULL)
-		return newNode(item);
-	unsigned cd = depth % Dimension;
-	
-	//CP_Vector point = CP_Vector_Set(item.x, item.y);
-	CP_Vector point = CP_Vector_Set(item->x, item->y);
+ItemNode* insertItemNode(ItemNode* root, Item *item) {
+	return insertItemRec(NULL, root, item, 0);
+}
 
-	if (point.v[cd] < (root->point.v[cd]))
-		root->left = insertItemNode(root->left, item, depth + 1);
+ItemNode* insertItemRec(ItemNode* prev, ItemNode* root, Item* item, unsigned depth) {
+	if (root == NULL) {
+		ItemNode* n = newNode(item);
+		n->prev = prev;
+		return n;
+	}
+	unsigned cd = depth % Dimension;
+	CP_Vector point = CP_Vector_Set(item->x, item->y);
+	//If root->prev == NULL, root == head
+	if (point.v[cd] < root->point.v[cd]) 
+		root->left = insertItemRec(root, root->left, item, depth + 1);
 	else
-		root->right = insertItemNode(root->right, item, depth + 1);
-	
+		root->right = insertItemRec(root, root->right, item, depth + 1);
 	return root;
 }
 
@@ -211,30 +214,30 @@ ItemNode* minNode(ItemNode* root, ItemNode* left, ItemNode* right, int d) {
 ItemNode* findMin(ItemNode* root, int d, unsigned int depth) {
 	if (root == NULL)
 		return NULL;
-	unsigned int cd = depth  % Dimension;
+	unsigned cd = depth % Dimension;
 	if (cd == d) {
 		if (root->left == NULL)
 			return root;
 		return findMin(root->left, d, depth + 1);
 	}
-	return minNode(
-		root,
-		findMin(root->left,  d, depth + 1),
-		findMin(root->right, d, depth + 1), 
+	//compare root, left, right
+	return minNode(root, 
+		findMin(root->left, d, depth + 1),
+		findMin(root->right, d, depth + 1),
 		d);
 }
 
 void copyItem(Item* dst, Item* src) {
 	dst->AffectedBaseStat = src->AffectedBaseStat;
-	dst->Duration = src->Duration;
 	dst->collected = src->collected;
-	dst->Start = src->Start;
+	dst->Duration = src->Duration;
 	dst->Hitbox = src->Hitbox;
+	dst->Modifier = src->Modifier;
+	dst->Start = src->Start;
 	dst->Type = src->Type;
 	dst->x = src->x;
 	dst->y = src->y;
-	dst->Modifier = src->Modifier;
-	printf("Copying from %p to %p\n", src, dst);
+
 }
 
 
@@ -242,22 +245,32 @@ ItemNode* deleteItemNode(ItemNode* root, CP_Vector point, unsigned int depth) {
 	if (root == NULL)
 		return NULL;
 	unsigned int cd = depth % Dimension;
+	ItemNode* temp = NULL;
 	if (point.x == root->point.x && point.y == root->point.y) {
+		//if same point, check right
 		if (root->right != NULL) {
 			ItemNode* min = findMin(root->right, cd, 0);
 			root->point = CP_Vector_Set(min->point.x, min->point.y);
+			//only copy the values
 			copyItem(root->key, min->key);
-			ItemNode* temp = deleteItemNode(root->right, min->point, depth + 1);	
+			temp = deleteItemNode(root->right, point, depth + 1);
 			root->right = temp;
 		}
+		//check left
 		else if (root->left != NULL) {
 			ItemNode* min = findMin(root->left, cd, 0);
 			root->point = CP_Vector_Set(min->point.x, min->point.y);
+			//only copy the values
 			copyItem(root->key, min->key);
-			ItemNode* temp = deleteItemNode(root->left, min->point, depth + 1);
+			temp = deleteItemNode(root->left, point, depth + 1);
 			root->right = temp;
+			if (temp->prev == root) {
+				 root->left = NULL;
+			}
 		}
+		//check is leaf
 		else {
+			//free pointers
 			free(root->key);
 			root->key = NULL;
 			free(root);
@@ -267,8 +280,8 @@ ItemNode* deleteItemNode(ItemNode* root, CP_Vector point, unsigned int depth) {
 		return root;
 	}
 
-	if (point.v[cd] < root->point.v[cd])  
-		root->left  = deleteItemNode(root->left, point, depth + 1);
+	if (point.v[cd] < root->point.v[cd])
+		root->left = deleteItemNode(root->left, point, depth + 1);
 	else
 		root->right = deleteItemNode(root->right, point, depth + 1);
 	return root;

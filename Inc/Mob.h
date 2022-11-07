@@ -58,7 +58,7 @@ extern int Mob_Img;
 // --------------------------- //
 
 //Mob Stuff
-#define NO_WAVES 1
+#define NO_WAVES 3
 #define Spawn_Timer 5
 #define Wave_Timer 20
 #define MaxMobGrowthRate 5
