@@ -33,7 +33,7 @@ void CreateBaseStat(MobStats* cStat, int type)
 		case SmallMob:
 			cStat->HP = 5;
 			cStat->DEF = 10;
-			cStat->Speed = 5;
+			cStat->Speed = 10;
 			cStat->Range = 0;
 			cStat->Dmg = 1;
 			cStat->size = 10;
@@ -117,10 +117,11 @@ void CreateMob(Mob*m, MobStats *Base, Player*player, int offSet)
 
 
 
-int WaveIDQueue[NO_WAVES];
-int MobCount[NO_WAVES], CWave = 0, MaxMob = MaxMobGrowthRate, CWaveCost = WaveCostGrowthRate;
+int WaveIDQueue[NO_WAVES], CWave, MaxMob, CWaveCost;
+int MobCount[NO_WAVES];
 WaveTrack WaveTracker[NO_WAVES];
 void CreateWaveTracker(void) {
+	CWave = 0, MaxMob = MaxMobGrowthRate, CWaveCost = WaveCostGrowthRate;
 	for (int i = 0; i < NO_WAVES; i++) {
 		WaveTracker[i] = (WaveTrack){
 			MaxMob, //Max Mob
@@ -205,7 +206,7 @@ void GenerateMobs(WaveTrack* tracker, Player* p) {
 	tracker->CurrentCount = MobC;
 }
 
-void GenerateWaves(Player*P) {
+void GenerateWaves(void) {
 	int cSec = (int)CP_System_GetSeconds();
 	if (cSec % Wave_Timer == 0)
 		MaxMob += MaxMobGrowthRate;
@@ -225,7 +226,7 @@ void GenerateWaves(Player*P) {
 					WaveTracker[i].WaveCost = CWaveCost;	//Update Value which allows spawning of mobs
 				}
 				//Generate Waves at avaiable slot 
-				GenerateMobs(&WaveTracker[i], P);
+				GenerateMobs(&WaveTracker[i], &P);
 				//printf("\n\tCreated Wave: %d\n", *WaveCount);
 				//Edit increment to spawn more mob each waves
 				WaveIDQueue[i] = CWave; //Update waves of queue at [i]
@@ -424,7 +425,7 @@ void MobTPlayerCollision(Mob* m, Player* p) {
 	
 	if (CP_Vector_Length(CP_Vector_Set(p->x-m->x, p->y-m->y)) <= p->HITBOX * 2) {
 		m->CStats.HP -= p->STATTOTAL.DAMAGE_TOTAL;
-		//p->CURRENT_HP -= m->CStats.Dmg;
+		p->CURRENT_HP -= m->CStats.Dmg;
 	}
 	if (m->CStats.HP <= 0) {
 		m->Status = 0;
@@ -434,10 +435,10 @@ void MobTPlayerCollision(Mob* m, Player* p) {
  
 
 
-void PrintWaveStats(int* CWaveCount) {
+void PrintWaveStats(void) {
 
 	//Result Print Start
-	printf("\nCurrent Wave: %d\nWave Queue: ", *CWaveCount);
+	printf("\nCurrent Wave: %d\nWave Queue: ", CWave);
 	for (int i = 0; i < NO_WAVES; i++) {
 		printf("| %d ", WaveIDQueue[i]);
 	}

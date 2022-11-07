@@ -59,8 +59,8 @@ extern int Mob_Img;
 
 //Mob Stuff
 #define NO_WAVES 3
-#define Spawn_Timer 5
-#define Wave_Timer 20
+#define Spawn_Timer 1
+#define Wave_Timer 10
 #define MaxMobGrowthRate 5
 #define MaxUpperLimit 20
 #define WaveCostGrowthRate 1
@@ -101,14 +101,14 @@ void CreateBaseStat(MobStats* ms, int type);
 void CreateMob(Mob* m, MobStats *Base, Player*player, int offSet);
 void GenerateMobs(WaveTrack* tracker, Player* player);
 //void GenerateWaves(Player* P, WaveTrack* queue, int* queueID, int WavesNo, int CostGrowth, int MaxMobGrowth,int *TotalWaveCount,  int* MobCount);
-void GenerateWaves(Player* P);
+void GenerateWaves(void);
 
 void DrawMobImage(Mob* m, Player*p);
 
 void MobTPlayerCollision(Mob* m, Player* p);
 void MobTMobCollision(Mob* mob, Player* p, WaveTrack* tracker, int const No_Waves);
 
-void PrintWaveStats(int*CWaveCount);
+void PrintWaveStats(void);
 
 void FreeMobResource();
 

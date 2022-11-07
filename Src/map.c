@@ -86,12 +86,6 @@ void map_Init(void) {
 	MobLoadImage();
 	ItemLoadImage();
 	
-	Item* one = CreateItemEffect(P.x + 100, P.y + 100);
-	Item* two = CreateItemEffect(P.x + 150, P.y + 150);
-	Item* three = CreateItemEffect(P.x + 50, P.y + 150);
-//	ItemTracker->tree = insertItemNode(ItemTracker->tree, one);
-//	ItemTracker->tree = insertItemNode(ItemTracker->tree, two);
-//	ItemTracker->tree = insertItemNode(ItemTracker->tree, three);
 	CameraDemo_Init();
 	Bulletinit();
 }
@@ -163,7 +157,9 @@ void map_Update(void) {
 		// Any objects below this function will be displaced by the camera movement
 		CameraDemo_Update(&P, &transform);
 		
-		GenerateWaves(&P);
+		GenerateWaves();
+		if((int)CP_System_GetSeconds() % 2 == 0)
+			PrintWaveStats();
 		
 		for (int w = 0; w < NO_WAVES; w++) {
 			cWave = &WaveTracker[w];
@@ -185,7 +181,6 @@ void map_Update(void) {
 					//MobTPlayerCollision(cMob, &P);
 					MobTMobCollision(cMob, &P, &WaveTracker, NO_WAVES);
 					MobTPlayerCollision(cMob, &P);
-
 					int bchecker;
 					if ((bchecker = BulletCollision(cMob->x, cMob->y, cMob->CStats.size)) >= 0 && bullet[bchecker].friendly == BULLET_PLAYER)
 					{
