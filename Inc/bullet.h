@@ -7,9 +7,11 @@
 #define BULLET_MOB 0
 #define BULLET_PLAYER 1
 #define TRUE 1
-#define FLASE 0
+#define FALSE 0
 #define PBULLET_NORMAL 1
-#define BULLET_TEST 2
+#define PBULLET_SPILT 2
+#define PBULLET_ROCKET 3
+#define PBULLET_HOMING 4 
 
 typedef struct Bullet
 {
@@ -38,20 +40,20 @@ void Bulletinit(void);
 // Sets the bullet Coords and angle (x,y,degree)
 void BulletCoor(float, float, float);
 
-// Sets the data for bullet type presets
-void BulletType(int);
+// Sets the data for bullet type presets (type, x, y, angle, friendly)
+void BulletType(int, float, float, float, int);
 
-// Calculate the direction of the bullet
+// Calculate the direction of the bullet (angle, bulletid)
 void BulletDirection(float, int);
 
-// Call to shoot bullet
+// Call to shoot bullet (playerx, playery, angle, type, bulletowner)
 void BulletShoot(float, float, float, int, int);
 
-// Draw the location of all bullets
+// Draws the location of all bullets
 void BulletDraw(void);
 
-// Check existing bullets collision against a target
-int BulletCollision(float, float, float);
+// Check existing bullets collision against a target (x, y, w, h)
+int BulletCollision(float, float, float, float);
 
 
 

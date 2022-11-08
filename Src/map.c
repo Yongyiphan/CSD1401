@@ -33,15 +33,15 @@ CP_Color grey, black, red, green, blue, white;
 CP_Matrix transform;
 
 //Starting Quantity
-int StartMobQuantity = 1000, StartItemQuantity = 1000;
+int StartMobQuantity = 10, StartItemQuantity = 1000;
 
 //Mob Stuff
-#define NO_WAVES 5
+#define NO_WAVES 1
 #define Spawn_Timer 1
 #define Wave_Timer 5
-#define MaxMobGrowthRate 550
-#define WaveCostGrowthRate 140
-#define SpawnAreaOffset 1500
+#define MaxMobGrowthRate 1
+#define WaveCostGrowthRate 50
+#define SpawnAreaOffset 1200
 
 Mob* cMob;
 int cWaveCost, MaxMob;
@@ -97,7 +97,7 @@ void map_Init(void) {
 	
 	P = (Player) { start_vector.x, start_vector.y, 90, P_stats, P_stats_mult, P_stats_total, PLAYER_HITBOX, level};
 	cWaveCost = 10;
-	MaxMob = 200;
+	MaxMob = 10;
 	cWaveCost = WaveCostGrowthRate;
 	MaxMob = MaxMobGrowthRate;
 	for (int i = 0; i < NO_WAVES; i++) {
@@ -271,7 +271,8 @@ void map_Update(void) {
 					MobTPlayerCollision(cMob, &P);
 
 					int bchecker;
-					if ((bchecker = BulletCollision(cMob->x, cMob->y, cMob->CStats.size)) >= 0 && bullet[bchecker].friendly == BULLET_PLAYER)
+					if ((bchecker = BulletCollision(cMob->x, cMob->y, cMob->w, cMob->h)) >= 0 && bullet[bchecker].friendly == BULLET_PLAYER
+						&& bullet[bchecker].exist == TRUE)
 					{
 						cMob->CStats.HP -= bullet[bchecker].damage;
 						if (cMob->CStats.HP <= 0)
@@ -292,14 +293,37 @@ void map_Update(void) {
 			}
 		}
 		//printf("MobCount: %d |\tFPS: %f \n", MobC, CP_System_GetFrameRate());
-		
+		static float bulletcd = 99; // Random big number so no cd on first shot
+		static btype = 1;
+		if (CP_Input_KeyTriggered(KEY_KP_1)) // For testing, keypad 1 to switch to spilt, if spilt then to normal
+		{
+			if (btype == PBULLET_SPILT) btype = PBULLET_NORMAL;
+			else btype = PBULLET_SPILT;
+		}
+		if (CP_Input_KeyTriggered(KEY_KP_2)) // For testing, keypad 2 to switch to rocket, if spilt then to normal
+		{
+			if (btype == PBULLET_ROCKET) btype = PBULLET_NORMAL;
+			else btype = PBULLET_ROCKET;
+		}
 		if (CP_Input_MouseDown(MOUSE_BUTTON_LEFT))
 		{
+			bulletcd += CP_System_GetDt();
+			if (bulletcd > 0.5) { // 0.5 is the cooldown timer; might need seperate timer for different bullet types
+				bulletcd = 0;
+			}
 			mousex = CP_Input_GetMouseWorldX();
 			mousey = CP_Input_GetMouseWorldY();
-			float bulletangle = 0;
-			bulletangle = point_point_angle(P.x, P.y, mousex, mousey);
-			BulletShoot(P.x, P.y, bulletangle, 1, BULLET_PLAYER);
+			if (bulletcd == 0) {
+				float bulletangle = 0;
+				bulletangle = point_point_angle(P.x, P.y, mousex, mousey);
+				BulletShoot(P.x, P.y, bulletangle, btype, BULLET_PLAYER);
+			}
+		}
+		if (CP_Input_MouseDown(MOUSE_BUTTON_LEFT) == FALSE && bulletcd != 99) // Keeps bulletcd running even when not on leftclick
+		{
+			bulletcd += CP_System_GetDt();
+			if (bulletcd > 0.5)
+				bulletcd = 99;
 		}
 		BulletDraw();
 		CP_Settings_ResetMatrix();
