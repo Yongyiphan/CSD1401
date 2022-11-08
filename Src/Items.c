@@ -22,24 +22,28 @@ void CreateItemTracker() {
 
 
 #include <stdio.h>
-Item* CreateItemEffect(float x, float y) {
+Item* CreateItemEffect(float x, float y, int exp) {
 	//Get Random chance generator
 	float RNG = CP_Random_RangeFloat(0, 1), DropChance;
 	//Get Random Type of effect
-	int noEffect = 2, EType = CP_Random_RangeInt(0, noEffect), cSec = (int)CP_System_GetSeconds();
-	EType = 0;
+	int noEffect = 2, EType = CP_Random_RangeInt(1, noEffect - 1), cSec = (int)CP_System_GetSeconds();
+	if(exp)
+		EType = 0;
 	char* StatType;
 	Item* newItem = malloc(sizeof(Item));
 	switch (EType) {
 	//char* PStats[] = {"HEALTH", "SPEED", "DAMAGE", "FIRE RATE", "BULLET SPEED"};
-	case 0: //All Base Stats Upgrade
-		//newItem->AffectedBaseStat = CP_Random_RangeInt(0, NoBaseStats);
-		newItem->AffectedBaseStat = 0;
+	case EXP:
+		newItem->AffectedBaseStat = -1;
+		newItem->Duration = -1;
+		newItem->Modifier = 5;
+		newItem->Hitbox = 25;
+		break;
+	case StatBoost: //All Base Stats Upgrade
+		newItem->AffectedBaseStat = CP_Random_RangeInt(0, NoBaseStats - 1);
 		newItem->Duration = 5; //in secs
 		newItem->Modifier = 10;
-		newItem->Hitbox = 50;
-		break;
-	case 1:
+		newItem->Hitbox = 32;
 		break;
 	case 2:
 		break;
@@ -68,15 +72,30 @@ int ScaledEXP(Player* p) {
 
 void IAffectPlayer(Item* item) {
 	int cSec = (int)CP_System_GetSeconds();
-	if (cSec - item->Start < item->Duration) {
+	if (cSec - item->Start < item->Duration || item->Duration == -1) {
 		switch (item->Type) {
-		case 0://Affect Base Stats
+		case StatBoost://Affect Base Stats
 			switch (item->AffectedBaseStat) {
 			case 0://HP
 				P.CURRENT_HP += item->Modifier;
 				break;
+			case 1://Movement Speed
+				P.STAT.SPEED += item->Modifier;
+				break;
+			case 2://Damage
+				P.STAT.DAMAGE += item->Modifier;
+				break;
+			case 3://Attack speed
+				P.STAT.ATK_SPEED += item->Modifier;
+				break;
+			case 4://Bullet Speed
+				break;
 			}
 			printf("Player %s increased by %d\n", GetBaseStats(item->AffectedBaseStat), item->Modifier);
+		case EXP:
+			P.LEVEL.P_EXP += item->Modifier;
+			level_up(&P.LEVEL.P_EXP, &P.LEVEL.EXP_REQ, &P.LEVEL.VAL);
+			break;
 		}
 	}
 }
@@ -86,6 +105,7 @@ CP_Image** ItemSprites;
 int Img_C;
 void ItemLoadImage(void) {
 	char* FilePaths[] = {
+		"./Assets/Items/GreenExp.png",
 		"./Assets/Items/Base Item Sprite.png",
 	};
 
@@ -100,15 +120,23 @@ void DrawItemImage(Item* item) {
 	if (item == NULL)
 		return;
 	//printf("Key: %p\n",item);
-	CP_Image* SImg = ItemSprites[item->Type + item->AffectedBaseStat];
-	int targetScale;
-	int IHeight = CP_Image_GetHeight(SImg), IWidth = CP_Image_GetHeight(SImg);
+	CP_Image* SImg = ItemSprites[item->Type];
+	int IHeight = CP_Image_GetHeight(SImg),IWidth;
+	int ph = IHeight * item->Hitbox / IHeight, pw = ph;
 	switch (item->Type) {
 	case StatBoost:
-		targetScale = 40;
-		CP_Image_Draw(SImg, item->x, item->y, targetScale, targetScale, IHeight, IWidth, 255);
+		IWidth = CP_Image_GetWidth(SImg) / NoBaseStats;
+		CP_Image_DrawSubImage(SImg, item->x, item->y,pw, ph,
+			IWidth * (item->AffectedBaseStat % 5) ,
+			0,
+			IWidth * (item->AffectedBaseStat % 5) + IWidth,
+			IHeight,
+			255);
 		break;
 	case EXP:
+		IWidth = CP_Image_GetWidth(SImg);
+		//Update when exp get increase as progression
+		CP_Image_DrawSubImage(SImg, item->x, item->y,pw, ph,0,0,IWidth,IHeight,	255);
 		break;
 	default:
 		break;

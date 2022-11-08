@@ -7,8 +7,9 @@
 
 #define ItemDecayTimer 10
 #define Empty -1
-#define StatBoost 0
-#define EXP 1 //random stat boost
+
+#define EXP 0
+#define StatBoost 1
 
 
 

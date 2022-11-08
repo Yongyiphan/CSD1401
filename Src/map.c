@@ -84,6 +84,8 @@ void map_Init(void) {
 	CreateItemTracker();
 	MobLoadImage();
 	ItemLoadImage();
+	//Item* one = CreateItemEffect(600, 500);
+	//ItemTracker->tree = insertItemNode(ItemTracker->tree, one);
 	
 	CameraDemo_Init();
 	Bulletinit();
@@ -180,7 +182,7 @@ void map_Update(void) {
 					if (cMob->Status == 0) {
 						cWave->CurrentCount -= 1;
 						MobCount[w] -= 1;
-						ItemTracker->tree = insertItemNode(ItemTracker->tree, CreateItemEffect(cMob->x, cMob->y));
+						ItemTracker->tree = insertItemNode(ItemTracker->tree, CreateItemEffect(cMob->x, cMob->y, 1));
 						ItemTracker->itemCount += 1;
 						continue;
 					}
