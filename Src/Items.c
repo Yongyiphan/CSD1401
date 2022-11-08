@@ -53,6 +53,7 @@ Item* CreateItemEffect(float x, float y) {
 	char* StatType;
 	Item* newItem = malloc(sizeof(Item));
 	switch (EType) {
+	//char* PStats[] = {"HEALTH", "SPEED", "DAMAGE", "FIRE RATE", "BULLET SPEED"};
 	case 0: //All Base Stats Upgrade
 		//newItem->AffectedBaseStat = CP_Random_RangeInt(0, NoBaseStats);
 		newItem->AffectedBaseStat = 0;

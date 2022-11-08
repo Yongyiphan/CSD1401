@@ -298,7 +298,12 @@ void DrawMobImage(Mob* m, Player* p) {
 			IWidth = CP_Image_GetWidth(SImg) / SizeDef;
 			m->h = IHeight * Img_Scale / IHeight, m->w = m->h;
 			FrameStep = (m->AnimationCycle / targetFPS) % SizeDef;
-			u0 = FrameStep * IWidth, v0 = 0, u1 = FrameStep * IWidth + IWidth, v1 = IHeight;
+			u0 = FrameStep * IWidth;
+			v0 = 0;
+			u1 = FrameStep * IWidth + IWidth;
+			v1 = IHeight;
+
+
 			CP_Image_DrawSubImage(SImg, m->x, m->y,m->w, m->h, u0, v0, u1, v1, alpha);
 
 			break;
