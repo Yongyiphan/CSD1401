@@ -46,6 +46,7 @@ typedef struct WaveTracker {
 	int WaveCost;
 	int arrSize;
 	int spawnOffset;
+	int Start;
 	Mob** arr;
 }WaveTrack;
 
@@ -58,11 +59,11 @@ extern int Mob_Img;
 // --------------------------- //
 
 //Mob Stuff
-#define NO_WAVES 3
-#define Spawn_Timer 5
-#define Wave_Timer 10
+#define NO_WAVES 4
+#define Spawn_Timer 2
+#define Wave_Timer 5
 #define MaxMobGrowthRate 15
-#define MaxUpperLimit 20
+#define MaxUpperLimit 100
 #define WaveCostGrowthRate 3
 #define SpawnAreaOffset 500
 #define StartMobQuantity 150
@@ -70,6 +71,9 @@ extern int Mob_Img;
 extern int WaveIDQueue[NO_WAVES], MobCount[NO_WAVES], CWave, CWaveCost, CMaxMob;
 extern WaveTrack WaveTracker[NO_WAVES];
 extern int MobCycleTimer;
+
+#define SWAP(one, two) (one ^= two ^= one ^=two)
+
 /*
 Mob C Flow
 : Generate N amt of mobs at random locations

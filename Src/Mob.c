@@ -116,7 +116,7 @@ void CreateMob(Mob*m, MobStats *Base, Player*player, int offSet)
 
 
 
-
+int MobCycleTimer = 0;
 int WaveIDQueue[NO_WAVES], CWave, MaxMob, CWaveCost;
 int MobCount[NO_WAVES];
 WaveTrack WaveTracker[NO_WAVES];
@@ -131,6 +131,7 @@ void CreateWaveTracker(void) {
 			0, //Wave Cost
 			StartMobQuantity, //Array Size 
 			SpawnAreaOffset, //Spawn offset
+			0, //Start Timer;
 			malloc(sizeof(Mob*) * StartMobQuantity) //, //Arr
 		};
 		InitWavesArr(&WaveTracker[i], 0);
@@ -170,8 +171,8 @@ void GenerateMobs(WaveTrack* tracker, Player* p) {
 		if (MobC == tracker->MaxMob) {
 			break;
 		}
-		randM = CP_Random_RangeInt(0, 1);
-		//randM = 0;
+		//randM = CP_Random_RangeInt(0, 1);
+		randM = 0;
 		randMCost = MobCosts[randM];		//Expand array
 		if (MobC >= tracker->arrSize) {
 			int nQ = tracker->arrSize * 2;
@@ -205,10 +206,9 @@ void GenerateMobs(WaveTrack* tracker, Player* p) {
 	tracker->CurrentCount = MobC;
 }
 
-int MobCycleTimer;
 void GenerateWaves(void) {
 	if (MobCycleTimer != (int)CP_System_GetSeconds()) {
-		MobCycleTimer += 1;
+		MobCycleTimer = (int)CP_System_GetSeconds() - MobCycleTimer > 1 ? (int)CP_System_GetSeconds() : MobCycleTimer + 1;
 
 		if (MobCycleTimer % Wave_Timer == 0)
 			MaxMob += MaxMobGrowthRate;
@@ -230,17 +230,17 @@ void GenerateWaves(void) {
 					}
 					//Generate Waves at avaiable slot 
 					GenerateMobs(&WaveTracker[i], &P);
-					//printf("\n\tCreated Wave: %d\n", *WaveCount);
 					//Edit increment to spawn more mob each waves
 					WaveIDQueue[i] = CWave; //Update waves of queue at [i]
 					MobCount[i] = WaveTracker[i].MobCount;
-					//PrintWaveStats();
+					PrintWaveStats();
+					printf("\t\tTimer: %d", MobCycleTimer);
 					break;
 				}
 			}
 		}
 	}
-	printf("%f\n", CP_System_GetSeconds());
+//	printf("%f\n", CP_System_GetSeconds());
 }
 
 
@@ -276,10 +276,10 @@ void MobLoadImage(void) {
 
 }
 void DrawMobImage(Mob* m, Player* p) {
-
-	int IHeight, IWidth, alpha = 255;
-	int SizeDef = 5, StartImgI = m->Title * 2;
-	int FrameStep = 0, targetFPS = 6;
+	
+	int IHeight, IWidth, alpha = 255,original_Size, scale, leftOS = 0, rightOS = 0, topOS = 0, btmOS = 0;
+	int SizeDef = 5, StartImgI = m->Title * 2, flip = 0;
+	int FrameStep = 0, targetFPS = 6, targetSize = 80;
 	m->AnimationCycle += 1;
 	int u0 = 0, v0 = 0, u1 = 0, v1 = 0;
 	/*
@@ -293,31 +293,63 @@ void DrawMobImage(Mob* m, Player* p) {
 	}
 	if (m->x > p->x) {
 		StartImgI += 1;
+		flip = 1;
 	}
 	CP_Image* SImg = MobSprites[StartImgI];
 	IHeight = CP_Image_GetHeight(SImg);
-
+	int h, w;
+	float t;
 	switch (m->Title) {
 		case SmallMob:
+			original_Size = 32, targetSize = 50;
 			SizeDef = 5, targetFPS = 6;
+			scale = IHeight / original_Size;
 			IWidth = CP_Image_GetWidth(SImg) / SizeDef;
-			m->h = IHeight * Img_Scale / IHeight, m->w = m->h;
-			FrameStep = (m->AnimationCycle / targetFPS) % SizeDef;
-			u0 = FrameStep * IWidth;
-			v0 = 0;
-			u1 = FrameStep * IWidth + IWidth;
-			v1 = IHeight;
-			CP_Image_DrawSubImage(SImg, m->x, m->y,m->w, m->h, u0, v0, u1, v1, alpha);
 
+			leftOS = scale * 9, rightOS = scale * 6;
+			if (flip == 1) SWAP(leftOS, rightOS);
+			topOS = scale * 7, btmOS = scale * 5;
+			
+			if (m->h == 0 && m->w == 0) {
+				h = original_Size * scale - topOS - btmOS;
+				w = original_Size * scale - leftOS - rightOS;
+				t = (float) h/ (float)w;
+				m->h = targetSize;
+				m->w = targetSize * t;
+			}
+
+			FrameStep = (m->AnimationCycle / targetFPS) % SizeDef;
+			
+			CP_Image_DrawSubImage(SImg, m->x, m->y,m->w, m->h, 
+				FrameStep * IWidth + leftOS,
+				topOS,
+				FrameStep * IWidth + IWidth - rightOS,
+				IHeight - btmOS,		
+				alpha);
 			break;
 		case MediumMob:
+			original_Size = 80, targetSize = 80;
 			SizeDef = 2, targetFPS = 4;
+			scale = IHeight / original_Size;
 			IWidth = CP_Image_GetWidth(SImg) / SizeDef;
-			m->h = IHeight * Img_Scale / IHeight, m->w = m->h;
 
+			leftOS = scale * 19, rightOS = scale * 18;
+			if (flip == 1) SWAP(leftOS, rightOS);
+			topOS = scale * 9, btmOS = scale * 7;
+			if (m->h == 0 && m->w == 0) {
+				h = original_Size * scale - topOS - btmOS;
+				w = original_Size * scale - leftOS - rightOS;
+				t = (float) h/ (float)w;
+				m->h = targetSize;
+				m->w = targetSize * t;
+			}
 			FrameStep = (m->AnimationCycle / targetFPS) % SizeDef;
-			u0 = FrameStep * IWidth, v0 = 0, u1 = FrameStep * IWidth + IWidth, v1 = IHeight;
-			CP_Image_DrawSubImage(SImg, m->x, m->y,m->w,m->h, u0, v0, u1, v1, alpha);
+			CP_Image_DrawSubImage(SImg, m->x, m->y, m->w, m->h,
+				FrameStep * IWidth + leftOS,
+				topOS,
+				FrameStep * IWidth + IWidth - rightOS,
+				IHeight - btmOS,		
+				alpha);
 			break;
 		default:
 			break;
