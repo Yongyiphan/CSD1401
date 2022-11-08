@@ -40,8 +40,8 @@ void BulletType(int type) //Sets type of bullet and stats
 	if (type == PBULLET_NORMAL) // Adjust value of 1 into variable after upgrades are made
 	{
 		bullet[bulletcounter].size = 10 * 1;
-		bullet[bulletcounter].speed = 10 * 1;
-		bullet[bulletcounter].maxdistance = 100 * 1;
+		bullet[bulletcounter].speed = 30 * 1;
+		bullet[bulletcounter].maxdistance = 1000 * 1;
 		bullet[bulletcounter].damage = 10 * 1;
 	}
 }

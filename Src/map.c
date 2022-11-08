@@ -14,8 +14,8 @@
 #define MAP_SIZEY 900
 #define PLAYER_HP 100.0f
 #define PLAYER_SPEED 300.0f
-#define PLAYER_DAMAGE 1.0f
-#define ATK_SPEED 2.0f
+#define PLAYER_DAMAGE 10.0f
+#define ATK_SPEED 5.0f
 #define PLAYER_DEFENSE 10
 #define PLAYER_HITBOX 50
 
