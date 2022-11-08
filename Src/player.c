@@ -5,25 +5,14 @@
 #include "player.h"
 #include "game.h"
 #include "utils.h"
+#include "Mob.h"
+#include "Items.h"
 
 
 // Player hitbox is a circle
 #define PLAYER_DIAMETER 50.0f
 #define PLAYER_SPEED 20
 #define _countof(array) (sizeof(array) / sizeof(array[0]))
-
-
-//int collide_bullet(Player p, Bullet bullet) {
-//	if (CP_Math_Distance(p.x, p.y, bullet.x, bullet.y) < p.HITBOX / 2 + bullet.maxdistance / 2) {
-//		p.CURRENT_HP -= 5;
-//		return 1;
-//	}
-//	return 0;
-//}
-
-//void shoot_bullet(Bullet bullet) {
-//	
-//}
 
 /*
 Shows healthbar of the player. Creates 2 rectangles, one specifying current HP, and the other max HP.
@@ -135,6 +124,8 @@ void death_screen(float totalElapsedTime) {
 
 	if (CP_Input_MouseClicked()) {
 		if (IsAreaClicked(middle.x, middle.y, width, height, CP_Input_GetMouseX(), CP_Input_GetMouseY())) {
+			FreeMobResource();
+			FreeItemResource();
 			map_Init();
 		}
 		if (IsAreaClicked(middle.x, middle.y + height + padding, width, height, CP_Input_GetMouseX(), CP_Input_GetMouseY())) {

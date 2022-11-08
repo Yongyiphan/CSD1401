@@ -14,33 +14,11 @@
 ItemTrack* ItemTracker;
 void CreateItemTracker() {
     ItemTracker = malloc(sizeof(ItemTrack*));
-    //ItemTracker->arrSize = StartItemQuantity;
-    //ItemTracker->arr = malloc(sizeof(Item*) * StartItemQuantity);
-    //InitItemArr(ItemTracker->arr);
     ItemTracker->tree = NULL;
     ItemTracker->itemCount - 0;
 
 }
 
-void InitItemArr(ItemTrack *tracker) {
-
-//	for (int w = 0; w < tracker->arrSize;w++) {
-//		//Allocate memory to it
-//		tracker->arr[w] = malloc(sizeof(Item));
-//		//Fill each mob pointers with data
-//
-//		Item* cI = tracker->arr[w];
-//		cI->Hitbox = 0;
-//		cI->Start = w;
-//		cI->Duration = 0;
-//		cI->Type = -1;
-//		cI->Modifier = 0;
-//		cI->x = 0;
-//		cI->y = 0;
-//
-//	}
-
-}
 
 
 #include <stdio.h>
@@ -70,7 +48,6 @@ Item* CreateItemEffect(float x, float y) {
 	newItem->Type = EType;
 	newItem->x = x;
 	newItem->y = y;
-	newItem->collected = -1;
 	return newItem;
 };
 
@@ -89,20 +66,19 @@ int ScaledEXP(Player* p) {
 }
 
 
-void IAffectPlayer(Item* item, Player* p) {
+void IAffectPlayer(Item* item) {
 	int cSec = (int)CP_System_GetSeconds();
 	if (cSec - item->Start < item->Duration) {
 		switch (item->Type) {
 		case 0://Affect Base Stats
 			switch (item->AffectedBaseStat) {
-			case 0:
-				p->CURRENT_HP += item->Modifier;
+			case 0://HP
+				P.CURRENT_HP += item->Modifier;
 				break;
 			}
 			printf("Player %s increased by %d\n", GetBaseStats(item->AffectedBaseStat), item->Modifier);
 		}
 	}
-	item->collected = 1;
 }
 
 
@@ -110,7 +86,7 @@ CP_Image** ItemSprites;
 int Img_C;
 void ItemLoadImage(void) {
 	char* FilePaths[] = {
-		"./Assets/Items/DmgUp.png",
+		"./Assets/Items/Base Item Sprite.png",
 	};
 
 	Img_C = (sizeof(FilePaths) / sizeof(FilePaths[0]));
@@ -160,6 +136,7 @@ void ItemPlayerCollision(void) {
 		CP_Graphics_DrawLine(target.x, target.y, nearest->point.x, nearest->point.y);
 	
 		if (dist1 < P.HITBOX) {
+			IAffectPlayer(nearest->key);
 			ItemTracker->tree = deleteItemNode(ItemTracker->tree, nearest->point, 0);
 			collected -= 1;
 			//printf("Here\n");
@@ -167,6 +144,19 @@ void ItemPlayerCollision(void) {
 		//printf("Dist %f | From Player: %d\n", dist1, p->HITBOX);
 	}
 }
+
+void copyItem(Item* dst, Item* src) {
+	dst->AffectedBaseStat = src->AffectedBaseStat;
+	dst->Duration = src->Duration;
+	dst->Hitbox = src->Hitbox;
+	dst->Modifier = src->Modifier;
+	dst->Start = src->Start;
+	dst->Type = src->Type;
+	dst->x = src->x;
+	dst->y = src->y;
+
+}
+
 
 ItemNode* newNode(Item *item) {
 	ItemNode* result = malloc(sizeof(ItemNode));
@@ -178,9 +168,6 @@ ItemNode* newNode(Item *item) {
 	return result;
 }
 
-int arePointsSame(CP_Vector p1, CP_Vector p2) {
-	return p1.x == p2.x && p1.y == p2.y ? 1 : 0;
-}
 
 
 ItemNode* insertItemNode(ItemNode* root, Item *item) {
@@ -228,18 +215,6 @@ ItemNode* findMin(ItemNode* root, int d, unsigned int depth) {
 		d);
 }
 
-void copyItem(Item* dst, Item* src) {
-	dst->AffectedBaseStat = src->AffectedBaseStat;
-	dst->collected = src->collected;
-	dst->Duration = src->Duration;
-	dst->Hitbox = src->Hitbox;
-	dst->Modifier = src->Modifier;
-	dst->Start = src->Start;
-	dst->Type = src->Type;
-	dst->x = src->x;
-	dst->y = src->y;
-
-}
 
 
 ItemNode* deleteItemNode(ItemNode* root, CP_Vector point, unsigned int depth) {
@@ -347,7 +322,7 @@ void FreeItemResource(void) {
 		free(ItemSprites[i]);
 	}
 	free(ItemSprites);
-    freeTree(ItemTracker->tree);
+    //freeTree(ItemTracker->tree);
 }
 
 

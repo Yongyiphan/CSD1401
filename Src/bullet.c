@@ -41,7 +41,7 @@ void BulletType(int type) //Sets type of bullet and stats
 	{
 		bullet[bulletcounter].size = 10 * 1;
 		bullet[bulletcounter].speed = 10 * 1;
-		bullet[bulletcounter].maxdistance = 500 * 1;
+		bullet[bulletcounter].maxdistance = 100 * 1;
 		bullet[bulletcounter].damage = 10 * 1;
 	}
 }
@@ -52,7 +52,8 @@ void BulletShoot(float coordx, float coordy, float angle, int type, int friendly
 	BulletType(type);
 	BulletCoor(coordx, coordy, angle);
 	bullet[bulletcounter].exist = TRUE;
-	if (friendly == BULLET_MOB) bullet[bulletcounter].friendly = BULLET_MOB; else bullet[bulletcounter].friendly = BULLET_PLAYER;
+	if (friendly == BULLET_MOB) bullet[bulletcounter].friendly = BULLET_MOB; 
+	else bullet[bulletcounter].friendly = BULLET_PLAYER;
 	if (bulletcounter < BULLET_CAP) //Adjustments to bullet data should be before this to prevent buffer overrun
 		bulletcounter++;
 	else bulletcounter = 0;

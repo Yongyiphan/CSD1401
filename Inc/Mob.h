@@ -59,16 +59,17 @@ extern int Mob_Img;
 
 //Mob Stuff
 #define NO_WAVES 3
-#define Spawn_Timer 1
+#define Spawn_Timer 5
 #define Wave_Timer 10
-#define MaxMobGrowthRate 5
+#define MaxMobGrowthRate 15
 #define MaxUpperLimit 20
-#define WaveCostGrowthRate 1
+#define WaveCostGrowthRate 3
 #define SpawnAreaOffset 500
 #define StartMobQuantity 150
 
 extern int WaveIDQueue[NO_WAVES], MobCount[NO_WAVES], CWave, CWaveCost, CMaxMob;
 extern WaveTrack WaveTracker[NO_WAVES];
+extern int MobCycleTimer;
 /*
 Mob C Flow
 : Generate N amt of mobs at random locations
@@ -106,11 +107,11 @@ void GenerateWaves(void);
 void DrawMobImage(Mob* m, Player*p);
 
 void MobTPlayerCollision(Mob* m, Player* p);
-void MobTMobCollision(Mob* mob, Player* p, WaveTrack* tracker, int const No_Waves);
+void MobTMobCollision(Mob* mob);
 
 void PrintWaveStats(void);
 
-void FreeMobResource();
+void FreeMobResource(void);
 
 float squareDist(float one, float two);
 

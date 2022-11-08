@@ -39,7 +39,6 @@ int totalWave = 0;
 float mousex, mousey;
 int isPaused, isMenu, isDead;
 
-
 //Images
 CP_Image background = NULL;
 
@@ -119,28 +118,23 @@ void map_Update(void) {
 	}
 	// if game is not paused
 	else {
-		
-		
-		if (CP_Input_KeyTriggered(KEY_ESCAPE))
+		if (CP_Input_KeyTriggered(KEY_ESCAPE)) {
 			isPaused = 1;
-
+		}
 		// Increase speed of the player
-		if (CP_Input_KeyTriggered(KEY_H)) {
+		if (CP_Input_KeyTriggered(KEY_H)){
 			P.STATMULT.SPEED_MULT *= 1.1f;
 		}
-
 		// Open up the Upgrade Screen
 		if (CP_Input_KeyTriggered(KEY_U) && isMenu == 0) {
 			isMenu = 1;
 			isPaused = 1;
 		}
-
 		// Testing for leveling up
 		if (CP_Input_KeyDown(KEY_L)) {
 			P.LEVEL.P_EXP += 5;
 			level_up(&P.LEVEL.P_EXP, &P.LEVEL.EXP_REQ, &P.LEVEL.VAL);
 		}
-
 		// Manually control the HP of the player for testing
 		if (CP_Input_KeyDown(KEY_Q)) {
 			P.CURRENT_HP -= 4;
@@ -148,24 +142,18 @@ void map_Update(void) {
 		else if (CP_Input_KeyDown(KEY_E)) {
 			P.CURRENT_HP += 4;
 		}
-
 		if (P.CURRENT_HP <= 0) {
 			isDead = 1;
 			isPaused = 1;
 		}
-
 		// Any objects below this function will be displaced by the camera movement
 		CameraDemo_Update(&P, &transform);
-		
 		GenerateWaves();
-		if((int)CP_System_GetSeconds() % 2 == 0)
-			PrintWaveStats();
-		
 		for (int w = 0; w < NO_WAVES; w++) {
-			cWave = &WaveTracker[w];
 			if (WaveIDQueue[w] == -1) {
 				continue;
 			}
+			cWave = &WaveTracker[w];
 			if (cWave->CurrentCount == 0) {
 				//if all mobs are dead
 				//return index to wave queue
@@ -179,7 +167,7 @@ void map_Update(void) {
 				//Dead = 0, Alive = 1
 				if (cMob->Status == 1) {
 					//MobTPlayerCollision(cMob, &P);
-					MobTMobCollision(cMob, &P, &WaveTracker, NO_WAVES);
+					MobTMobCollision(cMob);
 					MobTPlayerCollision(cMob, &P);
 					int bchecker;
 					if ((bchecker = BulletCollision(cMob->x, cMob->y, cMob->CStats.size)) >= 0 && bullet[bchecker].friendly == BULLET_PLAYER)
@@ -204,8 +192,10 @@ void map_Update(void) {
 
 			}
 		}
-		ItemPlayerCollision();
-		DrawItemTree(ItemTracker->tree);
+		if (ItemTracker->tree != NULL) {
+			ItemPlayerCollision();
+			DrawItemTree(ItemTracker->tree);
+		}
 	
 		if (CP_Input_MouseDown(MOUSE_BUTTON_LEFT))
 		{

@@ -29,7 +29,6 @@ typedef struct ItemStat {
 	double x;
 	double y;
 	//-1 = Collected, 1 = Not collected;
-	int collected;
 }Item;
 
 static const Item EmptyItem;
@@ -78,22 +77,20 @@ void ItemLoadImage(void);
 void DrawItemImage(Item* item);
 
 void CreateItemTracker(void);
-void InitItemArr(ItemTrack* tracker);
 
 Item* CreateItemEffect(float x, float y);
-void IAffectPlayer(Item* i, Player* p);
+void IAffectPlayer(Item* i);
 
 
 void DrawItemTree(ItemNode* node);
 
-void FreeItemResource(void);
+void ItemPlayerCollision(void);
 
+void copyItem(Item* dst, Item* src);
 
 
 //KD -Tree
 #define Dimension 2
-int arePointsSame(CP_Vector p1, CP_Vector p2);
-ItemNode* closest(ItemNode* n0, ItemNode* n1, CP_Vector point);
 ItemNode* newNode(Item *item);
 ItemNode* insertItemNode(ItemNode* root, Item *item);
 ItemNode* insertItemRec(ItemNode* prev, ItemNode* root, Item *item, unsigned depth);
@@ -101,12 +98,12 @@ ItemNode* minNode(ItemNode* root, ItemNode* left, ItemNode* right, int d);
 ItemNode* findMin(ItemNode* root, int d, unsigned int depth);
 ItemNode* deleteItemNode(ItemNode* root, CP_Vector point, unsigned int depth);
 
-void copyItem(Item* dst, Item* src);
 //returns the searched item node
 ItemNode* nearestNeighbour(ItemNode* root, CP_Vector point, unsigned int depth);
+ItemNode* closest(ItemNode* n0, ItemNode* n1, CP_Vector point);
 
-void ItemPlayerCollision(void);
 
+void FreeItemResource(void);
 void freeTree(ItemNode* root);
 
 
