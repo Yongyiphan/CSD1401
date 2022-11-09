@@ -4,6 +4,8 @@
 
 #include "bullet.h"
 
+extern int NoBaseStats;
+
 typedef struct PlayerStats {
 	float MAX_HP;
 	float SPEED;
@@ -48,9 +50,9 @@ typedef struct Player{
 
 
 //int collide_mob(Player, Mob);
-int collide_bullet(Player, Bullet);
+//int collide_bullet(Player, Bullet);
 
-void shoot_bullet(Bullet);
+//void shoot_bullet(Bullet);
 
 /*
 Shows healthbar of the player. Creates 2 rectangles, one specifying current HP, and the other max HP.
@@ -76,7 +78,7 @@ When "exp" reaches the value of "exp_req":
 */
 void level_up(int *exp, int *exp_req, int *level);
 
-
+char* GetBaseStats(int type);
 
 
 #endif

@@ -1,3 +1,4 @@
+#pragma once
 #include "cprocessing.h"
 #include "utils.h"
 #include "mainmenu.h"
@@ -36,7 +37,8 @@ void upgrades_Update(void)
 		CP_Graphics_DrawRectAdvanced((width / 6) * (i+1), height / 3, width / 8, height / 8, 0, 15);
 	}
 	//draw text on boxes
-	char* text[] = { "HEALTH", "SPEED", "DAMAGE", "FIRE RATE", "BULLET SPEED" };
+	//char* text[] = { "HEALTH", "SPEED", "DAMAGE", "FIRE RATE", "BULLET SPEED" };
+	char* text = GetBaseStats(-1); //from player.c
 	CP_Settings_Fill(white);
 	CP_Settings_TextSize(30);
 	for (int i = 0; i < 5; i++)
