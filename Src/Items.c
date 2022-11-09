@@ -91,10 +91,11 @@ void IAffectPlayer(Item* item) {
 			case 4://Bullet Speed
 				break;
 			}
-			printf("Player %s increased by %d\n", GetBaseStats(item->AffectedBaseStat), item->Modifier);
+			//printf("Player %s increased by %d\n", GetBaseStats(item->AffectedBaseStat), item->Modifier);
 		case EXP:
 			P.LEVEL.P_EXP += item->Modifier;
 			level_up(&P.LEVEL.P_EXP, &P.LEVEL.EXP_REQ, &P.LEVEL.VAL);
+			//printf("Item x: %f | y: %f\n", item->x, item->y);
 			break;
 		}
 	}
@@ -152,24 +153,40 @@ void DrawItemTree(ItemNode* node) {
 	DrawItemTree(node->left);
 	DrawItemTree(node->right);
 }
+#define COUNT 10
+void PrintTree(ItemNode* root, int space, int depth) {
+	if (root == NULL)
+		return;
+	space += COUNT;
+	char d = depth % Dimension == 0 ? 'X' : 'Y';
+	PrintTree(root->right, space, depth + 1);
+	printf("\n");
+	for (int i = COUNT; i < space; i++)
+        printf(" ");
+    printf("L(%c): %d | X: %4.3f | Y: %4.3f\n",d,depth, root->key->x, root->key->y);
+ 
+	PrintTree(root->left, space, depth + 1);
+}
 
 #include <math.h>
+#define ItemPruneLimit 50
 void ItemPlayerCollision(void) {
 	if (ItemTracker->tree != NULL) {
 		CP_Vector target = CP_Vector_Set(P.x, P.y);
-		int collected = 0;
-		ItemNode* nearest = nearestNeighbour(ItemTracker->tree, target, 0);
-		float dist1 = sqrt(squareDist(nearest->point.x - target.x, nearest->point.y - target.y));
+		int collected = 0, retry = 5;
 
+		ItemNode * nearest = nearestNeighbour(ItemTracker->tree, target, 0);
+		float dist1 = CP_Math_Distance(target.x, target.y, nearest->point.x, nearest->point.y);
 		CP_Graphics_DrawLine(target.x, target.y, nearest->point.x, nearest->point.y);
-	
+			
 		if (dist1 < P.HITBOX) {
 			IAffectPlayer(nearest->key);
 			ItemTracker->tree = deleteItemNode(ItemTracker->tree, nearest->point, 0);
 			collected -= 1;
-			//printf("Here\n");
 		}
-		//printf("Dist %f | From Player: %d\n", dist1, p->HITBOX);
+		if (ItemTracker->itemCount > ItemPruneLimit) {
+			//prune tree;
+		}
 	}
 }
 
@@ -202,15 +219,19 @@ ItemNode* insertItemNode(ItemNode* root, Item *item) {
 	return insertItemRec(NULL, root, item, 0);
 }
 
+int insertSucess = 0;
 ItemNode* insertItemRec(ItemNode* prev, ItemNode* root, Item* item, unsigned depth) {
 	if (root == NULL) {
 		ItemNode* n = newNode(item);
 		n->prev = prev;
+		ItemTracker->itemCount++;
 		return n;
 	}
 	unsigned cd = depth % Dimension;
 	CP_Vector point = CP_Vector_Set(item->x, item->y);
 	//If root->prev == NULL, root == head
+	if (CP_Math_Distance(point.x, point.y, root->point.x, root->point.y) <= item->Hitbox)
+		return root;
 	if (point.v[cd] < root->point.v[cd]) 
 		root->left = insertItemRec(root, root->left, item, depth + 1);
 	else
@@ -284,9 +305,9 @@ ItemNode* deleteItemNode(ItemNode* root, CP_Vector point, unsigned int depth) {
 		return root;
 	}
 
-	if (point.v[cd] < root->point.v[cd])
-		root->left = deleteItemNode(root->left, point, depth + 1);
-	else
+	//if (point.v[cd] < root->point.v[cd])
+		root->left =  deleteItemNode(root->left, point, depth + 1);
+//	else
 		root->right = deleteItemNode(root->right, point, depth + 1);
 	return root;
 }
@@ -315,7 +336,7 @@ ItemNode* nearestNeighbour(ItemNode* root, CP_Vector point, unsigned int depth) 
 
 	float r = squareDist(best->point.x - point.x, best->point.y - point.y);
 	float rprime = point.v[cd] - root->point.v[cd];
-	if (r >= squareDist(rprime, 0)) {
+	if (r > squareDist(rprime, 0)) {
 		temp = nearestNeighbour(otherbranch, point, depth + 1);
 		best = closest(temp, best, point);
 	}
@@ -332,10 +353,32 @@ ItemNode* closest(ItemNode* n0, ItemNode* n1, CP_Vector point) {
 		return n0;
 	float d0 = squareDist(point.x - n0->point.x, point.y - n0->point.y);
 	float d1 = squareDist(point.x - n1->point.x, point.y - n1->point.y);
+	
 	return d0 < d1 ? n0 : n1;
 }
 
 
+#define DecayDistance
+#define DecayTimer
+ItemNode* PruneTree(ItemNode*root) {
+	if (root == NULL)
+		return NULL;
+
+}
+
+Item* CustomXYMerge(Item arr[], int start, int end, unsigned int depth) {
+	
+	if ((end - start) > 1) {
+		CustomXYMerge(arr, start, end / 2, depth + 1);
+		CustomXYMerge(arr, end/2)
+	}
+
+
+}
+
+Item* MergeSort(Item arr[], int l,int m, int r, int cd) {
+	
+}
 
 void FreeItemResource(void) {
 

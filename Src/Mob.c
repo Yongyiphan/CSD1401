@@ -218,7 +218,6 @@ void GenerateWaves(void) {
 				//At default WaveIDQueue = {-1,-1,-1,-1}
 				//Whereby each "-1" == to available slot to generate waves
 				if (WaveIDQueue[i] == -1) {
-					printf("Here\n");
 					++CWave; //Increment WaveCount
 					if (MaxMob >= (MaxUpperLimit / NO_WAVES)) {
 						WaveTracker[i].MaxMob = (MaxUpperLimit / NO_WAVES);
@@ -233,8 +232,8 @@ void GenerateWaves(void) {
 					//Edit increment to spawn more mob each waves
 					WaveIDQueue[i] = CWave; //Update waves of queue at [i]
 					MobCount[i] = WaveTracker[i].MobCount;
-					PrintWaveStats();
-					printf("\t\tTimer: %d", MobCycleTimer);
+					//PrintWaveStats();
+					//printf("\t\tTimer: %d", MobCycleTimer);
 					break;
 				}
 			}

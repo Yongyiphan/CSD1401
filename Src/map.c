@@ -126,6 +126,10 @@ void map_Update(void) {
 		// Increase speed of the player
 		if (CP_Input_KeyTriggered(KEY_H)){
 			P.STATMULT.SPEED_MULT *= 1.1f;
+			P.HITBOX += 10;
+		}
+		if (CP_Input_KeyTriggered(KEY_M)){
+			P.HITBOX += 10;
 		}
 		// Open up the Upgrade Screen
 		if (CP_Input_KeyTriggered(KEY_U) && isMenu == 0) {
@@ -147,6 +151,10 @@ void map_Update(void) {
 		if (P.CURRENT_HP <= 0) {
 			isDead = 1;
 			isPaused = 1;
+		}
+		if (CP_Input_KeyDown(KEY_P)) {
+			//PrintTree(ItemTracker->tree, 0, 0);
+			//printf("Player X:%4.2f | Y:%4.2f\n", P.x, P.y);
 		}
 		// Any objects below this function will be displaced by the camera movement
 		CameraDemo_Update(&P, &transform);
@@ -183,7 +191,6 @@ void map_Update(void) {
 						cWave->CurrentCount -= 1;
 						MobCount[w] -= 1;
 						ItemTracker->tree = insertItemNode(ItemTracker->tree, CreateItemEffect(cMob->x, cMob->y, 1));
-						ItemTracker->itemCount += 1;
 						continue;
 					}
 					//cMob->h == 0 means haven drawn before. / assigned image to it yet

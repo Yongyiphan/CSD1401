@@ -79,11 +79,12 @@ void DrawItemImage(Item* item);
 
 void CreateItemTracker(void);
 
-Item* CreateItemEffect(float x, float y);
+Item* CreateItemEffect(float x, float y, int exp);
 void IAffectPlayer(Item* i);
 
 
 void DrawItemTree(ItemNode* node);
+void PrintTree(ItemNode* root, int space, int depth);
 
 void ItemPlayerCollision(void);
 
@@ -93,6 +94,7 @@ void copyItem(Item* dst, Item* src);
 //KD -Tree
 #define Dimension 2
 ItemNode* newNode(Item *item);
+extern int insertSuccess;
 ItemNode* insertItemNode(ItemNode* root, Item *item);
 ItemNode* insertItemRec(ItemNode* prev, ItemNode* root, Item *item, unsigned depth);
 ItemNode* minNode(ItemNode* root, ItemNode* left, ItemNode* right, int d);
