@@ -9,7 +9,7 @@
 #include "bullet.h"
 #include "Items.h"
 
-
+#define _COUNT(x) (sizeof(x) / sizeof(x)[0])
 #define MAP_SIZEX 1300
 #define MAP_SIZEY 900
 #define PLAYER_HP 100.0f
@@ -18,6 +18,7 @@
 #define ATK_SPEED 5.0f
 #define PLAYER_DEFENSE 10
 #define PLAYER_HITBOX 50
+#define PROJECTILE_SPEED 200
 
 int wHeight, wWidth;
 
@@ -49,10 +50,12 @@ int currentSec = 0;
 int WaveIDQueue[NO_WAVES];
 WaveTrack WaveTracker[NO_WAVES], *cWave; // pause state for the game when paused.
 
+//Bullet bulletList[500];
+CP_Vector mouseCoord;
 
 //Might be useful variable for Waves Tracking
 int totalWave = 0, MobCount[NO_WAVES];
-float mousex, mousey;
+//float mousex, mousey;
 int isPaused, isMenu, isDead;
 
 //Images
@@ -64,18 +67,10 @@ void map_Init(void) {
 	wHeight = CP_System_GetWindowHeight() / 2;
 	wWidth = CP_System_GetWindowWidth() / 2;
 	//CP_System_Fullscreen();
-	isPaused = 0;
-	isMenu = 0;
-	isDead = 0;
+	isPaused = 0; isMenu = 0; isDead = 0;
 	// initialize the timer to start from 0 
 	timer(1, isPaused);
-
-
-	grey = CP_Color_Create(111, 111, 111, 255);
-	white = CP_Color_Create(255, 255, 255, 255);
-	red = CP_Color_Create(255, 0, 0, 255);
-	green = CP_Color_Create(0, 255, 0, 255);
-	blue = CP_Color_Create(0, 0, 255, 255);
+	mouseCoord = CP_Vector_Set(CP_Input_GetMouseX(), CP_Input_GetMouseY());
 
 	background = CP_Image_Load("./Assets/background.png");
 
@@ -90,9 +85,9 @@ void map_Init(void) {
 	P_stats_total's MAX_HP_TOTAL = MAX_HP * MAX_HP_MULT
 								 = 100 * 1.2 = 120
 	*/
-	P_stats = (Stats){ PLAYER_HP, PLAYER_SPEED, PLAYER_DAMAGE, ATK_SPEED, PLAYER_DEFENSE };
-	P_stats_mult = (StatsMult){ 1, 1, 1, 1, 1 };
-	P_stats_total = (StatsTotal){ PLAYER_HP, PLAYER_SPEED, PLAYER_DAMAGE, ATK_SPEED, PLAYER_DEFENSE };
+	P_stats = (Stats){ PLAYER_HP, PLAYER_SPEED, PLAYER_DAMAGE, ATK_SPEED, PLAYER_DEFENSE, PROJECTILE_SPEED };
+	P_stats_mult = (StatsMult){ 1, 1, 1, 1, 1, 1 };
+	P_stats_total = (StatsTotal){ PLAYER_HP, PLAYER_SPEED, PLAYER_DAMAGE, ATK_SPEED, PLAYER_DEFENSE, PROJECTILE_SPEED };
 	level = (LEVEL){ 0, 0, 10 };
 	
 	P = (Player) { start_vector.x, start_vector.y, 90, P_stats, P_stats_mult, P_stats_total, PLAYER_HITBOX, level};
@@ -122,7 +117,7 @@ void map_Init(void) {
 	
 	
 	CameraDemo_Init();
-	Bulletinit();
+	Bullet_Init(500, P);
 }
 
 void map_Update(void) {
@@ -130,6 +125,10 @@ void map_Update(void) {
 	P.STATTOTAL.SPEED_TOTAL = P.STAT.SPEED * P.STATMULT.SPEED_MULT;
 	P.STATTOTAL.DAMAGE_TOTAL = P.STAT.DAMAGE * P.STATMULT.DAMAGE_MULT;
 	P.STATTOTAL.DEFENSE_TOTAL = P.STAT.DEFENSE * P.STATMULT.DEFENSE_MULT;
+
+	
+#pragma region
+	//mouseCoord = CP_Vector_Set(CP_Input_GetMouseX(), CP_Input_GetMouseY());
 	/*
 	CP_Settings_ApplyMatrix(transform);
 	CP_Settings_StrokeWeight(0.0);
@@ -156,7 +155,6 @@ void map_Update(void) {
 	generate images in that direction*/
 	//CP_Settings_ResetMatrix();
 
-	
 	if (isPaused) {
 		// Opens up the Upgrade Screen for players to pick their upgrades
 		if (isMenu) {
@@ -213,7 +211,6 @@ void map_Update(void) {
 			isDead = 1;
 			isPaused = 1;
 		}
-
 		// Any objects below this function will be displaced by the camera movement
 		CameraDemo_Update(&P, &transform);
 
@@ -269,15 +266,16 @@ void map_Update(void) {
 					//MobTPlayerCollision(cMob, &P);
 					MobTMobCollision(cMob, &P, &WaveTracker, NO_WAVES);
 					MobTPlayerCollision(cMob, &P);
+					Bullet_Collision(cMob, 200, P);
 
-					int bchecker;
+					/*int bchecker;
 					if ((bchecker = BulletCollision(cMob->x, cMob->y, cMob->CStats.size)) >= 0 && bullet[bchecker].friendly == BULLET_PLAYER)
 					{
 						cMob->CStats.HP -= bullet[bchecker].damage;
 						if (cMob->CStats.HP <= 0)
 							cMob->Status = 0;
 						bullet[bchecker].exist = FALSE;
-					}
+					}*/
 					if (cMob->Status == 0) {
 						cWave->CurrentCount -= 1;
 						MobCount[w] -= 1;
@@ -292,16 +290,18 @@ void map_Update(void) {
 			}
 		}
 		//printf("MobCount: %d |\tFPS: %f \n", MobC, CP_System_GetFrameRate());
-		
+#pragma endregion
+
+		// This is the entire mechanism for shooting
 		if (CP_Input_MouseDown(MOUSE_BUTTON_LEFT))
 		{
-			mousex = CP_Input_GetMouseWorldX();
-			mousey = CP_Input_GetMouseWorldY();
-			float bulletangle = 0;
-			bulletangle = point_point_angle(P.x, P.y, mousex, mousey);
-			BulletShoot(P.x, P.y, bulletangle, 1, BULLET_PLAYER);
+			mouseCoord = CP_Vector_Set(CP_Input_GetMouseWorldX(), CP_Input_GetMouseWorldY());
+			Bullet_Spawn(200, P, mouseCoord);
 		}
-		BulletDraw();
+		Bullet_Update(200, P);
+		Bullet_Draw(_COUNT(BulletList));
+
+		// Prevents any objects below from getting offsetted by camera
 		CP_Settings_ResetMatrix();
 
 		// Time, returns and draws text

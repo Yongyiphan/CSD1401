@@ -2,14 +2,13 @@
 #ifndef PLAYER_H
 #define PLAYER_H
 
-#include "bullet.h"
-
 typedef struct PlayerStats {
 	float MAX_HP;
 	float SPEED;
 	float DAMAGE;
 	float ATK_SPEED;
 	float DEFENSE;
+	float PROJECTILE_SPEED;
 }Stats;
 
 typedef struct PlayerStatsMultiplier {
@@ -18,6 +17,7 @@ typedef struct PlayerStatsMultiplier {
 	float DAMAGE_MULT;
 	float ATK_SPEED_MULT;
 	float DEFENSE_MULT;
+	float PROJECTILE_SPEED;
 }StatsMult;
 
 typedef struct PlayerStatsTotal {
@@ -26,6 +26,7 @@ typedef struct PlayerStatsTotal {
 	float DAMAGE_TOTAL;
 	float ATK_SPEED_TOTAL;
 	float DEFENSE_TOTAL;
+	float PROJECTILE_SPEED_TOTAL;
 }StatsTotal;
 
 typedef struct LEVEL {
@@ -46,11 +47,6 @@ typedef struct Player{
 	
 }Player;
 
-
-//int collide_mob(Player, Mob);
-int collide_bullet(Player, Bullet);
-
-void shoot_bullet(Bullet);
 
 /*
 Shows healthbar of the player. Creates 2 rectangles, one specifying current HP, and the other max HP.

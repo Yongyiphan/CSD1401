@@ -27,7 +27,7 @@ void Main_Menu_Init(void)
 	CP_Graphics_ClearBackground(grey);
 	width = CP_System_GetWindowWidth();
 	height = CP_System_GetWindowHeight();
-	BGM = CP_Sound_Load("./Assets/thememusic.mp3");
+	//BGM = CP_Sound_Load("./Assets/thememusic.mp3");
 	//shitSound = CP_Sound_Load("./Assets/static.mp3");
 	CP_Sound_Play(BGM);
 

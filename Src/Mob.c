@@ -1,3 +1,4 @@
+#pragma once
 #include "cprocessing.h"
 #include <stdlib.h>
 #include <stdio.h>

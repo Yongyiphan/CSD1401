@@ -1,40 +1,39 @@
 #pragma once
+#include "cprocessing.h"
+#include "Mob.h"
+#include "player.h"
+
 #ifndef BULLET_H
 #define BULLET_H
 
 
-#define BULLET_CAP 50
-#define BULLET_MOB 0
-#define BULLET_PLAYER 1
-#define TRUE 1
-#define FLASE 0
-#define PBULLET_NORMAL 1
-#define BULLET_TEST 2
+#define ACTIVE 1
+#define INACTIVE 0
 
 typedef struct Bullet
 {
-	float x;
-	float y;
+	CP_Vector velocity;
+	CP_Vector coord;
 	float degree;
 	float speed;
 	float size;
-	float traveldistance;
-	float maxdistance;
-	float timer;
 	float damage;
-	int type;
-	int friendly;
-	int exist;
+	int state;
+	int id;
+
+	float width;
+	float height;
 }Bullet;
 
-Bullet bullet[BULLET_CAP];
+#define BulletArrSize 500
+extern Bullet BulletList[BulletArrSize];
+// Reset the bullet and change its state to inactive
+void Bullet_Reset(Player P);
 
-// Reset all data in bullet[i]
-void BulletReset(void);
+// Initialize all bullets at the start of the game
+void Bullet_Init(int size, Player P);
 
-// Call BulletReset for all bullets
-void Bulletinit(void);
-
+/*
 // Sets the bullet Coords and angle (x,y,degree)
 void BulletCoor(float, float, float);
 
@@ -43,16 +42,21 @@ void BulletType(int);
 
 // Calculate the direction of the bullet
 void BulletDirection(float, int);
+*/
 
-// Call to shoot bullet
-void BulletShoot(float, float, float, int, int);
 
-// Draw the location of all bullets
-void BulletDraw(void);
+// Shoots bullet and returns the bullet that had just been turned active
+void Bullet_Update(int count, Player P);
 
-// Check existing bullets collision against a target
-int BulletCollision(float, float, float);
+// Spawn bullet
+void Bullet_Spawn(int count, Player P, CP_Vector shoot_direction);
 
+// Draws all bullets
+void Bullet_Draw(int count);
+
+// Check collision against mob
+// If collided, the mob is damaged according to player damage
+void Bullet_Collision(Mob* mob, int count, Player P);
 
 
 #endif
