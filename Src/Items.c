@@ -149,7 +149,15 @@ void DrawItemTree(ItemNode* node) {
 		return;
 	//printf("\tItem: Node: %p | Key: %p\n", node, node->key);
 	//DrawItemImage(&node->key);
-	DrawItemImage(node->key);
+	CP_Vector target = CP_Vector_Set(P.x - node->key->x, P.y - node->key->y);
+	float dist = CP_Vector_Length(target);
+	if ( dist <= P.HITBOX * 1.5) {
+		node->point = CP_Vector_Add(node->point, CP_Vector_Scale(CP_Vector_Normalize(target), 10));
+		node->key->x = node->point.x;
+		node->key->y = node->point.y;
+	}
+	if(dist >= (P.HITBOX * 0.8))
+		DrawItemImage(node->key);
 	DrawItemTree(node->left);
 	DrawItemTree(node->right);
 }
@@ -230,8 +238,10 @@ ItemNode* insertItemRec(ItemNode* prev, ItemNode* root, Item* item, unsigned dep
 	unsigned cd = depth % Dimension;
 	CP_Vector point = CP_Vector_Set(item->x, item->y);
 	//If root->prev == NULL, root == head
-	if (CP_Math_Distance(point.x, point.y, root->point.x, root->point.y) <= item->Hitbox)
+	if (CP_Math_Distance(point.x, point.y, root->point.x, root->point.y) <= item->Hitbox) {
+		root->key->Modifier += 5;
 		return root;
+	}
 	if (point.v[cd] < root->point.v[cd]) 
 		root->left = insertItemRec(root, root->left, item, depth + 1);
 	else
@@ -289,7 +299,7 @@ ItemNode* deleteItemNode(ItemNode* root, CP_Vector point, unsigned int depth) {
 			copyItem(root->key, min->key);
 			temp = deleteItemNode(root->left, point, depth + 1);
 			root->right = temp;
-			if (temp->prev == root) {
+			if (temp != NULL && temp->prev != NULL && temp->prev == root) {
 				 root->left = NULL;
 			}
 		}
@@ -367,12 +377,6 @@ ItemNode* PruneTree(ItemNode*root) {
 }
 
 Item* CustomXYMerge(Item arr[], int start, int end, unsigned int depth) {
-	
-	if ((end - start) > 1) {
-		CustomXYMerge(arr, start, end / 2, depth + 1);
-		CustomXYMerge(arr, end/2)
-	}
-
 
 }
 

@@ -33,7 +33,7 @@ void CreateBaseStat(MobStats* cStat, int type)
 		case SmallMob:
 			cStat->HP = 5;
 			cStat->DEF = 10;
-			cStat->Speed = 5;
+			cStat->Speed = 8;
 			cStat->Range = 0;
 			cStat->Dmg = 1;
 			cStat->size = 10;

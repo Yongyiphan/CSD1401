@@ -47,9 +47,9 @@ void level_up(int* exp, int* exp_req, int* level) {
 		*exp_req *= 1.5;
 		*level += 1;
 
-		//printf("EXP: %d\tEXP_REQ: %d\tLVL: %d\n", *exp, *exp_req, *level);
+		printf("EXP: %d\tEXP_REQ: %d\tLVL: %d\n", *exp, *exp_req, *level);
 	}
-	//printf("EXP: %d\tEXP_REQ: %d\tLVL: %d\n", *exp, *exp_req, *level);
+	printf("EXP: %d\tEXP_REQ: %d\tLVL: %d\n", *exp, *exp_req, *level);
 }
 
 void show_level(Player* P) {
