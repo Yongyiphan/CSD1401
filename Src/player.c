@@ -228,8 +228,8 @@ void upgrade_screen(Player* P, int* isMenu, int* isPaused) {
 	CP_Settings_Stroke(CP_Color_Create(0, 0, 0, 255));
 }
 
-char* PStats[] = {"HEALTH", "SPEED", "DAMAGE", "FIRE RATE", "BULLET SPEED"};
-int NoBaseStats = 5;
+char* PStats[] = {"HEALTH", "SPEED", "DAMAGE", "FIRE RATE", "BULLET SPEED", "MAX HP"};
+int NoBaseStats = 6;
 char* GetBaseStats(int type) {
 	type = type == -1 ? -1 : type % NoBaseStats;
 	switch (type) {

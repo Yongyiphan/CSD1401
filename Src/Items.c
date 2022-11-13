@@ -6,6 +6,7 @@
 #include "Mob.h"
 #include "player.h"
 #include "Map.h"
+#include <assert.h>
 /*
 @brief		Function that initialise array with empty items
 @params		tracker	-> Contains stats for tracking Items
@@ -15,8 +16,11 @@
 ItemTrack* ItemTracker;
 void CreateItemTracker() {
     ItemTracker = malloc(sizeof(ItemTrack*));
-    ItemTracker->tree = NULL;
-    ItemTracker->itemCount - 0;
+	ItemTracker->tExp = NULL;
+	ItemTracker->expDrops = 0;
+	//ItemTracker->itemList = NULL;
+	//ItemTracker->ItemCount = 0;
+
 
 }
 
@@ -54,6 +58,7 @@ Item* CreateItemEffect(float x, float y, int exp, int expVal) {
 	newItem->Type = EType;
 	newItem->x = x;
 	newItem->y = y;
+	newItem->collected = 0;
 	return newItem;
 };
 
@@ -62,9 +67,9 @@ Item* CreateItemEffect(float x, float y, int exp, int expVal) {
 
 
 
-void IAffectPlayer(Item* item) {
+void IAffectPlayer(Item* item, int method) {
 	int cSec = (int)CP_System_GetSeconds();
-	if (cSec - item->Start < item->Duration || item->Duration == -1) {
+	if (item->Duration == -1) {
 		switch (item->Type) {
 		case StatBoost://Affect Base Stats
 			switch (item->AffectedBaseStat) {
@@ -117,13 +122,15 @@ void DrawItemImage(Item* item) {
 		return;
 	//printf("Key: %p\n",item);
 	int original_Size, scale, leftOS = 0, rightOS = 0, topOS = 0, btmOS = 0;
+	if(item->Type < -1)
+		PrintTree(ItemTracker->exptree, 0, 0);
 	CP_Image* SImg = ItemSprites[item->Type];
 	int IHeight = CP_Image_GetHeight(SImg),IWidth;
 	int ph = IHeight * item->Hitbox / IHeight, pw = ph;
 	switch (item->Type) {
 	case StatBoost:
 		IWidth = CP_Image_GetWidth(SImg) / NoBaseStats;
-		CP_Image_DrawSubImage(SImg, item->x, item->y,pw, ph,
+		CP_Image_DrawSubImage(SImg, item->x + pw, item->y + ph,pw, ph,
 			IWidth * (item->AffectedBaseStat % 5) ,
 			0,
 			IWidth * (item->AffectedBaseStat % 5) + IWidth,
@@ -168,7 +175,7 @@ void DrawItemTree(ItemNode* node) {
 			}
 			if (dist < P.HITBOX)
 				NoDeleted++;
-			else
+			//else
 				DrawItemImage(node->key);
 		}
 		if(node->left)
@@ -194,17 +201,32 @@ void PrintTree(ItemNode* root, int space, int depth) {
 }
 
 #include <math.h>
+int deadcheck = 0;
+int failedDelete = 0;
 void ItemPlayerCollision(void) {
-	if (ItemTracker->tree != NULL) {
+	if (ItemTracker->exptree != NULL) {
 		CP_Vector target = CP_Vector_Set(P.x, P.y);
 
-		ItemNode * nearest = nearestNeighbour(ItemTracker->tree, target, 0);
+		ItemNode * nearest = nearestNeighbour(ItemTracker->exptree, target, 0);
 		float dist1 = CP_Math_Distance(target.x, target.y, nearest->point.x, nearest->point.y);
 		CP_Graphics_DrawLine(target.x, target.y, nearest->point.x, nearest->point.y);
 			
 		if (dist1 <= P.HITBOX) {
-			IAffectPlayer(nearest->key);
-			ItemTracker->tree = deleteItemNode(ItemTracker->tree, nearest->point, 0);
+			deadcheck = 0;
+			IAffectPlayer(nearest->key, 1);
+			printf("Removing %p | X: %f | Y: %f\n", nearest, nearest->point.x, nearest->point.y);
+			ItemTracker->exptree = deleteItemNode(ItemTracker->exptree, nearest->point, 0);
+			if (deadcheck == 0) {
+				failedDelete++;
+
+				printf("\nFailed Delete\nPointer: %p | X: %f | Y: %f\n", nearest, nearest->point.x, nearest->point.y);
+				printf("Printing Tree\n\n");
+				PrintTree(ItemTracker->exptree, 0, 0);
+				//CP_Engine_Terminate();
+			}
+			else
+				printf("Delete Successful %d\n", deadcheck);
+			
 		}
 	}
 }
@@ -219,14 +241,118 @@ void copyItem(Item* dst, Item* src) {
 	dst->x = src->x;
 	dst->y = src->y;
 }
+/*
+*	LINKED LIST IMPLEMENTATION
+*/
+#pragma region
 
+ItemLink* DrawItemLink(ItemLink* head) {
+	if (head == NULL)
+		return;
+	
+	ItemLink* current = head, *next = NULL;
+	int cC = 0;
+	while (current != NULL) {
+		cC++;
+		assert(current->key);
+		CP_Vector target = CP_Vector_Set(P.x - current->key->x, P.y - current->key->y);
+		float dist = CP_Vector_Length(target);
+		if ( dist <= P.STATTOTAL.PICKUP_TOTAL) {
+			CP_Vector npoint = CP_Vector_Add(CP_Vector_Set(current->key->x, current->key->y), CP_Vector_Scale(CP_Vector_Normalize(target), 10));
+			current->key->x = npoint.x;
+			current->key->y = npoint.y;
+		}
+		if (dist < P.HITBOX) {
+			if (current->key->Type != EXP && current->key->collected == 1) {
+				current->key->Start = (int)CP_System_GetSeconds();
+				current->key->collected = -1;
+			}
+			else if(current->key->Type == EXP) {
+				IAffectPlayer(current->key, 1);
+				next = current->next;
+				deleteItemLink(&head, current->key);
+				current = next;
+				ItemTracker->expDrops--;
+				continue;
+			}
+		}
+		else
+			DrawItemImage(current->key);
+		current = current->next;
+	}
+	return head;
+}
+
+ItemLink* newLink(Item *item) {
+	ItemLink* link = malloc(sizeof(ItemLink));
+	link->key = item;
+	link->next = NULL;
+}
+
+void insertItemLink(ItemLink** head, Item* item) {
+	ItemLink* nLink = newLink(item);
+	nLink->next = head;
+	switch (item->Type) {
+		case EXP:
+			ItemTracker->expDrops++;
+			break;
+		case StatBoost:
+			ItemTracker->ItemCount++;
+			break;
+	}
+	nLink->next = (*head);
+	(*head) = nLink;
+
+}
+void deleteItemLink(ItemLink**head, Item* item) {
+	ItemLink* curr = *head, * prev = NULL;
+
+	if (curr != NULL && curr->key == item) {
+		*head = curr->next;
+		free(curr->key);
+		free(curr);
+		return;
+	}
+	while (curr != NULL && curr->key != item) {
+		prev = curr;
+		curr = curr->next;
+	}
+	if (NULL == curr)
+		return;
+	prev->next = curr->next;
+
+	free(curr->key);
+	//curr->key = NULL;
+	free(curr);
+	//curr = NULL;
+}
+
+void freeLink(ItemLink* head) {
+	if (NULL == head)
+		return NULL;
+	ItemLink* tmp = NULL;
+	while (head != NULL) {
+		tmp = head;
+		head = head->next;
+		free(tmp->key);
+		free(tmp);
+	}
+
+}
+#pragma endregion
+
+/*
+* KD TREE IMPLEMENTATION
+*/
+#pragma region
 
 ItemNode* newNode(Item *item) {
 	ItemNode* result = malloc(sizeof(ItemNode));
 	result->key = item;
 	//result->point = CP_Vector_Set(item.x, item.y);
 	result->point = CP_Vector_Set(item->x, item->y);
-	result->left = NULL, result->right = NULL;
+	result->left = NULL;
+	result->right = NULL;
 	result->prev = NULL;
 	return result;
 }
@@ -240,13 +366,13 @@ ItemNode* insertItemRec(ItemNode* prev, ItemNode* root, Item* item, unsigned dep
 	if (root == NULL) {
 		ItemNode* n = newNode(item);
 		n->prev = prev;
-		ItemTracker->itemCount++;
+		ItemTracker->expDrops++;
 		return n;
 	}
 	unsigned cd = depth % Dimension;
 	CP_Vector point = CP_Vector_Set(item->x, item->y);
 	//If root->prev == NULL, root == head
-	if (CP_Math_Distance(point.x, point.y, root->point.x, root->point.y) <= item->Hitbox) {
+	if (CP_Math_Distance((int)point.x, (int)point.y, (int)root->point.x, (int)root->point.y) <= item->Hitbox && item->Type == EXP) {
 		root->key->Modifier += 5;
 		return root;
 	}
@@ -256,7 +382,6 @@ ItemNode* insertItemRec(ItemNode* prev, ItemNode* root, Item* item, unsigned dep
 		root->right = insertItemRec(root, root->right, item, depth + 1);
 	return root;
 }
-
 
 
 ItemNode* minNode(ItemNode* root, ItemNode* left, ItemNode* right, int d) {
@@ -284,51 +409,43 @@ ItemNode* findMin(ItemNode* root, int d, unsigned int depth) {
 		d);
 }
 
-
 ItemNode* deleteItemNode(ItemNode* root, CP_Vector point, unsigned int depth) {
 	if (root == NULL)
 		return NULL;
 	unsigned int cd = depth % Dimension;
-	ItemNode* temp = NULL;
-	//printf("Entering root: %p X: %f | Y: %f\n", root, point.x, point.y);
 	if (point.x == root->point.x && point.y == root->point.y) {
-		//if same point, check right
-		if (root->right != NULL) {
-			ItemNode* min = findMin(root->right, cd, 0);
-			root->point = CP_Vector_Set(min->point.x, min->point.y);
-			//only copy the values
-			copyItem(root->key, min->key);
-			temp = deleteItemNode(root->right, point, depth + 1);
-			root->right = temp;
-		}
-		//check left
-		else if (root->left != NULL) {
-			ItemNode* min = findMin(root->left, cd, 0);
-			root->point = CP_Vector_Set(min->point.x, min->point.y);
-			//only copy the values
-			copyItem(root->key, min->key);
-			temp = deleteItemNode(root->left, point, depth + 1);
-			root->right = temp;
-			if (temp && temp->prev && temp->prev == root) {
-				 root->left = NULL;
-			}
-		}
-		else {
-			//free pointers
-			free(root->key);
-			root->key = NULL;
-			root->point = CP_Vector_Zero();
+		if (root->left == NULL && root->right == NULL) {
 			free(root);
 			root = NULL;
-			ItemTracker->itemCount--;
-			NoDeleted--;
+			deadcheck = 1;
 			return NULL;
+		}
+		if (root->right != NULL) {
+			ItemNode* min = findMin(root->right, cd, 0);
+			free(root->key);
+			root->key = NULL;
+			root->key = min->key;
+
+			root->point = CP_Vector_Set(min->point.x, min->point.y);
+			root->right = deleteItemNode(root->right, min->point, depth + 1);
+		}
+		if(root->left != NULL) {
+			ItemNode* min = findMin(root->left, cd, 0);
+			free(root->key);
+			root->key = NULL;
+			root->key = min->key;
+
+			root->point = CP_Vector_Set(min->point.x, min->point.y);
+			root->right = deleteItemNode(root->left, min->point, depth + 1);
+			if (root->right == root->left)
+				root->left = NULL;
 		}
 		return root;
 	}
-
-	root->left =  deleteItemNode(root->left, point, depth + 1);
-	root->right = deleteItemNode(root->right, point, depth + 1);
+	if(point.v[cd]<root->point.v[cd])
+		root->left = deleteItemNode(root->left, point, depth + 1);
+	else
+		root->right = deleteItemNode(root->right, point, depth + 1);
 	return root;
 }
 
@@ -381,6 +498,8 @@ ItemNode* closest(ItemNode* n0, ItemNode* n1, CP_Vector point) {
 }
 #pragma endregion
 
+#pragma endregion
+
 
 // CLEAN UP //
 #pragma region
@@ -389,7 +508,8 @@ void CleanTree(ItemNode* root) {
 		return;
 
 	if (CP_Vector_Distance(CP_Vector_Set(P.x, P.y), root->point) <= 50) {
-		ItemTracker->tree = deleteItemNode(ItemTracker->tree, root->point, 0);
+		ItemTracker->exptree = deleteItemNode(ItemTracker->exptree, root->point, 0);
+		failedDelete--;
 		return;
 	}
 	CleanTree(root->left);
@@ -402,14 +522,18 @@ void FreeItemResource(void) {
 	//	free(ItemTracker->arr[i]);
 	//}
 	//free(ItemTracker->arr);
-
+	
+	printf("Freeing Item Images\n");
 	for (int i = 0; i < Img_C; i++) {
 		CP_Image* c = ItemSprites[i];
 		CP_Image_Free(&(ItemSprites[i]));
 		free(ItemSprites[i]);
 	}
 	free(ItemSprites);
-    freeTree(ItemTracker->tree);
+	//freeLink(ItemTracker->itemList);
+	freeLink(ItemTracker->tExp);
+	free(ItemTracker);
+	printf("Freeing Item Structures\n");
 }
 
 

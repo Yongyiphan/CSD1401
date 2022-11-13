@@ -21,6 +21,7 @@
 #define PLAYER_HITBOX 50
 #define PLAYER_PICKUP 50
 
+#define FREE(x)
 
 int WHeight, WWidth;
 
@@ -157,7 +158,7 @@ void map_Update(void) {
 			isPaused = 1;
 		}
 		if (CP_Input_KeyDown(KEY_P)) {
-			PrintTree(ItemTracker->tree, 0, 0);
+			PrintTree(ItemTracker->exptree, 0, 0);
 			printf("Player X:%4.2f | Y:%4.2f\n", P.x, P.y);
 		}
 		// Any objects below this function will be displaced by the camera movement
@@ -195,8 +196,11 @@ void map_Update(void) {
 					if (cMob->Status == 0) {
 						cWave->CurrentCount -= 1;
 						MobCount[w] -= 1;
-						ItemTracker->tree = insertItemNode(ItemTracker->tree, CreateItemEffect(cMob->x, cMob->y, 1, cMob->Title));
-						Item* BoostItem = CreateItemEffect(cMob->x, cMob->y, 0, 0);
+						//ItemTracker->exptree = insertItemNode(ItemTracker->exptree, CreateItemEffect(cMob->x, cMob->y, 1, cMob->Title));
+						insertItemLink(&ItemTracker->tExp, CreateItemEffect(cMob->x, cMob->y, 1, cMob->Title));
+						//float rng = CP_Random_RangeFloat(0, 1);
+						//if(rng < 0.3)
+						//	ItemTracker->itemtree = insertItemNode(ItemTracker->itemtree, CreateItemEffect(cMob->x, cMob->y, 0, 0));
 						continue;
 					}
 					//cMob->h == 0 means haven drawn before. / assigned image to it yet
@@ -207,12 +211,14 @@ void map_Update(void) {
 				
 			}
 		}
-		if (ItemTracker->tree != NULL) {
-			NoDeleted = 0;
-			DrawItemTree(ItemTracker->tree);
-			ItemPlayerCollision();
+	//	if (ItemTracker->exptree != NULL) {
+	//		NoDeleted = 0;
+	//		DrawItemTree(ItemTracker->exptree);
+	//		ItemPlayerCollision();
+	//	}
+		if (ItemTracker->tExp != NULL) {
+			ItemTracker->tExp = DrawItemLink(ItemTracker->tExp);
 		}
-	
 		if (CP_Input_MouseDown(MOUSE_BUTTON_LEFT))
 		{
 			mousex = CP_Input_GetMouseWorldX();
@@ -223,8 +229,6 @@ void map_Update(void) {
 		}
 		BulletDraw();
 		CP_Settings_ResetMatrix();
-		if (MobCycleTimer % 10 == 0 || NoDeleted >= 10)
-			CleanTree(ItemTracker->tree);
 
 		// Time, returns and draws text
 		timer(0, isPaused);
@@ -243,5 +247,6 @@ void map_Exit(void) {
 	FreeMobResource();
 	
 	FreeItemResource();
+	
 	//free(ItemTracker);
 }

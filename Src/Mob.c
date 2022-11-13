@@ -235,8 +235,8 @@ void GenerateWaves(void) {
 					break;
 				}
 			}
-			PrintWaveStats();
-			printf("\t\tTimer: %d", MobCycleTimer);
+			//PrintWaveStats();
+			//printf("\t\tTimer: %d", MobCycleTimer);
 		}
 	}
 //	printf("%f\n", CP_System_GetSeconds());

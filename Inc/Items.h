@@ -30,6 +30,8 @@ typedef struct ItemStat {
 	double x;
 	double y;
 	//-1 = Collected, 1 = Not collected;
+	//0 = initialised value
+	int collected;
 }Item;
 
 
@@ -42,17 +44,22 @@ typedef struct ItemTreeNode {
 	struct ItemNode* prev;	//int h; //height of current node;
 }ItemNode;
 
-typedef struct ItemTracker {
-	//Item** arr;
-	//int arrSize;
-	int itemCount;
-	ItemNode* tree;
-}ItemTrack;
 
 typedef struct ItemLink {
 	Item* key;
 	struct ItemLink* next;
 }ItemLink;
+
+typedef struct ItemTracker {
+	//Item** arr;
+	//int arrSize;
+	int expDrops;
+	ItemNode* exptree;
+	ItemLink* tExp;
+	ItemLink* itemList;
+	int ItemCount;
+}ItemTrack;
+
 
 
 #define StartItemQuantity 1000
@@ -85,7 +92,7 @@ void DrawItemImage(Item* item);
 void CreateItemTracker(void);
 
 Item* CreateItemEffect(float x, float y, int exp, int expVal);
-void IAffectPlayer(Item* i);
+void IAffectPlayer(Item* i, int method);
 
 
 void DrawItemTree(ItemNode* node);
@@ -95,6 +102,14 @@ void ItemPlayerCollision(void);
 
 void copyItem(Item* dst, Item* src);
 
+
+ItemLink* DrawItemLink(ItemLink* head);
+ItemLink* newLink(Item* item);
+void insertItemLink(ItemLink** head, Item *item);
+void deleteItemLink(ItemLink** head, Item *item);
+void freeLink(ItemLink* head);
+
+extern int failedDelete;
 
 //KD -Tree
 #define Dimension 2
