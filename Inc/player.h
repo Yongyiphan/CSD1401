@@ -12,6 +12,7 @@ typedef struct PlayerStats {
 	float DAMAGE;
 	float ATK_SPEED;
 	float DEFENSE;
+	float PICKUP;
 }Stats;
 
 typedef struct PlayerStatsMultiplier {
@@ -20,6 +21,7 @@ typedef struct PlayerStatsMultiplier {
 	float DAMAGE_MULT;
 	float ATK_SPEED_MULT;
 	float DEFENSE_MULT;
+	float PICKUP_MULT;
 }StatsMult;
 
 typedef struct PlayerStatsTotal {
@@ -28,6 +30,7 @@ typedef struct PlayerStatsTotal {
 	float DAMAGE_TOTAL;
 	float ATK_SPEED_TOTAL;
 	float DEFENSE_TOTAL;
+	float PICKUP_TOTAL;
 }StatsTotal;
 
 typedef struct LEVEL {

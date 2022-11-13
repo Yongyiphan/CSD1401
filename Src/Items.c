@@ -1,6 +1,7 @@
 #pragma once
 #include "cprocessing.h"
 #include <stdlib.h>
+#include <math.h>
 #include "Items.h"
 #include "Mob.h"
 #include "player.h"
@@ -22,7 +23,8 @@ void CreateItemTracker() {
 
 
 #include <stdio.h>
-Item* CreateItemEffect(float x, float y, int exp) {
+#pragma region
+Item* CreateItemEffect(float x, float y, int exp, int expVal) {
 	//Get Random chance generator
 	float RNG = CP_Random_RangeFloat(0, 1), DropChance;
 	//Get Random Type of effect
@@ -34,10 +36,10 @@ Item* CreateItemEffect(float x, float y, int exp) {
 	switch (EType) {
 	//char* PStats[] = {"HEALTH", "SPEED", "DAMAGE", "FIRE RATE", "BULLET SPEED"};
 	case EXP:
-		newItem->AffectedBaseStat = -1;
+		newItem->AffectedBaseStat = expVal;
 		newItem->Duration = -1;
-		newItem->Modifier = 5;
-		newItem->Hitbox = 25;
+		newItem->Modifier = pow(5, expVal + 1);
+		newItem->Hitbox = 32;
 		break;
 	case StatBoost: //All Base Stats Upgrade
 		newItem->AffectedBaseStat = CP_Random_RangeInt(0, NoBaseStats - 1);
@@ -58,16 +60,6 @@ Item* CreateItemEffect(float x, float y, int exp) {
 
 
 
-int ScaledEXP(Player* p) {
-	double baserate = 1.1;
-	int modrate = 10;
-	//More exp give every modrate levels
-	//every level increase exp required by baserate;
-	int nRate = p->LEVEL.P_EXP % modrate == 0 ? p->LEVEL.P_EXP / 10 * baserate : baserate;
-
-	p->LEVEL.EXP_REQ *= nRate;
-	printf("Current rate %d\n", p->LEVEL.EXP_REQ);
-}
 
 
 void IAffectPlayer(Item* item) {
@@ -90,6 +82,9 @@ void IAffectPlayer(Item* item) {
 				break;
 			case 4://Bullet Speed
 				break;
+			case 5:
+				P.STAT.MAX_HP += item->Modifier;
+				break;
 			}
 			//printf("Player %s increased by %d\n", GetBaseStats(item->AffectedBaseStat), item->Modifier);
 		case EXP:
@@ -106,7 +101,7 @@ CP_Image** ItemSprites;
 int Img_C;
 void ItemLoadImage(void) {
 	char* FilePaths[] = {
-		"./Assets/Items/GreenExp.png",
+		"./Assets/Items/EXP Sprite.png",
 		"./Assets/Items/Base Item Sprite.png",
 	};
 
@@ -121,6 +116,7 @@ void DrawItemImage(Item* item) {
 	if (item == NULL)
 		return;
 	//printf("Key: %p\n",item);
+	int original_Size, scale, leftOS = 0, rightOS = 0, topOS = 0, btmOS = 0;
 	CP_Image* SImg = ItemSprites[item->Type];
 	int IHeight = CP_Image_GetHeight(SImg),IWidth;
 	int ph = IHeight * item->Hitbox / IHeight, pw = ph;
@@ -135,31 +131,52 @@ void DrawItemImage(Item* item) {
 			255);
 		break;
 	case EXP:
-		IWidth = CP_Image_GetWidth(SImg);
+		original_Size = 32;
+		scale = IHeight / original_Size;
+		leftOS = scale * 0, rightOS = scale * 10;
+		topOS = scale * 0, btmOS = scale * 10;
+		IWidth = CP_Image_GetWidth(SImg) / 3; //theres only 3 types of exp
 		//Update when exp get increase as progression
-		CP_Image_DrawSubImage(SImg, item->x, item->y,pw, ph,0,0,IWidth,IHeight,	255);
+		CP_Image_DrawSubImage(SImg, item->x, item->y,pw, ph, 
+				item->AffectedBaseStat * IWidth + leftOS,
+				topOS,
+				item->AffectedBaseStat * IWidth + IWidth - rightOS,
+				IHeight - btmOS,		
+				255);
+
 		break;
 	default:
 		break;
 	}
 }
 
+
+
+int NoDeleted = 0;
 void DrawItemTree(ItemNode* node) {
-	if (node == NULL)
+	if (!node)
 		return;
-	//printf("\tItem: Node: %p | Key: %p\n", node, node->key);
-	//DrawItemImage(&node->key);
-	CP_Vector target = CP_Vector_Set(P.x - node->key->x, P.y - node->key->y);
-	float dist = CP_Vector_Length(target);
-	if ( dist <= P.HITBOX * 1.5) {
-		node->point = CP_Vector_Add(node->point, CP_Vector_Scale(CP_Vector_Normalize(target), 10));
-		node->key->x = node->point.x;
-		node->key->y = node->point.y;
+	if (node) {
+		if (node->key) {
+			CP_Vector target = CP_Vector_Set(P.x - node->key->x, P.y - node->key->y);
+			float dist = CP_Vector_Length(target);
+			if ( dist <= P.STATTOTAL.PICKUP_TOTAL) {
+				CP_Vector npoint = CP_Vector_Add(CP_Vector_Set(node->key->x, node->key->y), CP_Vector_Scale(CP_Vector_Normalize(target), 10));
+				node->key->x = npoint.x;
+				node->key->y = npoint.y;
+				node->point = npoint;
+			}
+			if (dist < P.HITBOX)
+				NoDeleted++;
+			else
+				DrawItemImage(node->key);
+		}
+		if(node->left)
+			DrawItemTree(node->left);
+		if (node->right)
+			DrawItemTree(node->right);
+
 	}
-	if(dist >= (P.HITBOX * 0.8))
-		DrawItemImage(node->key);
-	DrawItemTree(node->left);
-	DrawItemTree(node->right);
 }
 #define COUNT 10
 void PrintTree(ItemNode* root, int space, int depth) {
@@ -177,23 +194,17 @@ void PrintTree(ItemNode* root, int space, int depth) {
 }
 
 #include <math.h>
-#define ItemPruneLimit 50
 void ItemPlayerCollision(void) {
 	if (ItemTracker->tree != NULL) {
 		CP_Vector target = CP_Vector_Set(P.x, P.y);
-		int collected = 0, retry = 5;
 
 		ItemNode * nearest = nearestNeighbour(ItemTracker->tree, target, 0);
 		float dist1 = CP_Math_Distance(target.x, target.y, nearest->point.x, nearest->point.y);
 		CP_Graphics_DrawLine(target.x, target.y, nearest->point.x, nearest->point.y);
 			
-		if (dist1 < P.HITBOX) {
+		if (dist1 <= P.HITBOX) {
 			IAffectPlayer(nearest->key);
 			ItemTracker->tree = deleteItemNode(ItemTracker->tree, nearest->point, 0);
-			collected -= 1;
-		}
-		if (ItemTracker->itemCount > ItemPruneLimit) {
-			//prune tree;
 		}
 	}
 }
@@ -207,7 +218,6 @@ void copyItem(Item* dst, Item* src) {
 	dst->Type = src->Type;
 	dst->x = src->x;
 	dst->y = src->y;
-
 }
 
 
@@ -222,12 +232,10 @@ ItemNode* newNode(Item *item) {
 }
 
 
-
 ItemNode* insertItemNode(ItemNode* root, Item *item) {
 	return insertItemRec(NULL, root, item, 0);
 }
 
-int insertSucess = 0;
 ItemNode* insertItemRec(ItemNode* prev, ItemNode* root, Item* item, unsigned depth) {
 	if (root == NULL) {
 		ItemNode* n = newNode(item);
@@ -249,6 +257,8 @@ ItemNode* insertItemRec(ItemNode* prev, ItemNode* root, Item* item, unsigned dep
 	return root;
 }
 
+
+
 ItemNode* minNode(ItemNode* root, ItemNode* left, ItemNode* right, int d) {
 	ItemNode* res = root;
 	if (left != NULL && left->point.v[d] < res->point.v[d])
@@ -263,7 +273,7 @@ ItemNode* findMin(ItemNode* root, int d, unsigned int depth) {
 		return NULL;
 	unsigned cd = depth % Dimension;
 	if (cd == d) {
-		if (root->left == NULL)
+	if (root->left == NULL)
 			return root;
 		return findMin(root->left, d, depth + 1);
 	}
@@ -275,12 +285,12 @@ ItemNode* findMin(ItemNode* root, int d, unsigned int depth) {
 }
 
 
-
 ItemNode* deleteItemNode(ItemNode* root, CP_Vector point, unsigned int depth) {
 	if (root == NULL)
 		return NULL;
 	unsigned int cd = depth % Dimension;
 	ItemNode* temp = NULL;
+	//printf("Entering root: %p X: %f | Y: %f\n", root, point.x, point.y);
 	if (point.x == root->point.x && point.y == root->point.y) {
 		//if same point, check right
 		if (root->right != NULL) {
@@ -299,29 +309,32 @@ ItemNode* deleteItemNode(ItemNode* root, CP_Vector point, unsigned int depth) {
 			copyItem(root->key, min->key);
 			temp = deleteItemNode(root->left, point, depth + 1);
 			root->right = temp;
-			if (temp != NULL && temp->prev != NULL && temp->prev == root) {
+			if (temp && temp->prev && temp->prev == root) {
 				 root->left = NULL;
 			}
 		}
-		//check is leaf
 		else {
 			//free pointers
 			free(root->key);
 			root->key = NULL;
+			root->point = CP_Vector_Zero();
 			free(root);
 			root = NULL;
+			ItemTracker->itemCount--;
+			NoDeleted--;
 			return NULL;
 		}
 		return root;
 	}
 
-	//if (point.v[cd] < root->point.v[cd])
-		root->left =  deleteItemNode(root->left, point, depth + 1);
-//	else
-		root->right = deleteItemNode(root->right, point, depth + 1);
+	root->left =  deleteItemNode(root->left, point, depth + 1);
+	root->right = deleteItemNode(root->right, point, depth + 1);
 	return root;
 }
 
+
+// SEARCH //
+#pragma region
 //returns the searched item node
 ItemNode* nearestNeighbour(ItemNode* root, CP_Vector point, unsigned int depth) {
 	if (root == NULL)
@@ -366,22 +379,21 @@ ItemNode* closest(ItemNode* n0, ItemNode* n1, CP_Vector point) {
 	
 	return d0 < d1 ? n0 : n1;
 }
+#pragma endregion
 
 
-#define DecayDistance
-#define DecayTimer
-ItemNode* PruneTree(ItemNode*root) {
-	if (root == NULL)
-		return NULL;
+// CLEAN UP //
+#pragma region
+void CleanTree(ItemNode* root) {
+	if (NULL == root)
+		return;
 
-}
-
-Item* CustomXYMerge(Item arr[], int start, int end, unsigned int depth) {
-
-}
-
-Item* MergeSort(Item arr[], int l,int m, int r, int cd) {
-	
+	if (CP_Vector_Distance(CP_Vector_Set(P.x, P.y), root->point) <= 50) {
+		ItemTracker->tree = deleteItemNode(ItemTracker->tree, root->point, 0);
+		return;
+	}
+	CleanTree(root->left);
+	CleanTree(root->right);
 }
 
 void FreeItemResource(void) {
@@ -397,7 +409,7 @@ void FreeItemResource(void) {
 		free(ItemSprites[i]);
 	}
 	free(ItemSprites);
-    //freeTree(ItemTracker->tree);
+    freeTree(ItemTracker->tree);
 }
 
 
@@ -414,5 +426,5 @@ void freeTree(ItemNode* root) {
 	root = NULL;
 }
 
-
+#pragma endregion
 

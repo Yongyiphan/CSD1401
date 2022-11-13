@@ -32,6 +32,7 @@ typedef struct ItemStat {
 	//-1 = Collected, 1 = Not collected;
 }Item;
 
+
 static const Item EmptyItem;
 
 typedef struct ItemTreeNode {
@@ -48,6 +49,10 @@ typedef struct ItemTracker {
 	ItemNode* tree;
 }ItemTrack;
 
+typedef struct ItemLink {
+	Item* key;
+	struct ItemLink* next;
+}ItemLink;
 
 
 #define StartItemQuantity 1000
@@ -56,7 +61,7 @@ extern ItemTrack* ItemTracker;
 extern int Img_C;
 extern CP_Image** ItemSprites;
 
-
+extern int NoDeleted;
 /*
 Item Planning
 
@@ -79,7 +84,7 @@ void DrawItemImage(Item* item);
 
 void CreateItemTracker(void);
 
-Item* CreateItemEffect(float x, float y, int exp);
+Item* CreateItemEffect(float x, float y, int exp, int expVal);
 void IAffectPlayer(Item* i);
 
 
@@ -105,6 +110,7 @@ ItemNode* deleteItemNode(ItemNode* root, CP_Vector point, unsigned int depth);
 ItemNode* nearestNeighbour(ItemNode* root, CP_Vector point, unsigned int depth);
 ItemNode* closest(ItemNode* n0, ItemNode* n1, CP_Vector point);
 
+void CleanTree(ItemNode* root);
 
 void FreeItemResource(void);
 void freeTree(ItemNode* root);

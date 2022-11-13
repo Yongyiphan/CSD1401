@@ -19,6 +19,8 @@
 #define ATK_SPEED 2.0f
 #define PLAYER_DEFENSE 10
 #define PLAYER_HITBOX 50
+#define PLAYER_PICKUP 50
+
 
 int WHeight, WWidth;
 
@@ -74,9 +76,9 @@ void map_Init(void) {
 	P_stats_total's MAX_HP_TOTAL = MAX_HP * MAX_HP_MULT
 								 = 100 * 1.2 = 120
 	*/
-	P_stats = (Stats){ PLAYER_HP, PLAYER_SPEED, PLAYER_DAMAGE, ATK_SPEED, PLAYER_DEFENSE };
-	P_stats_mult = (StatsMult){ 1, 1, 1, 1, 1 };
-	P_stats_total = (StatsTotal){ PLAYER_HP, PLAYER_SPEED, PLAYER_DAMAGE, ATK_SPEED, PLAYER_DEFENSE };
+	P_stats = (Stats){ PLAYER_HP, PLAYER_SPEED, PLAYER_DAMAGE, ATK_SPEED, PLAYER_DEFENSE , PLAYER_PICKUP};
+	P_stats_mult = (StatsMult){ 1, 1, 1, 1, 1,1 };
+	P_stats_total = (StatsTotal){ PLAYER_HP, PLAYER_SPEED, PLAYER_DAMAGE, ATK_SPEED, PLAYER_DEFENSE, PLAYER_PICKUP };
 	level = (LEVEL){ 0, 0, 10 };
 	
 	P = (Player) { start_vector.x, start_vector.y, 90, P_stats, P_stats_mult, P_stats_total, PLAYER_HITBOX, level};
@@ -92,10 +94,12 @@ void map_Init(void) {
 }
 
 void map_Update(void) {
+#pragma region
 	P.STATTOTAL.MAX_HP_TOTAL = P.STAT.MAX_HP * P.STATMULT.MAX_HP_MULT;
 	P.STATTOTAL.SPEED_TOTAL = P.STAT.SPEED * P.STATMULT.SPEED_MULT;
 	P.STATTOTAL.DAMAGE_TOTAL = P.STAT.DAMAGE * P.STATMULT.DAMAGE_MULT;
 	P.STATTOTAL.DEFENSE_TOTAL = P.STAT.DEFENSE * P.STATMULT.DEFENSE_MULT;
+	P.STATTOTAL.PICKUP_TOTAL = P.STAT.PICKUP * P.STATMULT.PICKUP_MULT;
 
 	
 	if (isPaused) {
@@ -129,7 +133,7 @@ void map_Update(void) {
 			P.HITBOX += 10;
 		}
 		if (CP_Input_KeyTriggered(KEY_M)){
-			P.HITBOX += 10;
+			P.STATMULT.PICKUP_MULT *= 1.1;
 		}
 		// Open up the Upgrade Screen
 		if (CP_Input_KeyTriggered(KEY_U) && isMenu == 0) {
@@ -153,8 +157,8 @@ void map_Update(void) {
 			isPaused = 1;
 		}
 		if (CP_Input_KeyDown(KEY_P)) {
-			//PrintTree(ItemTracker->tree, 0, 0);
-			//printf("Player X:%4.2f | Y:%4.2f\n", P.x, P.y);
+			PrintTree(ItemTracker->tree, 0, 0);
+			printf("Player X:%4.2f | Y:%4.2f\n", P.x, P.y);
 		}
 		// Any objects below this function will be displaced by the camera movement
 		CameraDemo_Update(&P, &transform);
@@ -164,7 +168,7 @@ void map_Update(void) {
 				continue;
 			}
 			cWave = &WaveTracker[w];
-			if (cWave->CurrentCount == 0) {
+			if (cWave->CurrentCount == 0 || (MobCycleTimer % 10 == 0 && cWave->CurrentCount == 1)) {
 				//if all mobs are dead
 				//return index to wave queue
 				WaveIDQueue[w] = -1;
@@ -187,10 +191,12 @@ void map_Update(void) {
 							cMob->Status = 0;
 						bullet[bchecker].exist = FALSE;
 					}
+#pragma endregion
 					if (cMob->Status == 0) {
 						cWave->CurrentCount -= 1;
 						MobCount[w] -= 1;
-						ItemTracker->tree = insertItemNode(ItemTracker->tree, CreateItemEffect(cMob->x, cMob->y, 1));
+						ItemTracker->tree = insertItemNode(ItemTracker->tree, CreateItemEffect(cMob->x, cMob->y, 1, cMob->Title));
+						Item* BoostItem = CreateItemEffect(cMob->x, cMob->y, 0, 0);
 						continue;
 					}
 					//cMob->h == 0 means haven drawn before. / assigned image to it yet
@@ -198,12 +204,13 @@ void map_Update(void) {
 						DrawMobImage(cMob, &P);
 					}
 				}
-
+				
 			}
 		}
 		if (ItemTracker->tree != NULL) {
-			ItemPlayerCollision();
+			NoDeleted = 0;
 			DrawItemTree(ItemTracker->tree);
+			ItemPlayerCollision();
 		}
 	
 		if (CP_Input_MouseDown(MOUSE_BUTTON_LEFT))
@@ -216,6 +223,8 @@ void map_Update(void) {
 		}
 		BulletDraw();
 		CP_Settings_ResetMatrix();
+		if (MobCycleTimer % 10 == 0 || NoDeleted >= 10)
+			CleanTree(ItemTracker->tree);
 
 		// Time, returns and draws text
 		timer(0, isPaused);

@@ -171,8 +171,8 @@ void GenerateMobs(WaveTrack* tracker, Player* p) {
 		if (MobC == tracker->MaxMob) {
 			break;
 		}
-		//randM = CP_Random_RangeInt(0, 1);
-		randM = 0;
+		randM = CP_Random_RangeInt(0, 1);
+		//randM = 0;
 		randMCost = MobCosts[randM];		//Expand array
 		if (MobC >= tracker->arrSize) {
 			int nQ = tracker->arrSize * 2;
@@ -232,11 +232,11 @@ void GenerateWaves(void) {
 					//Edit increment to spawn more mob each waves
 					WaveIDQueue[i] = CWave; //Update waves of queue at [i]
 					MobCount[i] = WaveTracker[i].MobCount;
-					//PrintWaveStats();
-					//printf("\t\tTimer: %d", MobCycleTimer);
 					break;
 				}
 			}
+			PrintWaveStats();
+			printf("\t\tTimer: %d", MobCycleTimer);
 		}
 	}
 //	printf("%f\n", CP_System_GetSeconds());
@@ -327,14 +327,14 @@ void DrawMobImage(Mob* m, Player* p) {
 				alpha);
 			break;
 		case MediumMob:
-			original_Size = 80, targetSize = 80;
+			original_Size = 32, targetSize = 50;
 			SizeDef = 2, targetFPS = 4;
 			scale = IHeight / original_Size;
 			IWidth = CP_Image_GetWidth(SImg) / SizeDef;
 
-			leftOS = scale * 19, rightOS = scale * 18;
+			leftOS = scale * 8, rightOS = scale * 7;
 			if (flip == 1) SWAP(leftOS, rightOS);
-			topOS = scale * 9, btmOS = scale * 7;
+			topOS = scale * 6, btmOS = scale * 4;
 			if (m->h == 0 && m->w == 0) {
 				h = original_Size * scale - topOS - btmOS;
 				w = original_Size * scale - leftOS - rightOS;
