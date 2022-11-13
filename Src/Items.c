@@ -13,15 +13,25 @@
 @returns	Item arr with blank items
 */
 
+#ifdef _DEBUG
+#  define _CRTDBG_MAP_ALLOC
+#  define _CRTDBG_MAP_ALLOC_NEW
+#  include <crtdbg.h>
+#  include <assert.h>
+#endif
+
+
 ItemTrack* ItemTracker;
 void CreateItemTracker() {
-    ItemTracker = malloc(sizeof(ItemTrack*));
-	ItemTracker->tExp = NULL;
+    ItemTracker = malloc(sizeof(ItemTrack));
+	ItemTracker->ExpLL = NULL;
 	ItemTracker->expDrops = 0;
-	//ItemTracker->itemList = NULL;
-	//ItemTracker->ItemCount = 0;
-
-
+	ItemTracker->ItemLL = NULL;
+	ItemTracker->ItemCount = 0;
+	printf("Size of ItemTrack %d | Pointer: %d\n", sizeof(ItemTrack), sizeof(ItemTrack*));
+	printf("Size of ItemLink %d | Pointer: %d\n", sizeof(ItemLink), sizeof(ItemLink*));
+	printf("Size of Item %d | Pointer: %d\n", sizeof(Item), sizeof(Item*));
+	printf("Stat\n");
 }
 
 
@@ -69,35 +79,34 @@ Item* CreateItemEffect(float x, float y, int exp, int expVal) {
 
 void IAffectPlayer(Item* item, int method) {
 	int cSec = (int)CP_System_GetSeconds();
-	if (item->Duration == -1) {
-		switch (item->Type) {
+	int boost = item->Modifier * method;
+	switch (item->Type) {
 		case StatBoost://Affect Base Stats
-			switch (item->AffectedBaseStat) {
+		switch (item->AffectedBaseStat) {
 			case 0://HP
-				P.CURRENT_HP += item->Modifier;
+				P.CURRENT_HP += boost;
 				break;
 			case 1://Movement Speed
-				P.STAT.SPEED += item->Modifier;
+				P.STAT.SPEED += boost;
 				break;
 			case 2://Damage
-				P.STAT.DAMAGE += item->Modifier;
+				P.STAT.DAMAGE += boost;
 				break;
 			case 3://Attack speed
-				P.STAT.ATK_SPEED += item->Modifier;
+				P.STAT.ATK_SPEED += boost;
 				break;
 			case 4://Bullet Speed
 				break;
 			case 5:
-				P.STAT.MAX_HP += item->Modifier;
+				P.STAT.MAX_HP += boost;
 				break;
-			}
-			//printf("Player %s increased by %d\n", GetBaseStats(item->AffectedBaseStat), item->Modifier);
+		}
+		//printf("Player %s increased by %d\n", GetBaseStats(item->AffectedBaseStat), item->Modifier);
 		case EXP:
 			P.LEVEL.P_EXP += item->Modifier;
 			level_up(&P.LEVEL.P_EXP, &P.LEVEL.EXP_REQ, &P.LEVEL.VAL);
 			//printf("Item x: %f | y: %f\n", item->x, item->y);
 			break;
-		}
 	}
 }
 
@@ -122,15 +131,13 @@ void DrawItemImage(Item* item) {
 		return;
 	//printf("Key: %p\n",item);
 	int original_Size, scale, leftOS = 0, rightOS = 0, topOS = 0, btmOS = 0;
-	if(item->Type < -1)
-		PrintTree(ItemTracker->exptree, 0, 0);
 	CP_Image* SImg = ItemSprites[item->Type];
 	int IHeight = CP_Image_GetHeight(SImg),IWidth;
 	int ph = IHeight * item->Hitbox / IHeight, pw = ph;
 	switch (item->Type) {
 	case StatBoost:
 		IWidth = CP_Image_GetWidth(SImg) / NoBaseStats;
-		CP_Image_DrawSubImage(SImg, item->x + pw, item->y + ph,pw, ph,
+		CP_Image_DrawSubImage(SImg, item->x + pw, item->y,pw, ph,
 			IWidth * (item->AffectedBaseStat % 5) ,
 			0,
 			IWidth * (item->AffectedBaseStat % 5) + IWidth,
@@ -160,6 +167,7 @@ void DrawItemImage(Item* item) {
 
 
 int NoDeleted = 0;
+/*
 void DrawItemTree(ItemNode* node) {
 	if (!node)
 		return;
@@ -204,31 +212,29 @@ void PrintTree(ItemNode* root, int space, int depth) {
 int deadcheck = 0;
 int failedDelete = 0;
 void ItemPlayerCollision(void) {
-	if (ItemTracker->exptree != NULL) {
-		CP_Vector target = CP_Vector_Set(P.x, P.y);
+	//if (ItemTracker->exptree != NULL) {
+	//	CP_Vector target = CP_Vector_Set(P.x, P.y);
 
-		ItemNode * nearest = nearestNeighbour(ItemTracker->exptree, target, 0);
-		float dist1 = CP_Math_Distance(target.x, target.y, nearest->point.x, nearest->point.y);
-		CP_Graphics_DrawLine(target.x, target.y, nearest->point.x, nearest->point.y);
-			
-		if (dist1 <= P.HITBOX) {
-			deadcheck = 0;
-			IAffectPlayer(nearest->key, 1);
-			printf("Removing %p | X: %f | Y: %f\n", nearest, nearest->point.x, nearest->point.y);
-			ItemTracker->exptree = deleteItemNode(ItemTracker->exptree, nearest->point, 0);
-			if (deadcheck == 0) {
-				failedDelete++;
+	//	ItemNode * nearest = nearestNeighbour(ItemTracker->exptree, target, 0);
+	//	float dist1 = CP_Math_Distance(target.x, target.y, nearest->point.x, nearest->point.y);
+	//	CP_Graphics_DrawLine(target.x, target.y, nearest->point.x, nearest->point.y);
+	//		
+	//	if (dist1 <= P.HITBOX) {
+	//		deadcheck = 0;
+	//		IAffectPlayer(nearest->key, 1);
+	//		printf("Removing %p | X: %f | Y: %f\n", nearest, nearest->point.x, nearest->point.y);
+	//		if (deadcheck == 0) {
+	//			failedDelete++;
 
-				printf("\nFailed Delete\nPointer: %p | X: %f | Y: %f\n", nearest, nearest->point.x, nearest->point.y);
-				printf("Printing Tree\n\n");
-				PrintTree(ItemTracker->exptree, 0, 0);
-				//CP_Engine_Terminate();
-			}
-			else
-				printf("Delete Successful %d\n", deadcheck);
-			
-		}
-	}
+	//			printf("\nFailed Delete\nPointer: %p | X: %f | Y: %f\n", nearest, nearest->point.x, nearest->point.y);
+	//			printf("Printing Tree\n\n");
+	//			//CP_Engine_Terminate();
+	//		}
+	//		else
+	//			printf("Delete Successful %d\n", deadcheck);
+	//		
+	//	}
+	//}
 }
 
 void copyItem(Item* dst, Item* src) {
@@ -241,6 +247,9 @@ void copyItem(Item* dst, Item* src) {
 	dst->x = src->x;
 	dst->y = src->y;
 }
+
+*/
+
 /*
 *	LINKED LIST IMPLEMENTATION
 */
@@ -251,10 +260,11 @@ ItemLink* DrawItemLink(ItemLink* head) {
 		return;
 	
 	ItemLink* current = head, *next = NULL;
-	int cC = 0;
 	while (current != NULL) {
-		cC++;
-		assert(current->key);
+	assert(_CrtCheckMemory());
+		if (current->key->collected == -1) {
+			goto SkipThis;
+		}
 		CP_Vector target = CP_Vector_Set(P.x - current->key->x, P.y - current->key->y);
 		float dist = CP_Vector_Length(target);
 		if ( dist <= P.STATTOTAL.PICKUP_TOTAL) {
@@ -263,11 +273,7 @@ ItemLink* DrawItemLink(ItemLink* head) {
 			current->key->y = npoint.y;
 		}
 		if (dist < P.HITBOX) {
-			if (current->key->Type != EXP && current->key->collected == 1) {
-				current->key->Start = (int)CP_System_GetSeconds();
-				current->key->collected = -1;
-			}
-			else if(current->key->Type == EXP) {
+			if(current->key->Type == EXP) {
 				IAffectPlayer(current->key, 1);
 				next = current->next;
 				deleteItemLink(&head, current->key);
@@ -275,9 +281,28 @@ ItemLink* DrawItemLink(ItemLink* head) {
 				ItemTracker->expDrops--;
 				continue;
 			}
+			else {
+				//if collected item, start its duration timer
+				IAffectPlayer(current->key, 1);
+				current->key->Start = (int)CP_System_GetSeconds();
+				current->key->collected = -1;
+				goto SkipThis;
+			}
 		}
-		else
-			DrawItemImage(current->key);
+		if (current->key->Type != EXP) {
+			if (current->key->collected == -1 && (int)CP_System_GetSeconds() - current->key->Start > current->key->Duration) {
+				//time to delete item's stat boost
+				IAffectPlayer(current->key, -1);
+				next = current->next;
+				deleteItemLink(&head, current->key);
+				current = next;
+				ItemTracker->ItemCount--;
+				continue;
+			}
+		}
+		//only draw items that are newly initialised or not collected
+		DrawItemImage(current->key);
+	SkipThis:
 		current = current->next;
 	}
 	return head;
@@ -287,11 +312,11 @@ ItemLink* newLink(Item *item) {
 	ItemLink* link = malloc(sizeof(ItemLink));
 	link->key = item;
 	link->next = NULL;
+	return link;
 }
 
 void insertItemLink(ItemLink** head, Item* item) {
 	ItemLink* nLink = newLink(item);
-	nLink->next = head;
 	switch (item->Type) {
 		case EXP:
 			ItemTracker->expDrops++;
@@ -322,9 +347,7 @@ void deleteItemLink(ItemLink**head, Item* item) {
 	prev->next = curr->next;
 
 	free(curr->key);
-	//curr->key = NULL;
 	free(curr);
-	//curr = NULL;
 }
 
 void freeLink(ItemLink* head) {
@@ -341,9 +364,11 @@ void freeLink(ItemLink* head) {
 }
 #pragma endregion
 
+
 /*
 * KD TREE IMPLEMENTATION
 */
+/*
 #pragma region
 
 ItemNode* newNode(Item *item) {
@@ -499,22 +524,22 @@ ItemNode* closest(ItemNode* n0, ItemNode* n1, CP_Vector point) {
 #pragma endregion
 
 #pragma endregion
-
+*/
 
 // CLEAN UP //
 #pragma region
-void CleanTree(ItemNode* root) {
-	if (NULL == root)
-		return;
-
-	if (CP_Vector_Distance(CP_Vector_Set(P.x, P.y), root->point) <= 50) {
-		ItemTracker->exptree = deleteItemNode(ItemTracker->exptree, root->point, 0);
-		failedDelete--;
-		return;
-	}
-	CleanTree(root->left);
-	CleanTree(root->right);
-}
+//void CleanTree(ItemNode* root) {
+//	if (NULL == root)
+//		return;
+//
+//	if (CP_Vector_Distance(CP_Vector_Set(P.x, P.y), root->point) <= 50) {
+//		//ItemTracker->exptree = deleteItemNode(ItemTracker->exptree, root->point, 0);
+//		failedDelete--;
+//		return;
+//	}
+//	CleanTree(root->left);
+//	CleanTree(root->right);
+//}
 
 void FreeItemResource(void) {
 
@@ -530,25 +555,26 @@ void FreeItemResource(void) {
 		free(ItemSprites[i]);
 	}
 	free(ItemSprites);
-	//freeLink(ItemTracker->itemList);
-	freeLink(ItemTracker->tExp);
+	freeLink(ItemTracker->ItemLL);
+	freeLink(ItemTracker->ExpLL);
 	free(ItemTracker);
+	//assert(_CrtCheckMemory());
 	printf("Freeing Item Structures\n");
 }
 
 
-void freeTree(ItemNode* root) {
-	if (root == NULL)
-		return NULL;
-	free(root->key);
-	root->key = NULL;
-	freeTree(root->left);
-	root->left = NULL;
-	freeTree(root->right);
-	root->right = NULL;
-	free(root);
-	root = NULL;
-}
+//void freeTree(ItemNode* root) {
+//	if (root == NULL)
+//		return NULL;
+//	free(root->key);
+//	root->key = NULL;
+//	freeTree(root->left);
+//	root->left = NULL;
+//	freeTree(root->right);
+//	root->right = NULL;
+//	free(root);
+//	root = NULL;
+//}
 
 #pragma endregion
 

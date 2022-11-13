@@ -21,7 +21,6 @@
 #define PLAYER_HITBOX 50
 #define PLAYER_PICKUP 50
 
-#define FREE(x)
 
 int WHeight, WWidth;
 
@@ -157,10 +156,6 @@ void map_Update(void) {
 			isDead = 1;
 			isPaused = 1;
 		}
-		if (CP_Input_KeyDown(KEY_P)) {
-			PrintTree(ItemTracker->exptree, 0, 0);
-			printf("Player X:%4.2f | Y:%4.2f\n", P.x, P.y);
-		}
 		// Any objects below this function will be displaced by the camera movement
 		CameraDemo_Update(&P, &transform);
 		GenerateWaves();
@@ -197,10 +192,12 @@ void map_Update(void) {
 						cWave->CurrentCount -= 1;
 						MobCount[w] -= 1;
 						//ItemTracker->exptree = insertItemNode(ItemTracker->exptree, CreateItemEffect(cMob->x, cMob->y, 1, cMob->Title));
-						insertItemLink(&ItemTracker->tExp, CreateItemEffect(cMob->x, cMob->y, 1, cMob->Title));
-						//float rng = CP_Random_RangeFloat(0, 1);
-						//if(rng < 0.3)
-						//	ItemTracker->itemtree = insertItemNode(ItemTracker->itemtree, CreateItemEffect(cMob->x, cMob->y, 0, 0));
+						insertItemLink(&ItemTracker->ExpLL, CreateItemEffect(cMob->x, cMob->y, 1, cMob->Title));
+						float rng = CP_Random_RangeFloat(0, 1);
+						if (rng < 0.3) {
+							insertItemLink(&ItemTracker->ItemLL, CreateItemEffect(cMob->x, cMob->y, 0, 0));
+							ItemTracker->ItemCount++;
+						}
 						continue;
 					}
 					//cMob->h == 0 means haven drawn before. / assigned image to it yet
@@ -216,8 +213,11 @@ void map_Update(void) {
 	//		DrawItemTree(ItemTracker->exptree);
 	//		ItemPlayerCollision();
 	//	}
-		if (ItemTracker->tExp != NULL) {
-			ItemTracker->tExp = DrawItemLink(ItemTracker->tExp);
+		if (ItemTracker->ExpLL != NULL) {
+			ItemTracker->ExpLL = DrawItemLink(ItemTracker->ExpLL);
+		}
+		if (ItemTracker->ItemLL != NULL) {
+			ItemTracker->ItemLL = DrawItemLink(ItemTracker->ItemLL);
 		}
 		if (CP_Input_MouseDown(MOUSE_BUTTON_LEFT))
 		{
