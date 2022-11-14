@@ -209,7 +209,7 @@ void GenerateMobs(WaveTrack* tracker, Player* p) {
 void GenerateWaves(void) {
 	if (MobCycleTimer != (int)CP_System_GetSeconds()) {
 		MobCycleTimer = (int)CP_System_GetSeconds() - MobCycleTimer > 1 ? (int)CP_System_GetSeconds() : MobCycleTimer + 1;
-
+		printf("Current FPS: %f\n", CP_System_GetFrameRate());
 		if (MobCycleTimer % Wave_Timer == 0)
 			MaxMob += MaxMobGrowthRate;
 		if (MobCycleTimer % Spawn_Timer == 0) {

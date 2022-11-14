@@ -10,6 +10,7 @@
 
 #define EXP 0
 #define StatBoost 1
+#define MAGNET 2
 
 
 
@@ -24,7 +25,7 @@ typedef struct ItemStat {
 	*/
 	int Duration;// In Secs //-1 == Permanent
 	int Type;//Effect Type
-	int Modifier; //Stat Modified amt
+	float Modifier; //Stat Modified amt
 
 	//Coordinates
 	double x;
@@ -32,17 +33,12 @@ typedef struct ItemStat {
 	//-1 = Collected, 1 = Not collected;
 	//0 = initialised value
 	int collected;
+	int knockback;
 }Item;
 
 
 static const Item EmptyItem;
 
-//typedef struct ItemTreeNode {
-//	Item *key;
-//	CP_Vector point;
-//	struct ItemNode* left, *right;
-//	struct ItemNode* prev;	//int h; //height of current node;
-//}ItemNode;
 
 
 typedef struct ItemLink {
@@ -93,8 +89,6 @@ Item* CreateItemEffect(float x, float y, int exp, int expVal);
 void IAffectPlayer(Item* i, int method);
 
 
-//void DrawItemTree(ItemNode* node);
-//void PrintTree(ItemNode* root, int space, int depth);
 
 void ItemPlayerCollision(void);
 
@@ -109,45 +103,10 @@ void freeLink(ItemLink* head);
 
 extern int failedDelete;
 
-//KD -Tree
-//#define Dimension 2
-//ItemNode* newNode(Item *item);
-//extern int insertSuccess;
-//ItemNode* insertItemNode(ItemNode* root, Item *item);
-//ItemNode* insertItemRec(ItemNode* prev, ItemNode* root, Item *item, unsigned depth);
-//ItemNode* minNode(ItemNode* root, ItemNode* left, ItemNode* right, int d);
-//ItemNode* findMin(ItemNode* root, int d, unsigned int depth);
-//ItemNode* deleteItemNode(ItemNode* root, CP_Vector point, unsigned int depth);
-//
-////returns the searched item node
-//ItemNode* nearestNeighbour(ItemNode* root, CP_Vector point, unsigned int depth);
-//ItemNode* closest(ItemNode* n0, ItemNode* n1, CP_Vector point);
-//
-//void CleanTree(ItemNode* root);
-//void freeTree(ItemNode* root);
 
 void FreeItemResource(void);
 
 
 
-
-
-
-/*
-#pragma region
-int TreeHeight(ItemNode* current);
-int getBalance(ItemNode* current);
-
-ItemNode* newNode(Item item);
-ItemNode* insertItemNode(ItemNode* root, Item item);
-ItemNode* deleteItemNode(ItemNode* root, Item item);
-ItemNode* minValueNode(ItemNode* node);
-ItemNode* rightRotate(ItemNode* item);
-ItemNode* leftRotate(ItemNode* item);
-
-float getX(ItemNode* current);
-void freeTree(ItemNode* root);
-#pragma endregion
-*/
 
 #endif

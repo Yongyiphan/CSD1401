@@ -28,10 +28,10 @@ void CreateItemTracker() {
 	ItemTracker->expDrops = 0;
 	ItemTracker->ItemLL = NULL;
 	ItemTracker->ItemCount = 0;
-	printf("Size of ItemTrack %d | Pointer: %d\n", sizeof(ItemTrack), sizeof(ItemTrack*));
-	printf("Size of ItemLink %d | Pointer: %d\n", sizeof(ItemLink), sizeof(ItemLink*));
-	printf("Size of Item %d | Pointer: %d\n", sizeof(Item), sizeof(Item*));
-	printf("Stat\n");
+//	printf("Size of ItemTrack %d | Pointer: %d\n", sizeof(ItemTrack), sizeof(ItemTrack*));
+//	printf("Size of ItemLink %d | Pointer: %d\n", sizeof(ItemLink), sizeof(ItemLink*));
+//	printf("Size of Item %d | Pointer: %d\n", sizeof(Item), sizeof(Item*));
+//	printf("Stat\n");
 }
 
 
@@ -53,15 +53,15 @@ Item* CreateItemEffect(float x, float y, int exp, int expVal) {
 		newItem->AffectedBaseStat = expVal;
 		newItem->Duration = -1;
 		newItem->Modifier = pow(5, expVal + 1);
-		newItem->Hitbox = 32;
+		newItem->Hitbox = 25;
 		break;
 	case StatBoost: //All Base Stats Upgrade
 		newItem->AffectedBaseStat = CP_Random_RangeInt(0, NoBaseStats - 1);
-		newItem->Duration = 5; //in secs
+		newItem->Duration = 2; //in secs
 		newItem->Modifier = 10;
 		newItem->Hitbox = 32;
 		break;
-	case 2:
+	case MAGNET:
 		break;
 	}
 	newItem->Start = cSec;
@@ -69,6 +69,7 @@ Item* CreateItemEffect(float x, float y, int exp, int expVal) {
 	newItem->x = x;
 	newItem->y = y;
 	newItem->collected = 0;
+	newItem->knockback = 5;
 	return newItem;
 };
 
@@ -164,92 +165,6 @@ void DrawItemImage(Item* item) {
 	}
 }
 
-
-
-int NoDeleted = 0;
-/*
-void DrawItemTree(ItemNode* node) {
-	if (!node)
-		return;
-	if (node) {
-		if (node->key) {
-			CP_Vector target = CP_Vector_Set(P.x - node->key->x, P.y - node->key->y);
-			float dist = CP_Vector_Length(target);
-			if ( dist <= P.STATTOTAL.PICKUP_TOTAL) {
-				CP_Vector npoint = CP_Vector_Add(CP_Vector_Set(node->key->x, node->key->y), CP_Vector_Scale(CP_Vector_Normalize(target), 10));
-				node->key->x = npoint.x;
-				node->key->y = npoint.y;
-				node->point = npoint;
-			}
-			if (dist < P.HITBOX)
-				NoDeleted++;
-			//else
-				DrawItemImage(node->key);
-		}
-		if(node->left)
-			DrawItemTree(node->left);
-		if (node->right)
-			DrawItemTree(node->right);
-
-	}
-}
-#define COUNT 10
-void PrintTree(ItemNode* root, int space, int depth) {
-	if (root == NULL)
-		return;
-	space += COUNT;
-	char d = depth % Dimension == 0 ? 'X' : 'Y';
-	PrintTree(root->right, space, depth + 1);
-	printf("\n");
-	for (int i = COUNT; i < space; i++)
-        printf(" ");
-    printf("L(%c): %d | X: %4.3f | Y: %4.3f\n",d,depth, root->key->x, root->key->y);
- 
-	PrintTree(root->left, space, depth + 1);
-}
-
-#include <math.h>
-int deadcheck = 0;
-int failedDelete = 0;
-void ItemPlayerCollision(void) {
-	//if (ItemTracker->exptree != NULL) {
-	//	CP_Vector target = CP_Vector_Set(P.x, P.y);
-
-	//	ItemNode * nearest = nearestNeighbour(ItemTracker->exptree, target, 0);
-	//	float dist1 = CP_Math_Distance(target.x, target.y, nearest->point.x, nearest->point.y);
-	//	CP_Graphics_DrawLine(target.x, target.y, nearest->point.x, nearest->point.y);
-	//		
-	//	if (dist1 <= P.HITBOX) {
-	//		deadcheck = 0;
-	//		IAffectPlayer(nearest->key, 1);
-	//		printf("Removing %p | X: %f | Y: %f\n", nearest, nearest->point.x, nearest->point.y);
-	//		if (deadcheck == 0) {
-	//			failedDelete++;
-
-	//			printf("\nFailed Delete\nPointer: %p | X: %f | Y: %f\n", nearest, nearest->point.x, nearest->point.y);
-	//			printf("Printing Tree\n\n");
-	//			//CP_Engine_Terminate();
-	//		}
-	//		else
-	//			printf("Delete Successful %d\n", deadcheck);
-	//		
-	//	}
-	//}
-}
-
-void copyItem(Item* dst, Item* src) {
-	dst->AffectedBaseStat = src->AffectedBaseStat;
-	dst->Duration = src->Duration;
-	dst->Hitbox = src->Hitbox;
-	dst->Modifier = src->Modifier;
-	dst->Start = src->Start;
-	dst->Type = src->Type;
-	dst->x = src->x;
-	dst->y = src->y;
-}
-
-*/
-
 /*
 *	LINKED LIST IMPLEMENTATION
 */
@@ -261,16 +176,25 @@ ItemLink* DrawItemLink(ItemLink* head) {
 	
 	ItemLink* current = head, *next = NULL;
 	while (current != NULL) {
-	assert(_CrtCheckMemory());
-		if (current->key->collected == -1) {
-			goto SkipThis;
-		}
+	//assert(_CrtCheckMemory());
 		CP_Vector target = CP_Vector_Set(P.x - current->key->x, P.y - current->key->y);
 		float dist = CP_Vector_Length(target);
-		if ( dist <= P.STATTOTAL.PICKUP_TOTAL) {
-			CP_Vector npoint = CP_Vector_Add(CP_Vector_Set(current->key->x, current->key->y), CP_Vector_Scale(CP_Vector_Normalize(target), 10));
-			current->key->x = npoint.x;
-			current->key->y = npoint.y;
+		current->key->collected = dist < P.STATTOTAL.PICKUP_TOTAL ? -1 : 1;
+		if (current->key->collected == -1) {
+			float speed = dist * CP_System_GetDt() * 2, slowest = 10;
+			speed = speed > slowest ? speed : slowest;
+			printf("TYPE: %s\n", current->key->Type == EXP ? "EXP" : "Stat Boost");
+			CP_Vector Movement = CP_Vector_Scale(CP_Vector_Normalize(target), speed);
+			if (current->key->knockback > 0){
+				current->key->x -= Movement.x * 2;
+				current->key->y -= Movement.y * 2;
+				current->key->knockback--;
+				goto ToDraw;
+			}
+			else {
+				current->key->x += Movement.x;
+				current->key->y += Movement.y;
+			}
 		}
 		if (dist < P.HITBOX) {
 			if(current->key->Type == EXP) {
@@ -289,6 +213,7 @@ ItemLink* DrawItemLink(ItemLink* head) {
 				goto SkipThis;
 			}
 		}
+	
 		if (current->key->Type != EXP) {
 			if (current->key->collected == -1 && (int)CP_System_GetSeconds() - current->key->Start > current->key->Duration) {
 				//time to delete item's stat boost
@@ -301,10 +226,15 @@ ItemLink* DrawItemLink(ItemLink* head) {
 			}
 		}
 		//only draw items that are newly initialised or not collected
+	ToDraw:
 		DrawItemImage(current->key);
 	SkipThis:
 		current = current->next;
 	}
+
+MagnetHandle:
+	return head;
+
 	return head;
 }
 
@@ -321,7 +251,7 @@ void insertItemLink(ItemLink** head, Item* item) {
 		case EXP:
 			ItemTracker->expDrops++;
 			break;
-		case StatBoost:
+		default:
 			ItemTracker->ItemCount++;
 			break;
 	}
@@ -365,189 +295,7 @@ void freeLink(ItemLink* head) {
 #pragma endregion
 
 
-/*
-* KD TREE IMPLEMENTATION
-*/
-/*
-#pragma region
-
-ItemNode* newNode(Item *item) {
-	ItemNode* result = malloc(sizeof(ItemNode));
-	result->key = item;
-	//result->point = CP_Vector_Set(item.x, item.y);
-	result->point = CP_Vector_Set(item->x, item->y);
-	result->left = NULL;
-	result->right = NULL;
-	result->prev = NULL;
-	return result;
-}
-
-
-ItemNode* insertItemNode(ItemNode* root, Item *item) {
-	return insertItemRec(NULL, root, item, 0);
-}
-
-ItemNode* insertItemRec(ItemNode* prev, ItemNode* root, Item* item, unsigned depth) {
-	if (root == NULL) {
-		ItemNode* n = newNode(item);
-		n->prev = prev;
-		ItemTracker->expDrops++;
-		return n;
-	}
-	unsigned cd = depth % Dimension;
-	CP_Vector point = CP_Vector_Set(item->x, item->y);
-	//If root->prev == NULL, root == head
-	if (CP_Math_Distance((int)point.x, (int)point.y, (int)root->point.x, (int)root->point.y) <= item->Hitbox && item->Type == EXP) {
-		root->key->Modifier += 5;
-		return root;
-	}
-	if (point.v[cd] < root->point.v[cd]) 
-		root->left = insertItemRec(root, root->left, item, depth + 1);
-	else
-		root->right = insertItemRec(root, root->right, item, depth + 1);
-	return root;
-}
-
-
-ItemNode* minNode(ItemNode* root, ItemNode* left, ItemNode* right, int d) {
-	ItemNode* res = root;
-	if (left != NULL && left->point.v[d] < res->point.v[d])
-		res = left;
-	if (right != NULL && right->point.v[d] < res->point.v[d])
-		res = right;
-	return res;
-}
-
-ItemNode* findMin(ItemNode* root, int d, unsigned int depth) {
-	if (root == NULL)
-		return NULL;
-	unsigned cd = depth % Dimension;
-	if (cd == d) {
-	if (root->left == NULL)
-			return root;
-		return findMin(root->left, d, depth + 1);
-	}
-	//compare root, left, right
-	return minNode(root, 
-		findMin(root->left, d, depth + 1),
-		findMin(root->right, d, depth + 1),
-		d);
-}
-
-ItemNode* deleteItemNode(ItemNode* root, CP_Vector point, unsigned int depth) {
-	if (root == NULL)
-		return NULL;
-	unsigned int cd = depth % Dimension;
-	if (point.x == root->point.x && point.y == root->point.y) {
-		if (root->left == NULL && root->right == NULL) {
-			free(root);
-			root = NULL;
-			deadcheck = 1;
-			return NULL;
-		}
-		if (root->right != NULL) {
-			ItemNode* min = findMin(root->right, cd, 0);
-			free(root->key);
-			root->key = NULL;
-			root->key = min->key;
-
-			root->point = CP_Vector_Set(min->point.x, min->point.y);
-			root->right = deleteItemNode(root->right, min->point, depth + 1);
-		}
-		if(root->left != NULL) {
-			ItemNode* min = findMin(root->left, cd, 0);
-			free(root->key);
-			root->key = NULL;
-			root->key = min->key;
-
-			root->point = CP_Vector_Set(min->point.x, min->point.y);
-			root->right = deleteItemNode(root->left, min->point, depth + 1);
-			if (root->right == root->left)
-				root->left = NULL;
-		}
-		return root;
-	}
-	if(point.v[cd]<root->point.v[cd])
-		root->left = deleteItemNode(root->left, point, depth + 1);
-	else
-		root->right = deleteItemNode(root->right, point, depth + 1);
-	return root;
-}
-
-
-// SEARCH //
-#pragma region
-//returns the searched item node
-ItemNode* nearestNeighbour(ItemNode* root, CP_Vector point, unsigned int depth) {
-	if (root == NULL)
-		return NULL;
-
-	if (root->left == NULL && root->right == NULL)
-		return root;
-
-	unsigned int cd = depth % Dimension;
-	ItemNode* nextbranch, *otherbranch;
-	if (point.v[cd] < root->point.v[cd]) {
-		nextbranch = root->left;
-		otherbranch = root->right;
-	}
-	else {
-		nextbranch = root->right;
-		otherbranch = root->left;
-	}
-
-	ItemNode* temp = nearestNeighbour(nextbranch, point, depth + 1);
-	ItemNode* best = closest(temp, root, point);
-
-	float r = squareDist(best->point.x - point.x, best->point.y - point.y);
-	float rprime = point.v[cd] - root->point.v[cd];
-	if (r > squareDist(rprime, 0)) {
-		temp = nearestNeighbour(otherbranch, point, depth + 1);
-		best = closest(temp, best, point);
-	}
-
-	return best;
-}
-
-ItemNode* closest(ItemNode* n0, ItemNode* n1, CP_Vector point) {
-	//n0 = left
-	//n1 = right
-	if (n0 == NULL)
-		return n1;
-	if (n1 == NULL)
-		return n0;
-	float d0 = squareDist(point.x - n0->point.x, point.y - n0->point.y);
-	float d1 = squareDist(point.x - n1->point.x, point.y - n1->point.y);
-	
-	return d0 < d1 ? n0 : n1;
-}
-#pragma endregion
-
-#pragma endregion
-*/
-
-// CLEAN UP //
-#pragma region
-//void CleanTree(ItemNode* root) {
-//	if (NULL == root)
-//		return;
-//
-//	if (CP_Vector_Distance(CP_Vector_Set(P.x, P.y), root->point) <= 50) {
-//		//ItemTracker->exptree = deleteItemNode(ItemTracker->exptree, root->point, 0);
-//		failedDelete--;
-//		return;
-//	}
-//	CleanTree(root->left);
-//	CleanTree(root->right);
-//}
-
 void FreeItemResource(void) {
-
-	//for (int i = 0; i < ItemTracker->arrSize;i++) {
-	//	free(ItemTracker->arr[i]);
-	//}
-	//free(ItemTracker->arr);
-	
 	printf("Freeing Item Images\n");
 	for (int i = 0; i < Img_C; i++) {
 		CP_Image* c = ItemSprites[i];
@@ -558,23 +306,8 @@ void FreeItemResource(void) {
 	freeLink(ItemTracker->ItemLL);
 	freeLink(ItemTracker->ExpLL);
 	free(ItemTracker);
-	//assert(_CrtCheckMemory());
 	printf("Freeing Item Structures\n");
 }
-
-
-//void freeTree(ItemNode* root) {
-//	if (root == NULL)
-//		return NULL;
-//	free(root->key);
-//	root->key = NULL;
-//	freeTree(root->left);
-//	root->left = NULL;
-//	freeTree(root->right);
-//	root->right = NULL;
-//	free(root);
-//	root = NULL;
-//}
 
 #pragma endregion
 

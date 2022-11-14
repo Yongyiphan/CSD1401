@@ -129,8 +129,7 @@ void map_Update(void) {
 		}
 		// Increase speed of the player
 		if (CP_Input_KeyTriggered(KEY_H)){
-			P.STATMULT.SPEED_MULT *= 1.1f;
-			P.HITBOX += 10;
+			P.STATMULT.SPEED_MULT /= 1.1f;
 		}
 		if (CP_Input_KeyTriggered(KEY_M)){
 			P.STATMULT.PICKUP_MULT *= 1.1;
@@ -159,12 +158,14 @@ void map_Update(void) {
 		// Any objects below this function will be displaced by the camera movement
 		CameraDemo_Update(&P, &transform);
 		GenerateWaves();
+		CP_Settings_NoFill();
+		CP_Graphics_DrawCircle(P.x, P.y, P.STATTOTAL.PICKUP_TOTAL);
 		for (int w = 0; w < NO_WAVES; w++) {
 			if (WaveIDQueue[w] == -1) {
 				continue;
 			}
 			cWave = &WaveTracker[w];
-			if (cWave->CurrentCount == 0 || (MobCycleTimer % 10 == 0 && cWave->CurrentCount == 1)) {
+			if (cWave->CurrentCount == 0 || (MobCycleTimer % 3 == 0 && cWave->CurrentCount == 1)) {
 				//if all mobs are dead
 				//return index to wave queue
 				WaveIDQueue[w] = -1;
@@ -194,9 +195,9 @@ void map_Update(void) {
 						//ItemTracker->exptree = insertItemNode(ItemTracker->exptree, CreateItemEffect(cMob->x, cMob->y, 1, cMob->Title));
 						insertItemLink(&ItemTracker->ExpLL, CreateItemEffect(cMob->x, cMob->y, 1, cMob->Title));
 						float rng = CP_Random_RangeFloat(0, 1);
-						if (rng < 0.3) {
-							insertItemLink(&ItemTracker->ItemLL, CreateItemEffect(cMob->x, cMob->y, 0, 0));
-							ItemTracker->ItemCount++;
+						if (rng < 0.03) {
+							//insertItemLink(&ItemTracker->ItemLL, CreateItemEffect(cMob->x, cMob->y, 0, 0));
+							//ItemTracker->ItemCount++;
 						}
 						continue;
 					}
