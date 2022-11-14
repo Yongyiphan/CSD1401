@@ -467,7 +467,7 @@ void MobTPlayerCollision(Mob* m, Player* p) {
 	
 	if (CP_Vector_Length(CP_Vector_Subtract(m->coor, p->coor)) <= p->HITBOX * 2) {
 		m->CStats.HP -= p->STATTOTAL.DAMAGE_TOTAL;
-		//p->CURRENT_HP -= m->CStats.Dmg;
+		p->CURRENT_HP -= m->CStats.Dmg;
 	}
 	if (m->CStats.HP <= 0) {
 		m->Status = 0;

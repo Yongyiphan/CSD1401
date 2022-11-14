@@ -91,9 +91,6 @@ void IAffectPlayer(Item* i, int method);
 
 
 
-void ItemPlayerCollision(void);
-
-void copyItem(Item* dst, Item* src);
 
 
 ItemLink* DrawItemLink(ItemLink* head);

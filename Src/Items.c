@@ -25,41 +25,45 @@ ItemTrack* ItemTracker;
 void CreateItemTracker() {
     ItemTracker = malloc(sizeof(ItemTrack));
 	*ItemTracker = (ItemTrack){ 0 };
-	//ItemTracker->ExpLL = NULL;
-	//ItemTracker->expDrops = 0;
-	//ItemTracker->ItemLL = NULL;
-	//ItemTracker->ItemCount = 0;
 }
 
 
 
 #include <stdio.h>
 #pragma region
+int MagnetCDTimer = 10;
 Item* CreateItemEffect(float x, float y, int exp, int expVal) {
 	//Get Random chance generator
 	float RNG = CP_Random_RangeFloat(0, 1), DropChance;
 	//Get Random Type of effect
-	int noEffect = 2, EType = CP_Random_RangeInt(1, noEffect - 1), cSec = (int)CP_System_GetSeconds();
+	int noEffect = 2, EType = CP_Random_RangeInt(1, noEffect), cSec = (int)CP_System_GetSeconds();
 	if(exp)
 		EType = 0;
-	char* StatType;
+
 	Item* newItem = malloc(sizeof(Item));
 	*newItem = EmptyItem;
+
 	switch (EType) {
-	//char* PStats[] = {"HEALTH", "SPEED", "DAMAGE", "FIRE RATE", "BULLET SPEED"};
+		//char* PStats[] = {"HEALTH", "SPEED", "DAMAGE", "FIRE RATE", "BULLET SPEED"};
 	case EXP:
 		newItem->AffectedBaseStat = expVal;
 		newItem->Duration = -1;
-		newItem->Modifier = pow(5, expVal + 1);
+		newItem->Modifier = (float)pow(5, expVal + 1);
 		newItem->Hitbox = 25;
 		break;
 	case StatBoost: //All Base Stats Upgrade
 		newItem->AffectedBaseStat = CP_Random_RangeInt(0, NoBaseStats - 1);
 		newItem->Duration = 2; //in secs
-		newItem->Modifier = 10;
+		newItem->Modifier = 0.30;
+		if (newItem->AffectedBaseStat == 0) {
+			newItem->Duration = -1;
+			newItem->Modifier = 10;
+		}
 		newItem->Hitbox = 32;
 		break;
 	case MAGNET:
+		newItem->Duration = 2;
+		newItem->Hitbox = 32;
 		break;
 	}
 	newItem->Start = cSec;
@@ -73,39 +77,33 @@ Item* CreateItemEffect(float x, float y, int exp, int expVal) {
 };
 
 
-
-
-
-
 void IAffectPlayer(Item* item, int method) {
 	int cSec = (int)CP_System_GetSeconds();
-	int boost = item->Modifier * method;
+	int boost = 1 + item->Modifier;
 	switch (item->Type) {
 		case StatBoost://Affect Base Stats
 		switch (item->AffectedBaseStat) {
 			case 0://HP
-				P.CURRENT_HP += boost;
+				P.CURRENT_HP += item->Modifier;
 				break;
 			case 1://Movement Speed
-				P.STAT.SPEED += boost;
+				P.STATMULT.SPEED_MULT = method > 0 ? P.STATMULT.SPEED_MULT * boost : P.STATMULT.SPEED_MULT / boost;
 				break;
 			case 2://Damage
-				P.STAT.DAMAGE += boost;
+				P.STATMULT.DAMAGE_MULT = method > 0 ? P.STATMULT.DAMAGE_MULT * boost : P.STATMULT.DAMAGE_MULT/ boost;
 				break;
 			case 3://Attack speed
-				P.STAT.ATK_SPEED += boost;
+				P.STATMULT.ATK_SPEED_MULT = method > 0 ? P.STATMULT.ATK_SPEED_MULT * boost : P.STATMULT.ATK_SPEED_MULT / boost;
 				break;
 			case 4://Bullet Speed
 				break;
 			case 5:
-				P.STAT.MAX_HP += boost;
+				P.STATMULT.SPEED_MULT = method > 0 ? P.STATMULT.SPEED_MULT * boost : P.STATMULT.SPEED_MULT / boost;
 				break;
 		}
-		//printf("Player %s increased by %d\n", GetBaseStats(item->AffectedBaseStat), item->Modifier);
 		case EXP:
 			P.LEVEL.P_EXP += item->Modifier;
 			level_up(&P.LEVEL.P_EXP, &P.LEVEL.EXP_REQ, &P.LEVEL.VAL);
-			//printf("Item x: %f | y: %f\n", item->x, item->y);
 			break;
 	}
 }
@@ -117,6 +115,7 @@ void ItemLoadImage(void) {
 	char* FilePaths[] = {
 		"./Assets/Items/EXP Sprite.png",
 		"./Assets/Items/Base Item Sprite.png",
+		"./Assets/Items/Magnet.png",
 	};
 
 	Img_C = (sizeof(FilePaths) / sizeof(FilePaths[0]));
@@ -157,7 +156,15 @@ void DrawItemImage(Item* item) {
 				item->AffectedBaseStat * IWidth + IWidth - rightOS,
 				IHeight - btmOS,		
 				255);
-
+		break;
+	case MAGNET:
+		IWidth = CP_Image_GetWidth(SImg);
+		CP_Image_DrawSubImage(SImg, item->coor.x + pw, item->coor.y,pw, ph,
+			0,
+			0,
+			IWidth,
+			IHeight,
+			255);
 		break;
 	default:
 		break;
@@ -169,24 +176,29 @@ void DrawItemImage(Item* item) {
 */
 #pragma region
 
+int IsMagnet = 0, ToCollect = 0;
 ItemLink* DrawItemLink(ItemLink* head) {
 	if (head == NULL)
 		return;
 	
 	ItemLink* current = head, *next = NULL;
-	while (current != NULL) {
 	//assert(_CrtCheckMemory());
-		//CP_Vector target = CP_Vector_Set(P.x - current->key->x, P.y - current->key->y);
+	while (current != NULL) {
+		if (IsMagnet && ToCollect > 0)
+			P.STATTOTAL.PICKUP_TOTAL = 3000;
 		CP_Vector target = CP_Vector_Subtract(CP_Vector_Set(P.x, P.y), current->key->coor);
 		float dist = CP_Vector_Length(target);
 		if (dist < P.STATTOTAL.PICKUP_TOTAL)
 			current->key->collected = -1;
-
 		if (current->key->collected == -1) {
+			if (current->key->Type == MAGNET) {
+				IsMagnet = 1;
+				ToCollect = ItemTracker->expDrops + ItemTracker->ItemCount;
+			}
 			float speed = dist * CP_System_GetDt() * 2, slowest = 10;
 			speed = speed > slowest ? speed : slowest;
-			//printf("TYPE: %s\n", current->key->Type == EXP ? "EXP" : "Stat Boost");
-			CP_Vector Movement = CP_Vector_Scale(CP_Vector_Normalize(target), speed);
+			CP_Vector Movement = CP_Vector_Scale(CP_Vector_Normalize(target), speed * 2);
+
 			if (current->key->knockback > 0){
 				current->key->coor = CP_Vector_Subtract(current->key->coor, Movement);
 				current->key->knockback--;
@@ -203,12 +215,23 @@ ItemLink* DrawItemLink(ItemLink* head) {
 				deleteItemLink(&head, current->key);
 				current = next;
 				ItemTracker->expDrops--;
+				if (ToCollect > 0)
+					ToCollect--;
 				continue;
 			}
 			else {
 				//if collected item, start its duration timer
+				if (current->key->Duration == -1) {
+					IAffectPlayer(current->key, 1);
+					next = current->next;
+					deleteItemLink(&head, current->key);
+					current = next;
+					ItemTracker->expDrops--;
+					if (ToCollect > 0)
+						ToCollect--;
+					continue;
+				}
 				if (current->key->applying == 0) {
-					printf("Applying %s buff\n", GetBaseStats(current->key->AffectedBaseStat));
 					IAffectPlayer(current->key, 1);
 					current->key->Start = (int)CP_System_GetSeconds();
 					current->key->applying = 1;
@@ -217,20 +240,19 @@ ItemLink* DrawItemLink(ItemLink* head) {
 			}
 		}
 	
-		if (current->key->Type != EXP) {
-			if (current->key->applying == 1) {
-				if ((int)CP_System_GetSeconds() - current->key->Start > current->key->Duration) {
-					//time to delete item's stat boost
-					printf("Removing %s buff\n", GetBaseStats(current->key->AffectedBaseStat));
-					IAffectPlayer(current->key, -1);
-					next = current->next;
-					deleteItemLink(&head, current->key);
-					current = next;
-					ItemTracker->ItemCount--;
-					continue;
-				}
-				goto SkipThis;
+		if (current->key->Type != EXP && current->key->applying == 1) {
+			if ((int)CP_System_GetSeconds() - current->key->Start > current->key->Duration) {
+				//time to delete item's stat boost
+				IAffectPlayer(current->key, -1);
+				next = current->next;
+				deleteItemLink(&head, current->key);
+				current = next;
+				ItemTracker->ItemCount--;
+				if (ToCollect > 0)
+					ToCollect--;
+				continue;
 			}
+			goto SkipThis;
 		}
 		//only draw items that are newly initialised or not collected
 	ToDraw:
@@ -238,9 +260,6 @@ ItemLink* DrawItemLink(ItemLink* head) {
 	SkipThis:
 		current = current->next;
 	}
-
-MagnetHandle:
-	return head;
 
 	return head;
 }
@@ -266,6 +285,7 @@ void insertItemLink(ItemLink** head, Item* item) {
 	(*head) = nLink;
 
 }
+
 void deleteItemLink(ItemLink**head, Item* item) {
 	ItemLink* curr = *head, * prev = NULL;
 
@@ -316,5 +336,4 @@ void FreeItemResource(void) {
 	printf("Freeing Item Structures\n");
 }
 
-#pragma endregion
 

@@ -32,7 +32,7 @@ void Player_Init(Player* P) {
 	P_stats_total = (StatsTotal){ PLAYER_HP, PLAYER_SPEED, PLAYER_DAMAGE, ATK_SPD, PLAYER_DEFENSE, PLAYER_PICKUP };
 	level = (LEVEL){ 0, 0, 10 };
 
-	*P = (Player){ start_vector.x, start_vector.y, 90, P_stats, P_stats_mult, P_stats_total, PLAYER_HITBOX, level};
+	*P = (Player){ start_vector.x, start_vector.y, PLAYER_HP, P_stats, P_stats_mult, P_stats_total, PLAYER_HITBOX, level};
 	P->coor = CP_Vector_Set(P->x, P->y);
 }
 
@@ -44,6 +44,7 @@ void Player_Stats_Update(Player* P) {
 	P->STATTOTAL.DAMAGE_TOTAL = P->STAT.DAMAGE * P->STATMULT.DAMAGE_MULT;
 	P->STATTOTAL.DEFENSE_TOTAL = P->STAT.DEFENSE * P->STATMULT.DEFENSE_MULT;
 	P->STATTOTAL.PICKUP_TOTAL = P->STAT.PICKUP * P->STATMULT.PICKUP_MULT;
+	P->STATTOTAL.ATK_SPEED_TOTAL = P->STAT.ATK_SPEED * P->STATMULT.ATK_SPEED_MULT;
 	
 }
 

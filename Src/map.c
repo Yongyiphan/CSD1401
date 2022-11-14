@@ -56,9 +56,9 @@ void map_Init(void) {
 	CreateItemTracker();
 	MobLoadImage();
 	ItemLoadImage();
-	//Item* one = CreateItemEffect(600, 500);
+	Item* magnet = CreateItemEffect(600, 500, MAGNET, 0);
 	//ItemTracker->tree = insertItemNode(ItemTracker->tree, one);
-	
+	insertItemLink(&ItemTracker->ItemLL, magnet);
 	Player_Init(&P);
 	CameraDemo_Init();
 	Bulletinit();
@@ -95,29 +95,29 @@ void map_Update(void) {
 			isPaused = 1;
 		}
 		// Increase speed of the player
-		if (CP_Input_KeyTriggered(KEY_H)){
-			P.STATMULT.SPEED_MULT /= 1.1f;
-		}
-		if (CP_Input_KeyTriggered(KEY_M)){
-			P.STATMULT.PICKUP_MULT *= 1.1;
-		}
+		//if (CP_Input_KeyTriggered(KEY_H)){
+		//	P.STATMULT.SPEED_MULT /= 1.1f;
+		//}
+		//if (CP_Input_KeyTriggered(KEY_M)){
+		//	P.STATMULT.PICKUP_MULT *= 1.1;
+		//}
 		// Open up the Upgrade Screen
 		if (CP_Input_KeyTriggered(KEY_U) && isMenu == 0) {
 			isMenu = 1;
 			isPaused = 1;
 		}
-		// Testing for leveling up
-		if (CP_Input_KeyDown(KEY_L)) {
-			P.LEVEL.P_EXP += 5;
-			level_up(&P.LEVEL.P_EXP, &P.LEVEL.EXP_REQ, &P.LEVEL.VAL);
-		}
-		// Manually control the HP of the player for testing
-		if (CP_Input_KeyDown(KEY_Q)) {
-			P.CURRENT_HP -= 4;
-		}
-		else if (CP_Input_KeyDown(KEY_E)) {
-			P.CURRENT_HP += 4;
-		}
+		//// Testing for leveling up
+		//if (CP_Input_KeyDown(KEY_L)) {
+		//	P.LEVEL.P_EXP += 5;
+		//	level_up(&P.LEVEL.P_EXP, &P.LEVEL.EXP_REQ, &P.LEVEL.VAL);
+		//}
+		//// Manually control the HP of the player for testing
+		//if (CP_Input_KeyDown(KEY_Q)) {
+		//	P.CURRENT_HP -= 4;
+		//}
+		//else if (CP_Input_KeyDown(KEY_E)) {
+		//	P.CURRENT_HP += 4;
+		//}
 		if (P.CURRENT_HP <= 0) {
 			isDead = 1;
 			isPaused = 1;
@@ -165,7 +165,7 @@ void map_Update(void) {
 						//ItemTracker->exptree = insertItemNode(ItemTracker->exptree, CreateItemEffect(cMob->x, cMob->y, 1, cMob->Title));
 						insertItemLink(&ItemTracker->ExpLL, CreateItemEffect(cMob->coor.x, cMob->coor.y, 1, cMob->Title));
 						float rng = CP_Random_RangeFloat(0, 1);
-						if (rng < 0.13) {
+						if (rng < 0.23) {
 							insertItemLink(&ItemTracker->ItemLL, CreateItemEffect(cMob->coor.x, cMob->coor.y, 0, 0));
 							ItemTracker->ItemCount++;
 						}
