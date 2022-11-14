@@ -45,7 +45,7 @@ void BulletType(int type, float coordx, float coordy, float angle, int friendly)
 		if (friendly == BULLET_MOB) bullet[bulletcounter].friendly = BULLET_MOB; else bullet[bulletcounter].friendly = BULLET_PLAYER;
 		bullet[bulletcounter].type = PBULLET_NORMAL;
 		bullet[bulletcounter].size = 10 * 1;
-		bullet[bulletcounter].speed = 10 * 1;
+		bullet[bulletcounter].speed = 20 * 1;
 		bullet[bulletcounter].maxdistance = 200 * 1;
 		bullet[bulletcounter].damage = 10 * 1;
 		bullet[bulletcounter].exist = TRUE;
@@ -139,7 +139,7 @@ int BulletCollision(float targetx, float targety, float width, float height)
 		if (bullet[i].exist == FALSE)
 			continue;
 		if (bullet[i].type == PBULLET_HOMING) BulletHomingTrack(targetx, targety, width, i);
-		CP_Graphics_DrawCircle(targetx, targety, width); // Draws hitbox zone of mob
+		//CP_Graphics_DrawCircle(targetx, targety, width); // Draws hitbox zone of mob
 		distance = CP_Math_Distance(bullet[i].x, bullet[i].y, targetx, targety);
 		if (distance < width)
 			return i;

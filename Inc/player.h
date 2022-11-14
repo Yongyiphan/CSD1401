@@ -3,6 +3,7 @@
 #define PLAYER_H
 
 #include "bullet.h"
+#include "cprocessing.h"
 
 extern int NoBaseStats;
 
@@ -48,6 +49,7 @@ typedef struct Player{
 	StatsTotal STATTOTAL;
 	int HITBOX;
 	LEVEL LEVEL;
+	CP_Vector coor;
 	
 }Player;
 

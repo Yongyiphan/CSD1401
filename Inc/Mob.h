@@ -30,13 +30,15 @@ typedef struct Mob {
 
 	MobStats BaseStats;
 	MobStats CStats;
-	float x, y;
+	//float x, y;
+	CP_Vector coor;
 	int Status; 
 	int AnimationCycle;
 	int w, h;
 	//Dead = 0 | Alive = 1
 } Mob;
 
+static const struct Mob EmptyMob;
  
 
 typedef struct WaveTracker {

@@ -28,11 +28,12 @@ typedef struct ItemStat {
 	float Modifier; //Stat Modified amt
 
 	//Coordinates
-	double x;
-	double y;
-	//-1 = Collected, 1 = Not collected;
+	//double x;
+	//double y;
+	CP_Vector coor;
+	//-1 = Collected, 1 = Not collected, 2 = applying;
 	//0 = initialised value
-	int collected;
+	int collected, applying;
 	int knockback;
 }Item;
 

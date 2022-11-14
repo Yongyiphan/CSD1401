@@ -101,12 +101,12 @@ void CreateMob(Mob*m, MobStats *Base, Player*player, int offSet)
 	r = sqrt(CP_Random_RangeFloat(0, 1) * (squareDist(MaxRadius,0) - squareDist(offSet, 0)) + squareDist(offSet,0));
 	nx = player->x + r * cos(rTheta);
 	ny = player->y + r * sin(rTheta);
-
+	m->coor = CP_Vector_Add(CP_Vector_Scale(CP_Vector_Set(cos(rTheta), sin(rTheta)), r), player->coor);
 
 	m->BaseStats = *Base;
 	m->CStats = *Base;
-	m->x = nx;
-	m->y = ny;
+	//m->x = nx;
+	//m->y = ny;
 	m->Status = 1;
 	m->AnimationCycle = 0;
 	m->w = 0;
@@ -149,16 +149,13 @@ void InitWavesArr(WaveTrack* tracker, int start) {
 		//Allocate memory to it
 		tracker->arr[w] = malloc(sizeof(Mob));
 		//Fill each mob pointers with data
+		*tracker->arr[w] = (Mob){ 0 };
 		tracker->arr[w]->Title = w;
 		tracker->arr[w]->BaseStats = bs;
 		tracker->arr[w]->CStats = bs;
-		tracker->arr[w]->x = 0;
-		tracker->arr[w]->y = 0;
 		//Dead = 0, Alive = 1, Blank = 2
 		tracker->arr[w]->Status = 2;
-		tracker->arr[w]->AnimationCycle = 0;
-		tracker->arr[w]->w = 0;
-		tracker->arr[w]->h = 0;
+		tracker->arr[w]->coor = CP_Vector_Zero();
 	}
 }
 
@@ -286,11 +283,11 @@ void DrawMobImage(Mob* m, Player* p) {
 	MM = 1, 1 * 2 = 2
 	BM = 2, 2 * 2 = 4
 	*/
-	if (CP_Math_Distance(m->x, m->y, p->x, p->y) <= p->HITBOX) {
+	if(CP_Vector_Distance(m->coor, p->coor) <= p->HITBOX){
 		//Dying
 		alpha = (m->CStats.HP / m->BaseStats.HP) * 255;
 	}
-	if (m->x > p->x) {
+	if (m->coor.x > p->coor.x) {
 		StartImgI += 1;
 		flip = 1;
 	}
@@ -319,7 +316,7 @@ void DrawMobImage(Mob* m, Player* p) {
 
 			FrameStep = (m->AnimationCycle / targetFPS) % SizeDef;
 			
-			CP_Image_DrawSubImage(SImg, m->x, m->y,m->w, m->h, 
+			CP_Image_DrawSubImage(SImg, m->coor.x, m->coor.y,m->w, m->h, 
 				FrameStep * IWidth + leftOS,
 				topOS,
 				FrameStep * IWidth + IWidth - rightOS,
@@ -343,7 +340,7 @@ void DrawMobImage(Mob* m, Player* p) {
 				m->w = targetSize * t;
 			}
 			FrameStep = (m->AnimationCycle / targetFPS) % SizeDef;
-			CP_Image_DrawSubImage(SImg, m->x, m->y, m->w, m->h,
+			CP_Image_DrawSubImage(SImg, m->coor.x, m->coor.y, m->w, m->h,
 				FrameStep * IWidth + leftOS,
 				topOS,
 				FrameStep * IWidth + IWidth - rightOS,
@@ -389,8 +386,8 @@ void MobTMobCollision(Mob* m) {
 			dist will be left in squared form
 		*/
 		float mRad = squareDist(m->w/2, m->h/2), tmRad;
-		float dMtoP = squareDist(P.x-m->x, P.y-m->y), dTMtoP, dMtoTM;
-		CP_Vector vMtoP = CP_Vector_Set(P.x - m->x, P.y - m->y);
+		float dMtoP = squareDist(P.x-m->coor.x, P.y-m->coor.y), dTMtoP, dMtoTM;
+		CP_Vector vMtoP = CP_Vector_Subtract(P.coor, m->coor);
 		CP_Vector NormBase = CP_Vector_Normalize(vMtoP);
 		CP_Vector BasePF = CP_Vector_Scale(NormBase, m->CStats.Speed);
 #pragma region
@@ -412,8 +409,8 @@ void MobTMobCollision(Mob* m) {
 							->if M collide with another mob and is same vector direction pause
 						*/
 						tmRad = squareDist(tm->w / 2, tm->h / 2);
-						dMtoTM = squareDist(m->x - tm->x, m->y - tm->y);
-						dTMtoP = squareDist(P.x - tm->x, P.y - tm->y);
+						dMtoTM = squareDist(m->coor.x - tm->coor.x, m->coor.y - tm->coor.y);
+						dTMtoP = squareDist(P.x - tm->coor.x, P.y - tm->coor.y);
 						if (dMtoTM <= mRad + tmRad && dMtoP < dTMtoP) {
 							main = m;
 							bounce = tm;
@@ -422,8 +419,8 @@ void MobTMobCollision(Mob* m) {
 								Vector bounce to main
 								Vector bounce to p
 							*/
-							CP_Vector vBounceToMain = CP_Vector_Set(m->x - tm->x, m->y - tm->y);
-							CP_Vector vBounceToP = CP_Vector_Set(P.x - tm->x, P.y - tm->y);
+							CP_Vector vBounceToMain = CP_Vector_Set(m->coor.x - tm->coor.x, m->coor.y - tm->coor.y);
+							CP_Vector vBounceToP = CP_Vector_Set(P.x - tm->coor.x, P.y - tm->coor.y);
 							if (vBounceToMain.x == vBounceToP.x && vBounceToMain.y == vBounceToMain.y) {
 								goto BasicMovement;
 							}
@@ -439,12 +436,14 @@ void MobTMobCollision(Mob* m) {
 								0, 0, 0
 							);
 							CP_Vector nDirection = CP_Vector_Normalize(CP_Vector_MatrixMultiply(rot, vBounceToP));
-							CP_Vector mainDirection = CP_Vector_Scale(CP_Vector_Normalize(CP_Vector_Set(P.x - m->x, P.y - m->y)), m->CStats.Speed);
-							bounce->x -= nDirection.x;
-							bounce->y -= nDirection.y;
+							CP_Vector mainDirection = CP_Vector_Scale(CP_Vector_Normalize(CP_Vector_Set(P.x - m->coor.x, P.y - m->coor.y)), m->CStats.Speed);
+							//bounce->x -= nDirection.x;
+							//bounce->y -= nDirection.y;
+							bounce->coor = CP_Vector_Subtract(bounce->coor, nDirection);
 							if (m != main) {
-								main->x += mainDirection.x;
-								main->y += mainDirection.y;
+								main->coor = CP_Vector_Add(main->coor, mainDirection);
+							//	main->x += mainDirection.x;
+							//	main->y += mainDirection.y;
 								status = 1;
 							}
 							goto BasicMovement;
@@ -457,15 +456,16 @@ void MobTMobCollision(Mob* m) {
 #pragma endregion
 	BasicMovement:
 		if (0 == status) {
-			m->x += BasePF.x;
-			m->y += BasePF.y;
+			m->coor = CP_Vector_Add(m->coor, BasePF);
+		//	m->x += BasePF.x;
+		//	m->y += BasePF.y;
 		}
 	}
 }
 
 void MobTPlayerCollision(Mob* m, Player* p) {
 	
-	if (CP_Vector_Length(CP_Vector_Set(p->x-m->x, p->y-m->y)) <= p->HITBOX * 2) {
+	if (CP_Vector_Length(CP_Vector_Subtract(m->coor, p->coor)) <= p->HITBOX * 2) {
 		m->CStats.HP -= p->STATTOTAL.DAMAGE_TOTAL;
 		//p->CURRENT_HP -= m->CStats.Dmg;
 	}

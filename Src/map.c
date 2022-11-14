@@ -150,7 +150,7 @@ void map_Update(void) {
 					MobTMobCollision(cMob);
 					MobTPlayerCollision(cMob, &P);
 					int bchecker;
-					if ((bchecker = BulletCollision(cMob->x, cMob->y, cMob->w, cMob->h)) >= 0 && bullet[bchecker].friendly == BULLET_PLAYER
+					if ((bchecker = BulletCollision(cMob->coor.x, cMob->coor.y, cMob->w, cMob->h)) >= 0 && bullet[bchecker].friendly == BULLET_PLAYER
 						&& bullet[bchecker].exist == TRUE)
 					{
 						cMob->CStats.HP -= bullet[bchecker].damage;
@@ -163,16 +163,16 @@ void map_Update(void) {
 						cWave->CurrentCount -= 1;
 						MobCount[w] -= 1;
 						//ItemTracker->exptree = insertItemNode(ItemTracker->exptree, CreateItemEffect(cMob->x, cMob->y, 1, cMob->Title));
-						insertItemLink(&ItemTracker->ExpLL, CreateItemEffect(cMob->x, cMob->y, 1, cMob->Title));
+						insertItemLink(&ItemTracker->ExpLL, CreateItemEffect(cMob->coor.x, cMob->coor.y, 1, cMob->Title));
 						float rng = CP_Random_RangeFloat(0, 1);
-						if (rng < 0.03) {
-							//insertItemLink(&ItemTracker->ItemLL, CreateItemEffect(cMob->x, cMob->y, 0, 0));
-							//ItemTracker->ItemCount++;
+						if (rng < 0.13) {
+							insertItemLink(&ItemTracker->ItemLL, CreateItemEffect(cMob->coor.x, cMob->coor.y, 0, 0));
+							ItemTracker->ItemCount++;
 						}
 						continue;
 					}
 					//cMob->h == 0 means haven drawn before. / assigned image to it yet
-					if (P.x - WWidth/2 - cMob->w < cMob->x && cMob->x < P.x + WWidth/2 + cMob->w && P.y - WHeight/2 - cMob->h < cMob->y && cMob->y < P.y + WHeight/2 + cMob->h || cMob->h == 0) {
+					if (P.x - WWidth/2 - cMob->w < cMob->coor.x && cMob->coor.x < P.x + WWidth/2 + cMob->w && P.y - WHeight/2 - cMob->h < cMob->coor.y && cMob->coor.y < P.y + WHeight/2 + cMob->h || cMob->h == 0) {
 						DrawMobImage(cMob, &P);
 					}
 				}

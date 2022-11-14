@@ -24,14 +24,11 @@
 ItemTrack* ItemTracker;
 void CreateItemTracker() {
     ItemTracker = malloc(sizeof(ItemTrack));
-	ItemTracker->ExpLL = NULL;
-	ItemTracker->expDrops = 0;
-	ItemTracker->ItemLL = NULL;
-	ItemTracker->ItemCount = 0;
-//	printf("Size of ItemTrack %d | Pointer: %d\n", sizeof(ItemTrack), sizeof(ItemTrack*));
-//	printf("Size of ItemLink %d | Pointer: %d\n", sizeof(ItemLink), sizeof(ItemLink*));
-//	printf("Size of Item %d | Pointer: %d\n", sizeof(Item), sizeof(Item*));
-//	printf("Stat\n");
+	*ItemTracker = (ItemTrack){ 0 };
+	//ItemTracker->ExpLL = NULL;
+	//ItemTracker->expDrops = 0;
+	//ItemTracker->ItemLL = NULL;
+	//ItemTracker->ItemCount = 0;
 }
 
 
@@ -47,6 +44,7 @@ Item* CreateItemEffect(float x, float y, int exp, int expVal) {
 		EType = 0;
 	char* StatType;
 	Item* newItem = malloc(sizeof(Item));
+	*newItem = EmptyItem;
 	switch (EType) {
 	//char* PStats[] = {"HEALTH", "SPEED", "DAMAGE", "FIRE RATE", "BULLET SPEED"};
 	case EXP:
@@ -66,8 +64,9 @@ Item* CreateItemEffect(float x, float y, int exp, int expVal) {
 	}
 	newItem->Start = cSec;
 	newItem->Type = EType;
-	newItem->x = x;
-	newItem->y = y;
+	//newItem->x = x;
+	//newItem->y = y;
+	newItem->coor = CP_Vector_Set(x, y);
 	newItem->collected = 0;
 	newItem->knockback = 5;
 	return newItem;
@@ -138,7 +137,7 @@ void DrawItemImage(Item* item) {
 	switch (item->Type) {
 	case StatBoost:
 		IWidth = CP_Image_GetWidth(SImg) / NoBaseStats;
-		CP_Image_DrawSubImage(SImg, item->x + pw, item->y,pw, ph,
+		CP_Image_DrawSubImage(SImg, item->coor.x + pw, item->coor.y,pw, ph,
 			IWidth * (item->AffectedBaseStat % 5) ,
 			0,
 			IWidth * (item->AffectedBaseStat % 5) + IWidth,
@@ -152,7 +151,7 @@ void DrawItemImage(Item* item) {
 		topOS = scale * 0, btmOS = scale * 10;
 		IWidth = CP_Image_GetWidth(SImg) / 3; //theres only 3 types of exp
 		//Update when exp get increase as progression
-		CP_Image_DrawSubImage(SImg, item->x, item->y,pw, ph, 
+		CP_Image_DrawSubImage(SImg, item->coor.x, item->coor.y,pw, ph, 
 				item->AffectedBaseStat * IWidth + leftOS,
 				topOS,
 				item->AffectedBaseStat * IWidth + IWidth - rightOS,
@@ -177,23 +176,24 @@ ItemLink* DrawItemLink(ItemLink* head) {
 	ItemLink* current = head, *next = NULL;
 	while (current != NULL) {
 	//assert(_CrtCheckMemory());
-		CP_Vector target = CP_Vector_Set(P.x - current->key->x, P.y - current->key->y);
+		//CP_Vector target = CP_Vector_Set(P.x - current->key->x, P.y - current->key->y);
+		CP_Vector target = CP_Vector_Subtract(CP_Vector_Set(P.x, P.y), current->key->coor);
 		float dist = CP_Vector_Length(target);
-		current->key->collected = dist < P.STATTOTAL.PICKUP_TOTAL ? -1 : 1;
+		if (dist < P.STATTOTAL.PICKUP_TOTAL)
+			current->key->collected = -1;
+
 		if (current->key->collected == -1) {
 			float speed = dist * CP_System_GetDt() * 2, slowest = 10;
 			speed = speed > slowest ? speed : slowest;
-			printf("TYPE: %s\n", current->key->Type == EXP ? "EXP" : "Stat Boost");
+			//printf("TYPE: %s\n", current->key->Type == EXP ? "EXP" : "Stat Boost");
 			CP_Vector Movement = CP_Vector_Scale(CP_Vector_Normalize(target), speed);
 			if (current->key->knockback > 0){
-				current->key->x -= Movement.x * 2;
-				current->key->y -= Movement.y * 2;
+				current->key->coor = CP_Vector_Subtract(current->key->coor, Movement);
 				current->key->knockback--;
 				goto ToDraw;
 			}
 			else {
-				current->key->x += Movement.x;
-				current->key->y += Movement.y;
+				current->key->coor = CP_Vector_Add(current->key->coor, Movement);
 			}
 		}
 		if (dist < P.HITBOX) {
@@ -207,22 +207,29 @@ ItemLink* DrawItemLink(ItemLink* head) {
 			}
 			else {
 				//if collected item, start its duration timer
-				IAffectPlayer(current->key, 1);
-				current->key->Start = (int)CP_System_GetSeconds();
-				current->key->collected = -1;
-				goto SkipThis;
+				if (current->key->applying == 0) {
+					printf("Applying %s buff\n", GetBaseStats(current->key->AffectedBaseStat));
+					IAffectPlayer(current->key, 1);
+					current->key->Start = (int)CP_System_GetSeconds();
+					current->key->applying = 1;
+					goto SkipThis;
+				}
 			}
 		}
 	
 		if (current->key->Type != EXP) {
-			if (current->key->collected == -1 && (int)CP_System_GetSeconds() - current->key->Start > current->key->Duration) {
-				//time to delete item's stat boost
-				IAffectPlayer(current->key, -1);
-				next = current->next;
-				deleteItemLink(&head, current->key);
-				current = next;
-				ItemTracker->ItemCount--;
-				continue;
+			if (current->key->applying == 1) {
+				if ((int)CP_System_GetSeconds() - current->key->Start > current->key->Duration) {
+					//time to delete item's stat boost
+					printf("Removing %s buff\n", GetBaseStats(current->key->AffectedBaseStat));
+					IAffectPlayer(current->key, -1);
+					next = current->next;
+					deleteItemLink(&head, current->key);
+					current = next;
+					ItemTracker->ItemCount--;
+					continue;
+				}
+				goto SkipThis;
 			}
 		}
 		//only draw items that are newly initialised or not collected
