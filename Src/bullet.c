@@ -3,6 +3,7 @@
 #include <stdio.h>
 #include <math.h>
 #include "bullet.h"
+#include "utils.h"
 
 static int bulletcounter = 0;
 
@@ -74,7 +75,8 @@ void BulletType(int type, float coordx, float coordy, float angle, int friendly)
 	}
 	if (type == PBULLET_HOMING)
 	{
-		BulletReset();
+		BulletType(PBULLET_NORMAL, coordx, coordy, angle, friendly);
+		bullet[bulletcounter].type = PBULLET_HOMING;
 		//TBA
 	}
 }
@@ -130,11 +132,14 @@ void BulletDraw(void) //Draws the location of all active bullets
 }
 
 int BulletCollision(float targetx, float targety, float width, float height)
-{
+{	// Current plan: draws bullet bounderies -> check if mob exist within it -> collide!
+	// Current plan: Use circles for all hitbox, try to make it not look off
 	float distance = 0;
 	for (int i = 0; i < BULLET_CAP; i++) {
 		if (bullet[i].exist == FALSE)
 			continue;
+		if (bullet[i].type == PBULLET_HOMING) BulletHomingTrack(targetx, targety, width, i);
+		CP_Graphics_DrawCircle(targetx, targety, width); // Draws hitbox zone of mob
 		distance = CP_Math_Distance(bullet[i].x, bullet[i].y, targetx, targety);
 		if (distance < width)
 			return i;
@@ -142,3 +147,11 @@ int BulletCollision(float targetx, float targety, float width, float height)
 	return -1; // for no collision with any bullets
 }
 
+void BulletHomingTrack(float targetx, float targety, float size, int i)
+{
+	int homingzone = 3 * size; // Maybe 3* of mob hitbox for homing range?
+	if (CP_Math_Distance(bullet[i].x, bullet[i].y, targetx, targety) < homingzone)
+	{
+		bullet[i].degree = point_point_angle(bullet[i].x, bullet[i].y, targetx, targety);
+	}
+}

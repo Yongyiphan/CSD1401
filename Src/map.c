@@ -295,15 +295,22 @@ void map_Update(void) {
 		//printf("MobCount: %d |\tFPS: %f \n", MobC, CP_System_GetFrameRate());
 		static float bulletcd = 99; // Random big number so no cd on first shot
 		static btype = 1;
-		if (CP_Input_KeyTriggered(KEY_KP_1)) // For testing, keypad 1 to switch to spilt, if spilt then to normal
+		if (CP_Input_KeyTriggered(KEY_1)) // For testing, keypad 1 to switch to spilt, if spilt then to normal
 		{
 			if (btype == PBULLET_SPILT) btype = PBULLET_NORMAL;
 			else btype = PBULLET_SPILT;
 		}
-		if (CP_Input_KeyTriggered(KEY_KP_2)) // For testing, keypad 2 to switch to rocket, if spilt then to normal
+		if (CP_Input_KeyTriggered(KEY_2)) // For testing, keypad 2 to switch to rocket, if spilt then to normal
 		{
 			if (btype == PBULLET_ROCKET) btype = PBULLET_NORMAL;
 			else btype = PBULLET_ROCKET;
+		}
+		if (CP_Input_KeyTriggered(KEY_3)) // For testing, keypad 3 to switch to rocket, if spilt then to normal
+		{
+			if (btype == PBULLET_HOMING) {
+				printf("Swap homing\n");  btype = PBULLET_HOMING;
+			}
+			else btype = PBULLET_HOMING;
 		}
 		if (CP_Input_MouseDown(MOUSE_BUTTON_LEFT))
 		{

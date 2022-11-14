@@ -55,6 +55,7 @@ void BulletDraw(void);
 // Check existing bullets collision against a target (x, y, w, h)
 int BulletCollision(float, float, float, float);
 
-
+// Updates homing bullet angle to lock onto mob
+void BulletHomingTrack(float targetx, float targety, float size, int i);
 
 #endif
