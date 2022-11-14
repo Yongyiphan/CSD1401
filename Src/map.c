@@ -149,7 +149,8 @@ void map_Update(void) {
 					MobTMobCollision(cMob);
 					MobTPlayerCollision(cMob, &P);
 					int bchecker;
-					if ((bchecker = BulletCollision(cMob->x, cMob->y, cMob->CStats.size)) >= 0 && bullet[bchecker].friendly == BULLET_PLAYER)
+					if ((bchecker = BulletCollision(cMob->x, cMob->y, cMob->w, cMob->h)) >= 0 && bullet[bchecker].friendly == BULLET_PLAYER
+						&& bullet[bchecker].exist == TRUE)
 					{
 						cMob->CStats.HP -= bullet[bchecker].damage;
 						if (cMob->CStats.HP <= 0)
@@ -188,13 +189,45 @@ void map_Update(void) {
 		if (ItemTracker->ItemLL != NULL) {
 			ItemTracker->ItemLL = DrawItemLink(ItemTracker->ItemLL);
 		}
+		//printf("MobCount: %d |\tFPS: %f \n", MobC, CP_System_GetFrameRate());
+		static float bulletcd = 99; // Random big number so no cd on first shot
+		static btype = 1;
+		if (CP_Input_KeyTriggered(KEY_1)) // For testing, keypad 1 to switch to spilt, if spilt then to normal
+		{
+			if (btype == PBULLET_SPILT) btype = PBULLET_NORMAL;
+			else btype = PBULLET_SPILT;
+		}
+		if (CP_Input_KeyTriggered(KEY_2)) // For testing, keypad 2 to switch to rocket, if spilt then to normal
+		{
+			if (btype == PBULLET_ROCKET) btype = PBULLET_NORMAL;
+			else btype = PBULLET_ROCKET;
+		}
+		if (CP_Input_KeyTriggered(KEY_3)) // For testing, keypad 3 to switch to rocket, if spilt then to normal
+		{
+			if (btype == PBULLET_HOMING) {
+				printf("Swap homing\n");  btype = PBULLET_HOMING;
+			}
+			else btype = PBULLET_HOMING;
+		}
 		if (CP_Input_MouseDown(MOUSE_BUTTON_LEFT))
 		{
+			bulletcd += CP_System_GetDt();
+			if (bulletcd > 0.5) { // 0.5 is the cooldown timer; might need seperate timer for different bullet types
+				bulletcd = 0;
+			}
 			mousex = CP_Input_GetMouseWorldX();
 			mousey = CP_Input_GetMouseWorldY();
-			float bulletangle = 0;
-			bulletangle = point_point_angle(P.x, P.y, mousex, mousey);
-			BulletShoot(P.x, P.y, bulletangle, 1, BULLET_PLAYER);
+			if (bulletcd == 0) {
+				float bulletangle = 0;
+				bulletangle = point_point_angle(P.x, P.y, mousex, mousey);
+				BulletShoot(P.x, P.y, bulletangle, btype, BULLET_PLAYER);
+			}
+		}
+		if (CP_Input_MouseDown(MOUSE_BUTTON_LEFT) == FALSE && bulletcd != 99) // Keeps bulletcd running even when not on leftclick
+		{
+			bulletcd += CP_System_GetDt();
+			if (bulletcd > 0.5)
+				bulletcd = 99;
 		}
 		BulletDraw();
 		CP_Settings_ResetMatrix();
