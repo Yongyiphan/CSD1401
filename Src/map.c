@@ -13,26 +13,18 @@
 
 #define MAP_SIZEX 1300
 #define MAP_SIZEY 900
-#define PLAYER_HP 100.0f
-#define PLAYER_SPEED 300.0f
-#define PLAYER_DAMAGE 1.0f
-#define ATK_SPEED 2.0f
-#define PLAYER_DEFENSE 10
-#define PLAYER_HITBOX 50
-#define PLAYER_PICKUP 50
+
 
 
 int WHeight, WWidth;
 
-//Declaring player variables
-Player P; Stats P_stats; StatsMult P_stats_mult; StatsTotal P_stats_total; LEVEL level;
 
 
-CP_Vector start_vector;
+
 CP_Color grey, black, red, green, blue, white;
 CP_Matrix transform;
 
-
+Player P;
 Mob* cMob;
 WaveTrack *cWave; // pause state for the game when paused.
 
@@ -50,38 +42,16 @@ void map_Init(void) {
 	WHeight = CP_System_GetWindowHeight();
 	WWidth = CP_System_GetWindowWidth();
 	//CP_System_Fullscreen();
-	isPaused = 0;
-	isMenu = 0;
-	isDead = 0;
+	isPaused = 0, isMenu = 0, isDead = 0;
 	// initialize the timer to start from 0 
 	timer(1, isPaused);
 
-
-	grey = CP_Color_Create(111, 111, 111, 255);
-	white = CP_Color_Create(255, 255, 255, 255);
-	red = CP_Color_Create(255, 0, 0, 255);
-	green = CP_Color_Create(0, 255, 0, 255);
-	blue = CP_Color_Create(0, 0, 255, 255);
-
 	background = CP_Image_Load("./Assets/background.png");
 
-	start_vector = CP_Vector_Zero();
+	
 	// Initialize the coordinates and stats of the player
 
-	/*
-	P_stats: Base stats of the player, can only be altered outside of the game.
-	P_stats_mult: In-game stats upgrade. Player stats are increased by multiplying its value against the player base stats
-	P_stats_total: The total amount of stats by multiplying its value with player base stats.
-	E.G. P_stats's MAX_HP = 100, P_stats_mult's MAX_HP_MULT = 1.2
-	P_stats_total's MAX_HP_TOTAL = MAX_HP * MAX_HP_MULT
-								 = 100 * 1.2 = 120
-	*/
-	P_stats = (Stats){ PLAYER_HP, PLAYER_SPEED, PLAYER_DAMAGE, ATK_SPEED, PLAYER_DEFENSE , PLAYER_PICKUP};
-	P_stats_mult = (StatsMult){ 1, 1, 1, 1, 1,1 };
-	P_stats_total = (StatsTotal){ PLAYER_HP, PLAYER_SPEED, PLAYER_DAMAGE, ATK_SPEED, PLAYER_DEFENSE, PLAYER_PICKUP };
-	level = (LEVEL){ 0, 0, 10 };
 	
-	P = (Player) { start_vector.x, start_vector.y, 90, P_stats, P_stats_mult, P_stats_total, PLAYER_HITBOX, level};
 	CreateWaveTracker();
 	CreateItemTracker();
 	MobLoadImage();
@@ -89,19 +59,16 @@ void map_Init(void) {
 	//Item* one = CreateItemEffect(600, 500);
 	//ItemTracker->tree = insertItemNode(ItemTracker->tree, one);
 	
+	Player_Init(&P);
 	CameraDemo_Init();
 	Bulletinit();
 }
 
 void map_Update(void) {
-#pragma region
-	P.STATTOTAL.MAX_HP_TOTAL = P.STAT.MAX_HP * P.STATMULT.MAX_HP_MULT;
-	P.STATTOTAL.SPEED_TOTAL = P.STAT.SPEED * P.STATMULT.SPEED_MULT;
-	P.STATTOTAL.DAMAGE_TOTAL = P.STAT.DAMAGE * P.STATMULT.DAMAGE_MULT;
-	P.STATTOTAL.DEFENSE_TOTAL = P.STAT.DEFENSE * P.STATMULT.DEFENSE_MULT;
-	P.STATTOTAL.PICKUP_TOTAL = P.STAT.PICKUP * P.STATMULT.PICKUP_MULT;
 
-	
+	// Update player stats, inclusive of base stats and multipliers.
+	Player_Stats_Update(&P);
+#pragma region	
 	if (isPaused) {
 		// Opens up the Upgrade Screen for players to pick their upgrades
 		if (isMenu) {
@@ -155,6 +122,8 @@ void map_Update(void) {
 			isDead = 1;
 			isPaused = 1;
 		}
+
+#pragma endregion
 		// Any objects below this function will be displaced by the camera movement
 		CameraDemo_Update(&P, &transform);
 		GenerateWaves();
@@ -181,14 +150,15 @@ void map_Update(void) {
 					MobTMobCollision(cMob);
 					MobTPlayerCollision(cMob, &P);
 					int bchecker;
-					if ((bchecker = BulletCollision(cMob->x, cMob->y, cMob->CStats.size)) >= 0 && bullet[bchecker].friendly == BULLET_PLAYER)
+					if ((bchecker = BulletCollision(cMob->x, cMob->y, cMob->w, cMob->h)) >= 0 && bullet[bchecker].friendly == BULLET_PLAYER
+						&& bullet[bchecker].exist == TRUE)
 					{
 						cMob->CStats.HP -= bullet[bchecker].damage;
 						if (cMob->CStats.HP <= 0)
 							cMob->Status = 0;
 						bullet[bchecker].exist = FALSE;
 					}
-#pragma endregion
+
 					if (cMob->Status == 0) {
 						cWave->CurrentCount -= 1;
 						MobCount[w] -= 1;
@@ -220,13 +190,45 @@ void map_Update(void) {
 		if (ItemTracker->ItemLL != NULL) {
 			ItemTracker->ItemLL = DrawItemLink(ItemTracker->ItemLL);
 		}
+		//printf("MobCount: %d |\tFPS: %f \n", MobC, CP_System_GetFrameRate());
+		static float bulletcd = 99; // Random big number so no cd on first shot
+		static btype = 1;
+		if (CP_Input_KeyTriggered(KEY_1)) // For testing, keypad 1 to switch to spilt, if spilt then to normal
+		{
+			if (btype == PBULLET_SPILT) btype = PBULLET_NORMAL;
+			else btype = PBULLET_SPILT;
+		}
+		if (CP_Input_KeyTriggered(KEY_2)) // For testing, keypad 2 to switch to rocket, if spilt then to normal
+		{
+			if (btype == PBULLET_ROCKET) btype = PBULLET_NORMAL;
+			else btype = PBULLET_ROCKET;
+		}
+		if (CP_Input_KeyTriggered(KEY_3)) // For testing, keypad 3 to switch to rocket, if spilt then to normal
+		{
+			if (btype == PBULLET_HOMING) {
+				printf("Swap homing\n");  btype = PBULLET_HOMING;
+			}
+			else btype = PBULLET_HOMING;
+		}
 		if (CP_Input_MouseDown(MOUSE_BUTTON_LEFT))
 		{
+			bulletcd += CP_System_GetDt();
+			if (bulletcd > 0.5) { // 0.5 is the cooldown timer; might need seperate timer for different bullet types
+				bulletcd = 0;
+			}
 			mousex = CP_Input_GetMouseWorldX();
 			mousey = CP_Input_GetMouseWorldY();
-			float bulletangle = 0;
-			bulletangle = point_point_angle(P.x, P.y, mousex, mousey);
-			BulletShoot(P.x, P.y, bulletangle, 1, BULLET_PLAYER);
+			if (bulletcd == 0) {
+				float bulletangle = 0;
+				bulletangle = point_point_angle(P.x, P.y, mousex, mousey);
+				BulletShoot(P.x, P.y, bulletangle, btype, BULLET_PLAYER);
+			}
+		}
+		if (CP_Input_MouseDown(MOUSE_BUTTON_LEFT) == FALSE && bulletcd != 99) // Keeps bulletcd running even when not on leftclick
+		{
+			bulletcd += CP_System_GetDt();
+			if (bulletcd > 0.5)
+				bulletcd = 99;
 		}
 		BulletDraw();
 		CP_Settings_ResetMatrix();

@@ -10,9 +10,51 @@
 
 
 // Player hitbox is a circle
-#define PLAYER_DIAMETER 50.0f
-#define PLAYER_SPEED 20
+
 #define _countof(array) (sizeof(array) / sizeof(array[0]))
+
+//Declaring player variables
+CP_Vector start_vector;
+Stats P_stats; StatsMult P_stats_mult; StatsTotal P_stats_total; LEVEL level;
+
+void Player_Init(Player* P) {
+	/*
+	P_stats: Base stats of the player, can only be altered outside of the game.
+	P_stats_mult: In-game stats upgrade. Player stats are increased by multiplying its value against the player base stats
+	P_stats_total: The total amount of stats by multiplying its value with player base stats.
+	E.G. P_stats's MAX_HP = 100, P_stats_mult's MAX_HP_MULT = 1.2
+	P_stats_total's MAX_HP_TOTAL = MAX_HP * MAX_HP_MULT
+								 = 100 * 1.2 = 120
+	*/
+	start_vector = CP_Vector_Zero();
+	P_stats = (Stats){ PLAYER_HP, PLAYER_SPEED, PLAYER_DAMAGE, ATK_SPD, PLAYER_DEFENSE , PLAYER_PICKUP };
+	P_stats_mult = (StatsMult){ 1, 1, 1, 1, 1,1 };
+	P_stats_total = (StatsTotal){ PLAYER_HP, PLAYER_SPEED, PLAYER_DAMAGE, ATK_SPD, PLAYER_DEFENSE, PLAYER_PICKUP };
+	level = (LEVEL){ 0, 0, 10 };
+
+	*P = (Player){ start_vector.x, start_vector.y, 90, P_stats, P_stats_mult, P_stats_total, PLAYER_HITBOX, level };
+}
+
+
+// Update Player's Total Stats where the base HP is multiplied by the respective stat multipliers.
+void Player_Stats_Update(Player* P) {
+	P->STATTOTAL.MAX_HP_TOTAL = P->STAT.MAX_HP * P->STATMULT.MAX_HP_MULT;
+	P->STATTOTAL.SPEED_TOTAL = P->STAT.SPEED * P->STATMULT.SPEED_MULT;
+	P->STATTOTAL.DAMAGE_TOTAL = P->STAT.DAMAGE * P->STATMULT.DAMAGE_MULT;
+	P->STATTOTAL.DEFENSE_TOTAL = P->STAT.DEFENSE * P->STATMULT.DEFENSE_MULT;
+	P->STATTOTAL.PICKUP_TOTAL = P->STAT.PICKUP * P->STATMULT.PICKUP_MULT;
+	
+}
+
+void Player_Show_Stats(Player P) {
+	char buffer_HP[30] = { 0 };
+	char buffer_SPD[30] = { 0 };
+	char buffer_DMG[30] = { 0 };
+	char buffer_ATK_SPD[30] = { 0 };
+	
+	/*sprintf_s(buffer, _countof(buffer), "%d", P.STATTOTAL.MAX_HP_TOTAL);
+	CP_Font_DrawText(buffer,)*/
+}
 
 /*
 Shows healthbar of the player. Creates 2 rectangles, one specifying current HP, and the other max HP.
@@ -24,9 +66,7 @@ void show_healthbar(Player *p) {
 	float y_coord = (float) CP_System_GetWindowHeight() * 0.65 / 10;
 	int rectWidth = 300;
 	int rectHeight = 30;
-	/*CP_Settings_TextSize(40.0f);
-	CP_Settings_TextAlignment(CP_TEXT_ALIGN_H_LEFT, CP_TEXT_ALIGN_V_TOP);
-	CP_Font_DrawText("Health", 10, 10);*/
+	
 	CP_Settings_Fill(CP_Color_Create(255, 200, 200, 255));
 	CP_Settings_StrokeWeight(3.0f);
 	CP_Graphics_DrawRectAdvanced(x_coord, y_coord, rectWidth, rectHeight, 0, 0);
