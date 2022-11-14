@@ -12,6 +12,7 @@ typedef struct PlayerStats {
 	float DAMAGE;
 	float ATK_SPEED;
 	float DEFENSE;
+	float PICKUP;
 }Stats;
 
 typedef struct PlayerStatsMultiplier {
@@ -20,6 +21,7 @@ typedef struct PlayerStatsMultiplier {
 	float DAMAGE_MULT;
 	float ATK_SPEED_MULT;
 	float DEFENSE_MULT;
+	float PICKUP_MULT;
 }StatsMult;
 
 typedef struct PlayerStatsTotal {
@@ -28,6 +30,7 @@ typedef struct PlayerStatsTotal {
 	float DAMAGE_TOTAL;
 	float ATK_SPEED_TOTAL;
 	float DEFENSE_TOTAL;
+	float PICKUP_TOTAL;
 }StatsTotal;
 
 typedef struct LEVEL {
@@ -48,16 +51,24 @@ typedef struct Player{
 	
 }Player;
 
+#define PLAYER_HP 100.0f
+#define PLAYER_SPEED 300.0f
+#define PLAYER_DAMAGE 1.0f
+#define ATK_SPD 2.0f
+#define PLAYER_DEFENSE 10
+#define PLAYER_HITBOX 50
+#define PLAYER_PICKUP 50
 
-//int collide_mob(Player, Mob);
-//int collide_bullet(Player, Bullet);
 
-//void shoot_bullet(Bullet);
 
-/*
-Shows healthbar of the player. Creates 2 rectangles, one specifying current HP, and the other max HP.
-Current HP is always proportional to the length of max HP.
-*/
+
+// Initializes player stats
+void Player_Init(Player* player);
+
+void Player_Stats_Update(Player* player);
+
+void Player_Show_Stats(Player player);
+
 void show_healthbar(Player* player);
 
 void show_level(Player* player);
