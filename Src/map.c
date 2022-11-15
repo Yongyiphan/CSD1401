@@ -236,7 +236,7 @@ void map_Update(void) {
 		timer(0, isPaused);
 	}
 	
-	
+	Player_Show_Stats(P);
 	show_healthbar(&P);
 	show_level(&P);
 

@@ -27,9 +27,9 @@ void Player_Init(Player* P) {
 								 = 100 * 1.2 = 120
 	*/
 	start_vector = CP_Vector_Zero();
-	P_stats = (Stats){ PLAYER_HP, PLAYER_SPEED, PLAYER_DAMAGE, ATK_SPD, PLAYER_DEFENSE , PLAYER_PICKUP };
-	P_stats_mult = (StatsMult){ 1, 1, 1, 1, 1,1 };
-	P_stats_total = (StatsTotal){ PLAYER_HP, PLAYER_SPEED, PLAYER_DAMAGE, ATK_SPD, PLAYER_DEFENSE, PLAYER_PICKUP };
+	P_stats = (Stats){ PLAYER_HP, PLAYER_SPEED, PLAYER_DAMAGE, ATK_SPD, PLAYER_DEFENSE , PLAYER_PICKUP, PLAYER_PROJ_SPD };
+	P_stats_mult = (StatsMult){ 1, 1, 1, 1, 1, 1, 1 };
+	P_stats_total = (StatsTotal){ PLAYER_HP, PLAYER_SPEED, PLAYER_DAMAGE, ATK_SPD, PLAYER_DEFENSE, PLAYER_PICKUP, PLAYER_PROJ_SPD };
 	level = (LEVEL){ 0, 0, 10 };
 
 	*P = (Player){ start_vector.x, start_vector.y, 90, P_stats, P_stats_mult, P_stats_total, PLAYER_HITBOX, level };
@@ -41,17 +41,33 @@ void Player_Stats_Update(Player* P) {
 	P->STATTOTAL.MAX_HP_TOTAL = P->STAT.MAX_HP * P->STATMULT.MAX_HP_MULT;
 	P->STATTOTAL.SPEED_TOTAL = P->STAT.SPEED * P->STATMULT.SPEED_MULT;
 	P->STATTOTAL.DAMAGE_TOTAL = P->STAT.DAMAGE * P->STATMULT.DAMAGE_MULT;
-	P->STATTOTAL.DEFENSE_TOTAL = P->STAT.DEFENSE * P->STATMULT.DEFENSE_MULT;
+	P->STATTOTAL.ATK_SPEED_TOTAL = P->STAT.ATK_SPEED * P->STATMULT.ATK_SPEED_MULT;
 	P->STATTOTAL.PICKUP_TOTAL = P->STAT.PICKUP * P->STATMULT.PICKUP_MULT;
+	P->STATTOTAL.PROJECTILE_SPD_TOTAL = P->STAT.PROJECTILE_SPD * P->STATMULT.PROJECTILE_SPD_MULT;
 	
 }
 
 void Player_Show_Stats(Player P) {
-	char buffer_HP[30] = { 0 };
-	char buffer_SPD[30] = { 0 };
-	char buffer_DMG[30] = { 0 };
-	char buffer_ATK_SPD[30] = { 0 };
-	
+	float printX = CP_System_GetWindowWidth() * 0.7 / 10;
+	float printY = CP_System_GetWindowHeight() * 7.5 / 10;
+	float padding = 30;
+	char bufferList[6][30] = { {0},{0},{0},{0},{0},{0} };
+	char* bufferName[] = { "HP: ", "SPEED: ", "DAMAGE: ", "FIRE RATE: ", "PICKUP RADIUS: ", "BULLET SPEED: " };
+
+
+	CP_Settings_TextSize(30.0f);
+	CP_Settings_TextAlignment(CP_TEXT_ALIGN_H_LEFT, CP_TEXT_ALIGN_V_TOP);
+	sprintf_s(bufferList[0], _countof(bufferList[0]), "%.f", P.STATTOTAL.MAX_HP_TOTAL);
+	sprintf_s(bufferList[1], _countof(bufferList[1]), "%.f", P.STATTOTAL.SPEED_TOTAL);
+	sprintf_s(bufferList[2], _countof(bufferList[2]), "%.f", P.STATTOTAL.DAMAGE_TOTAL);
+	sprintf_s(bufferList[3], _countof(bufferList[3]), "%.f", P.STATTOTAL.ATK_SPEED_TOTAL);
+	sprintf_s(bufferList[4], _countof(bufferList[4]), "%.f", P.STATTOTAL.PICKUP_TOTAL);
+	sprintf_s(bufferList[5], _countof(bufferList[5]), "%.f", P.STATTOTAL.PROJECTILE_SPD_TOTAL);
+
+	for (int i = 0; i < 6; i++) {
+		CP_Font_DrawText(bufferName[i], printX, printY + padding * i);
+		CP_Font_DrawText(bufferList[i], printX + 200, printY + padding * i);
+	}
 	/*sprintf_s(buffer, _countof(buffer), "%d", P.STATTOTAL.MAX_HP_TOTAL);
 	CP_Font_DrawText(buffer,)*/
 }
