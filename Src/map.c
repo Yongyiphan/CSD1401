@@ -56,9 +56,6 @@ void map_Init(void) {
 	CreateItemTracker();
 	MobLoadImage();
 	ItemLoadImage();
-	Item* magnet = CreateItemEffect(600, 500, MAGNET, 0);
-	//ItemTracker->tree = insertItemNode(ItemTracker->tree, one);
-	insertItemLink(&ItemTracker->ItemLL, magnet);
 	Player_Init(&P);
 	CameraDemo_Init();
 	Bulletinit();
@@ -169,6 +166,8 @@ void map_Update(void) {
 							insertItemLink(&ItemTracker->ItemLL, CreateItemEffect(cMob->coor.x, cMob->coor.y, 0, 0));
 							ItemTracker->ItemCount++;
 						}
+						int sub = P.LEVEL.VAL > 0 ? P.LEVEL.VAL : 2;
+						P.CURRENT_HP += sub / 2;
 						continue;
 					}
 					//cMob->h == 0 means haven drawn before. / assigned image to it yet
@@ -185,14 +184,16 @@ void map_Update(void) {
 	//		ItemPlayerCollision();
 	//	}
 		if (ItemTracker->ExpLL != NULL) {
-			ItemTracker->ExpLL = DrawItemLink(ItemTracker->ExpLL);
+			ItemTracker->ExpLL = ItemInteraction(ItemTracker->ExpLL);
+			DrawItemLink(ItemTracker->ExpLL);
 		}
 		if (ItemTracker->ItemLL != NULL) {
-			ItemTracker->ItemLL = DrawItemLink(ItemTracker->ItemLL);
+			ItemTracker->ItemLL = ItemInteraction(ItemTracker->ItemLL);
+			DrawItemLink(ItemTracker->ItemLL);
 		}
 		//printf("MobCount: %d |\tFPS: %f \n", MobC, CP_System_GetFrameRate());
 		static float bulletcd = 99; // Random big number so no cd on first shot
-		static btype = 1;
+		static btype = 2;
 		if (CP_Input_KeyTriggered(KEY_1)) // For testing, keypad 1 to switch to spilt, if spilt then to normal
 		{
 			if (btype == PBULLET_SPILT) btype = PBULLET_NORMAL;
@@ -236,7 +237,9 @@ void map_Update(void) {
 		// Time, returns and draws text
 		timer(0, isPaused);
 	}
-	
+
+	if(MobCycleTimer % (P.LEVEL.VAL + 1 )== 0)
+		P.CURRENT_HP--;
 	
 	show_healthbar(&P);
 	show_level(&P);

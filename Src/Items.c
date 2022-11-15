@@ -31,14 +31,20 @@ void CreateItemTracker() {
 
 #include <stdio.h>
 #pragma region
-int MagnetCDTimer = 10;
+int IsMagnet = 0, ToCollect = 0;
+int MagnetSpawned = 0;
 Item* CreateItemEffect(float x, float y, int exp, int expVal) {
 	//Get Random chance generator
 	float RNG = CP_Random_RangeFloat(0, 1), DropChance;
 	//Get Random Type of effect
-	int noEffect = 2, EType = CP_Random_RangeInt(1, noEffect), cSec = (int)CP_System_GetSeconds();
+	int noEffect = 1, EType = CP_Random_RangeInt(1, noEffect), cSec = (int)CP_System_GetSeconds();
 	if(exp)
 		EType = 0;
+
+	if (ItemTracker->ItemLL > 20 && MagnetSpawned == 0 && IsMagnet != 1) {
+		MagnetSpawned = 1;
+		EType = MAGNET;
+	}
 
 	Item* newItem = malloc(sizeof(Item));
 	*newItem = EmptyItem;
@@ -54,11 +60,9 @@ Item* CreateItemEffect(float x, float y, int exp, int expVal) {
 	case StatBoost: //All Base Stats Upgrade
 		newItem->AffectedBaseStat = CP_Random_RangeInt(0, NoBaseStats - 1);
 		newItem->Duration = 2; //in secs
-		newItem->Modifier = 0.30;
-		if (newItem->AffectedBaseStat == 0) {
+		if (newItem->AffectedBaseStat == 0)
 			newItem->Duration = -1;
-			newItem->Modifier = 10;
-		}
+		newItem->Modifier = 30;
 		newItem->Hitbox = 32;
 		break;
 	case MAGNET:
@@ -79,7 +83,7 @@ Item* CreateItemEffect(float x, float y, int exp, int expVal) {
 
 void IAffectPlayer(Item* item, int method) {
 	int cSec = (int)CP_System_GetSeconds();
-	int boost = 1 + item->Modifier;
+	int boost = item->Modifier * method;
 	switch (item->Type) {
 		case StatBoost://Affect Base Stats
 		switch (item->AffectedBaseStat) {
@@ -87,18 +91,18 @@ void IAffectPlayer(Item* item, int method) {
 				P.CURRENT_HP += item->Modifier;
 				break;
 			case 1://Movement Speed
-				P.STATMULT.SPEED_MULT = method > 0 ? P.STATMULT.SPEED_MULT * boost : P.STATMULT.SPEED_MULT / boost;
+				P.STAT.SPEED += boost;
 				break;
 			case 2://Damage
-				P.STATMULT.DAMAGE_MULT = method > 0 ? P.STATMULT.DAMAGE_MULT * boost : P.STATMULT.DAMAGE_MULT/ boost;
+				P.STAT.DAMAGE += boost;
 				break;
 			case 3://Attack speed
-				P.STATMULT.ATK_SPEED_MULT = method > 0 ? P.STATMULT.ATK_SPEED_MULT * boost : P.STATMULT.ATK_SPEED_MULT / boost;
+				P.STAT.ATK_SPEED += boost;
 				break;
 			case 4://Bullet Speed
 				break;
 			case 5:
-				P.STATMULT.SPEED_MULT = method > 0 ? P.STATMULT.SPEED_MULT * boost : P.STATMULT.SPEED_MULT / boost;
+				P.STAT.MAX_HP += boost;
 				break;
 		}
 		case EXP:
@@ -176,8 +180,19 @@ void DrawItemImage(Item* item) {
 */
 #pragma region
 
-int IsMagnet = 0, ToCollect = 0;
-ItemLink* DrawItemLink(ItemLink* head) {
+void DrawItemLink(ItemLink* head) {
+	if (head == NULL)
+		return;
+	ItemLink* current = head, * next = NULL;
+	while (current != NULL) {
+		if (current->key->collected = -1 && current->key->applying != 1) {
+			DrawItemImage(current->key);
+		}
+		current = current->next;
+	}
+}
+
+ItemLink* ItemInteraction(ItemLink* head) {
 	if (head == NULL)
 		return;
 	
@@ -194,19 +209,12 @@ ItemLink* DrawItemLink(ItemLink* head) {
 			if (current->key->Type == MAGNET) {
 				IsMagnet = 1;
 				ToCollect = ItemTracker->expDrops + ItemTracker->ItemCount;
+				MagnetSpawned = 0;
 			}
-			float speed = dist * CP_System_GetDt() * 2, slowest = 10;
-			speed = speed > slowest ? speed : slowest;
+			float speed = dist * CP_System_GetDt() * 2;
+			//speed = speed > slowest ? speed : slowest;
 			CP_Vector Movement = CP_Vector_Scale(CP_Vector_Normalize(target), speed * 2);
-
-			if (current->key->knockback > 0){
-				current->key->coor = CP_Vector_Subtract(current->key->coor, Movement);
-				current->key->knockback--;
-				goto ToDraw;
-			}
-			else {
-				current->key->coor = CP_Vector_Add(current->key->coor, Movement);
-			}
+			current->key->coor = CP_Vector_Add(current->key->coor, Movement);
 		}
 		if (dist < P.HITBOX) {
 			if(current->key->Type == EXP) {
@@ -240,8 +248,9 @@ ItemLink* DrawItemLink(ItemLink* head) {
 			}
 		}
 	
-		if (current->key->Type != EXP && current->key->applying == 1) {
-			if ((int)CP_System_GetSeconds() - current->key->Start > current->key->Duration) {
+		int timeDiff = (int)CP_System_GetSeconds() - current->key->Start;
+		if (current->key->Type != EXP) {
+			if (timeDiff > current->key->Duration && current->key->applying == 1) {
 				//time to delete item's stat boost
 				IAffectPlayer(current->key, -1);
 				next = current->next;
@@ -254,9 +263,9 @@ ItemLink* DrawItemLink(ItemLink* head) {
 			}
 			goto SkipThis;
 		}
+
+
 		//only draw items that are newly initialised or not collected
-	ToDraw:
-		DrawItemImage(current->key);
 	SkipThis:
 		current = current->next;
 	}

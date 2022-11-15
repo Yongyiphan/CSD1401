@@ -206,7 +206,7 @@ void GenerateMobs(WaveTrack* tracker, Player* p) {
 void GenerateWaves(void) {
 	if (MobCycleTimer != (int)CP_System_GetSeconds()) {
 		MobCycleTimer = (int)CP_System_GetSeconds() - MobCycleTimer > 1 ? (int)CP_System_GetSeconds() : MobCycleTimer + 1;
-		printf("Current FPS: %f\n", CP_System_GetFrameRate());
+		//printf("Current FPS: %f\n", CP_System_GetFrameRate());
 		if (MobCycleTimer % Wave_Timer == 0)
 			MaxMob += MaxMobGrowthRate;
 		if (MobCycleTimer % Spawn_Timer == 0) {
@@ -465,8 +465,8 @@ void MobTMobCollision(Mob* m) {
 
 void MobTPlayerCollision(Mob* m, Player* p) {
 	
-	if (CP_Vector_Length(CP_Vector_Subtract(m->coor, p->coor)) <= p->HITBOX * 2) {
-		m->CStats.HP -= p->STATTOTAL.DAMAGE_TOTAL;
+	if (CP_Vector_Length(CP_Vector_Subtract(m->coor, p->coor)) <= p->HITBOX) {
+		//m->CStats.HP -= p->STATTOTAL.DAMAGE_TOTAL;
 		p->CURRENT_HP -= m->CStats.Dmg;
 	}
 	if (m->CStats.HP <= 0) {

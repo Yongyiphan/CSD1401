@@ -92,8 +92,8 @@ void IAffectPlayer(Item* i, int method);
 
 
 
-
-ItemLink* DrawItemLink(ItemLink* head);
+ItemLink* ItemInteraction(ItemLink* head);
+void DrawItemLink(ItemLink* head);
 ItemLink* newLink(Item* item);
 void insertItemLink(ItemLink** head, Item *item);
 void deleteItemLink(ItemLink** head, Item *item);
