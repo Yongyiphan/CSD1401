@@ -18,10 +18,7 @@
 
 int WHeight, WWidth;
 
-
-
-
-CP_Color grey, black, red, green, blue, white;
+CP_Color dark_green;
 CP_Matrix transform;
 
 Player P;
@@ -31,7 +28,7 @@ WaveTrack *cWave; // pause state for the game when paused.
 //Might be useful variable for Waves Tracking
 int totalWave = 0;
 float mousex, mousey;
-int isPaused, isMenu, isDead;
+int isPaused, isUpgrade, isDead;
 
 //Images
 CP_Image background = NULL;
@@ -42,13 +39,13 @@ void map_Init(void) {
 	WHeight = CP_System_GetWindowHeight();
 	WWidth = CP_System_GetWindowWidth();
 	//CP_System_Fullscreen();
-	isPaused = 0, isMenu = 0, isDead = 0;
+	isPaused = 0, isUpgrade = 0, isDead = 0;
 	// initialize the timer to start from 0 
 	timer(1, isPaused);
 
 	background = CP_Image_Load("./Assets/background.png");
-
-	
+	dark_green = CP_Color_Create(20, 50, 0, 255);
+	CP_Graphics_ClearBackground(dark_green);
 	// Initialize the coordinates and stats of the player
 
 	
@@ -65,14 +62,14 @@ void map_Init(void) {
 }
 
 void map_Update(void) {
-
+	
 	// Update player stats, inclusive of base stats and multipliers.
 	Player_Stats_Update(&P);
 #pragma region	
 	if (isPaused) {
 		// Opens up the Upgrade Screen for players to pick their upgrades
-		if (isMenu) {
-			upgrade_screen(&P, &isMenu, &isPaused);
+		if (isUpgrade) {
+			upgrade_screen(&P, &isUpgrade, &isPaused);
 			//printf("Player max hp: %f\n", P.MAX_HP);
 		}
 		// Opens up the Pause Screen
@@ -103,14 +100,14 @@ void map_Update(void) {
 			P.STATMULT.PICKUP_MULT *= 1.1;
 		}
 		// Open up the Upgrade Screen
-		if (CP_Input_KeyTriggered(KEY_U) && isMenu == 0) {
-			isMenu = 1;
+		if (CP_Input_KeyTriggered(KEY_U) && isUpgrade == 0) {
+			isUpgrade = 1;
 			isPaused = 1;
 		}
 		// Testing for leveling up
 		if (CP_Input_KeyDown(KEY_L)) {
 			P.LEVEL.P_EXP += 5;
-			level_up(&P.LEVEL.P_EXP, &P.LEVEL.EXP_REQ, &P.LEVEL.VAL);
+			level_up(&P.LEVEL);
 		}
 		// Manually control the HP of the player for testing
 		if (CP_Input_KeyDown(KEY_Q)) {
@@ -242,7 +239,7 @@ void map_Update(void) {
 
 	if (CP_Input_KeyTriggered(KEY_SPACE))
 		CP_Engine_Terminate();
-
+	CP_Graphics_ClearBackground(dark_green);
 }
 
 void map_Exit(void) {

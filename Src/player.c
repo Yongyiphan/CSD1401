@@ -56,6 +56,7 @@ void Player_Show_Stats(Player P) {
 
 
 	CP_Settings_TextSize(30.0f);
+	CP_Settings_Fill(CP_Color_Create(244, 244, 244, 255));
 	CP_Settings_TextAlignment(CP_TEXT_ALIGN_H_LEFT, CP_TEXT_ALIGN_V_TOP);
 	sprintf_s(bufferList[0], _countof(bufferList[0]), "%.f", P.STATTOTAL.MAX_HP_TOTAL);
 	sprintf_s(bufferList[1], _countof(bufferList[1]), "%.f", P.STATTOTAL.SPEED_TOTAL);
@@ -64,7 +65,7 @@ void Player_Show_Stats(Player P) {
 	sprintf_s(bufferList[4], _countof(bufferList[4]), "%.f", P.STATTOTAL.PICKUP_TOTAL);
 	sprintf_s(bufferList[5], _countof(bufferList[5]), "%.f", P.STATTOTAL.PROJECTILE_SPD_TOTAL);
 
-	for (int i = 0; i < 6; i++) {
+	for (int i = 1; i < 6; i++) {
 		CP_Font_DrawText(bufferName[i], printX, printY + padding * i);
 		CP_Font_DrawText(bufferList[i], printX + 200, printY + padding * i);
 	}
@@ -76,13 +77,34 @@ void Player_Show_Stats(Player P) {
 Shows healthbar of the player. Creates 2 rectangles, one specifying current HP, and the other max HP.
 Current HP is always proportional to the length of max HP.
 */
-void show_healthbar(Player *p) {
+
+
+//void level_up(int* exp, int* exp_req, int* level) {
+//	if (*exp > *exp_req) {
+//		*exp = 0;
+//		*exp_req *= 1.5;
+//		*level += 1;
+//
+//		//printf("EXP: %d\tEXP_REQ: %d\tLVL: %d\n", *exp, *exp_req, *level);
+//	}
+//	//printf("EXP: %d\tEXP_REQ: %d\tLVL: %d\n", *exp, *exp_req, *level);
+//}
+
+void level_up(LEVEL* level) {
+	if (level->P_EXP > level->EXP_REQ) {
+		level->P_EXP = 0;
+		level->EXP_REQ *= 1.5;
+		level->VAL += 1;
+	}
+}
+
+void show_healthbar(Player* p) {
 	CP_Settings_RectMode(CP_POSITION_CORNER);
-	float x_coord = (float) CP_System_GetWindowWidth() * 1 / 10;
-	float y_coord = (float) CP_System_GetWindowHeight() * 0.65 / 10;
+	float x_coord = (float)CP_System_GetWindowWidth() * 1 / 10;
+	float y_coord = (float)CP_System_GetWindowHeight() * 0.65 / 10;
 	int rectWidth = 300;
 	int rectHeight = 30;
-	
+
 	CP_Settings_Fill(CP_Color_Create(255, 200, 200, 255));
 	CP_Settings_StrokeWeight(3.0f);
 	CP_Graphics_DrawRectAdvanced(x_coord, y_coord, rectWidth, rectHeight, 0, 0);
@@ -95,17 +117,15 @@ void show_healthbar(Player *p) {
 
 	CP_Graphics_DrawRectAdvanced(x_coord, y_coord, p->CURRENT_HP / p->STAT.MAX_HP * rectWidth, rectHeight, 0, 0);
 	CP_Settings_RectMode(CP_POSITION_CENTER);
-}
-
-void level_up(int* exp, int* exp_req, int* level) {
-	if (*exp > *exp_req) {
-		*exp = 0;
-		*exp_req *= 1.5;
-		*level += 1;
-
-		//printf("EXP: %d\tEXP_REQ: %d\tLVL: %d\n", *exp, *exp_req, *level);
-	}
-	//printf("EXP: %d\tEXP_REQ: %d\tLVL: %d\n", *exp, *exp_req, *level);
+	
+	CP_Settings_TextAlignment(CP_TEXT_ALIGN_H_CENTER, CP_TEXT_ALIGN_V_TOP);
+	CP_Settings_Fill(CP_Color_Create(0, 0, 0, 255));
+	char buffer[2][16] = { {0}, {0} };
+	sprintf_s(buffer[0], _countof(buffer[0]), "%.f", P.CURRENT_HP);
+	sprintf_s(buffer[1], _countof(buffer[1]), "%.f", P.STATTOTAL.MAX_HP_TOTAL);
+	CP_Font_DrawText(buffer[0], (x_coord * 2 + rectWidth) / 2 - 40, y_coord);
+	CP_Font_DrawText("/", (x_coord * 2 + rectWidth) / 2, y_coord);
+	CP_Font_DrawText(buffer[1], (x_coord * 2 + rectWidth) / 2 + 40, y_coord);
 }
 
 void show_level(Player* P) {
@@ -126,6 +146,15 @@ void show_level(Player* P) {
 	CP_Settings_Fill(CP_Color_Create(100, 200, 100, 255));
 	CP_Graphics_DrawRectAdvanced(x_coord, y_coord, (P->LEVEL.P_EXP / (float) P->LEVEL.EXP_REQ) * rectWidth, rectHeight, 0, 0);
 	CP_Settings_RectMode(CP_POSITION_CENTER);
+
+	CP_Settings_TextAlignment(CP_TEXT_ALIGN_H_CENTER, CP_TEXT_ALIGN_V_TOP);
+	CP_Settings_Fill(CP_Color_Create(0, 0, 0, 255));
+	char buffer[2][16] = { {0}, {0} };
+	sprintf_s(buffer[0], _countof(buffer[0]), "%d", P->LEVEL.P_EXP);
+	sprintf_s(buffer[1], _countof(buffer[1]), "%d", P->LEVEL.EXP_REQ);
+	CP_Font_DrawText(buffer[0], (x_coord * 2 + rectWidth) / 2 - 40, y_coord);
+	CP_Font_DrawText("/", (x_coord * 2 + rectWidth) / 2, y_coord);
+	CP_Font_DrawText(buffer[1], (x_coord * 2 + rectWidth) / 2 + 40, y_coord);
 }
 
 // Shows a death screen, and gives the player the option whether to restart the game
