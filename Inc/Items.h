@@ -8,6 +8,7 @@
 #define ItemDecayTimer 10
 #define Empty -1
 
+#define No_Items 3
 #define EXP 0
 #define StatBoost 1
 #define MAGNET 2
@@ -50,10 +51,10 @@ typedef struct ItemLink {
 typedef struct ItemTracker {
 	//Item** arr;
 	//int arrSize;
-	int expDrops;
 	ItemLink* ExpLL, *ItemLL;
-	int ItemCount;
+	int DropCount[No_Items][2];
 }ItemTrack;
+
 
 
 
@@ -63,7 +64,6 @@ extern ItemTrack* ItemTracker;
 extern int Img_C;
 extern CP_Image** ItemSprites;
 
-extern int NoDeleted;
 /*
 Item Planning
 
@@ -85,7 +85,7 @@ void ItemLoadImage(void);
 void DrawItemImage(Item* item);
 
 void CreateItemTracker(void);
-
+int ItemCountSum(void);
 Item* CreateItemEffect(float x, float y, int exp, int expVal);
 void IAffectPlayer(Item* i, int method);
 
@@ -93,13 +93,11 @@ void IAffectPlayer(Item* i, int method);
 
 
 ItemLink* ItemInteraction(ItemLink* head);
-void DrawItemLink(ItemLink* head);
 ItemLink* newLink(Item* item);
 void insertItemLink(ItemLink** head, Item *item);
 void deleteItemLink(ItemLink** head, Item *item);
 void freeLink(ItemLink* head);
 
-extern int failedDelete;
 
 
 void FreeItemResource(void);

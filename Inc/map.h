@@ -7,7 +7,6 @@
 #define Coarse_Spacing 50
 #define Fine_Spacing 10
 extern int WHeight, WWidth;
-extern Player P;
 
 
 

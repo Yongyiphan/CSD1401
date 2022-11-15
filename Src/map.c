@@ -24,7 +24,6 @@ int WHeight, WWidth;
 CP_Color grey, black, red, green, blue, white;
 CP_Matrix transform;
 
-Player P;
 Mob* cMob;
 WaveTrack *cWave; // pause state for the game when paused.
 
@@ -164,7 +163,6 @@ void map_Update(void) {
 						float rng = CP_Random_RangeFloat(0, 1);
 						if (rng < 0.23) {
 							insertItemLink(&ItemTracker->ItemLL, CreateItemEffect(cMob->coor.x, cMob->coor.y, 0, 0));
-							ItemTracker->ItemCount++;
 						}
 						int sub = P.LEVEL.VAL > 0 ? P.LEVEL.VAL : 2;
 						P.CURRENT_HP += sub / 2;
@@ -183,13 +181,11 @@ void map_Update(void) {
 	//		DrawItemTree(ItemTracker->exptree);
 	//		ItemPlayerCollision();
 	//	}
-		if (ItemTracker->ExpLL != NULL) {
-			ItemTracker->ExpLL = ItemInteraction(ItemTracker->ExpLL);
-			DrawItemLink(ItemTracker->ExpLL);
-		}
 		if (ItemTracker->ItemLL != NULL) {
 			ItemTracker->ItemLL = ItemInteraction(ItemTracker->ItemLL);
-			DrawItemLink(ItemTracker->ItemLL);
+		}
+		if (ItemTracker->ExpLL != NULL) {
+			ItemTracker->ExpLL = ItemInteraction(ItemTracker->ExpLL);
 		}
 		//printf("MobCount: %d |\tFPS: %f \n", MobC, CP_System_GetFrameRate());
 		static float bulletcd = 99; // Random big number so no cd on first shot

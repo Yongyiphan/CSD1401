@@ -17,6 +17,7 @@
 CP_Vector start_vector;
 Stats P_stats; StatsMult P_stats_mult; StatsTotal P_stats_total; LEVEL level;
 
+Player P;
 void Player_Init(Player* P) {
 	/*
 	P_stats: Base stats of the player, can only be altered outside of the game.

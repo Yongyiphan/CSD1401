@@ -59,10 +59,9 @@ typedef struct Player{
 #define ATK_SPD 2.0f
 #define PLAYER_DEFENSE 10
 #define PLAYER_HITBOX 50
-#define PLAYER_PICKUP 80
+#define PLAYER_PICKUP 100
 
-
-
+extern Player P;
 
 // Initializes player stats
 void Player_Init(Player* player);
