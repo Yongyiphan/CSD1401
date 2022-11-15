@@ -89,7 +89,7 @@ float timer(int reset, int isDead) {
 	
 	// Draw text of respective boxes at respective coordinates.
 	CP_Settings_TextSize(40.0f);
-	CP_Settings_TextAlignment(CP_TEXT_ALIGN_H_CENTER, CP_TEXT_ALIGN_V_MIDDLE);
+	CP_Settings_TextAlignment(CP_TEXT_ALIGN_H_LEFT, CP_TEXT_ALIGN_V_MIDDLE);
 	CP_Settings_Fill(CP_Color_Create(0, 0, 0, 255));
 
 	if (reset) {

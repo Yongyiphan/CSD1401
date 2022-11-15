@@ -131,7 +131,8 @@ void IAffectPlayer(Item* item, int method) {
 		}
 		case EXP:
 			P.LEVEL.P_EXP += item->Modifier;
-			level_up(&P.LEVEL.P_EXP, &P.LEVEL.EXP_REQ, &P.LEVEL.VAL);
+			level_up(&P.LEVEL);
+			//printf("Item x: %f | y: %f\n", item->x, item->y);
 			break;
 	}
 }
