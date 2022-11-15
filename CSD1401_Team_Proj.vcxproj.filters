@@ -20,15 +20,15 @@
     <ClInclude Include="Inc\game.h" />
     <ClInclude Include="Inc\mainmenu.h" />
     <ClInclude Include="Inc\Items.h" />
-    <ClInclude Include="Inc\map.h" />
+    </ClCompile>
     <ClInclude Include="Inc\options.h" />
-    <ClInclude Include="Inc\player.h" />
+    <ClInclude Include="Inc\Camera.h" />
     <ClInclude Include="Inc\upgrades.h" />
     <ClInclude Include="Inc\utils.h" />
     <ClInclude Include="Inc\Mob.h" />
   </ItemGroup>
   <ItemGroup>
-    <Image Include="Assests\DigiPen_Singapore_WEB_RED.png" />
-    <Image Include="Assets\background.png" />
+    <Library Include="Extern\CProcessing\lib\x64\CProcessing.lib" />
+    <Library Include="Extern\CProcessing\lib\x64\CProcessingd.lib" />
   </ItemGroup>
 </Project>
