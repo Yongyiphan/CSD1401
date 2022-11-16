@@ -90,6 +90,7 @@ void map_Update(void) {
 	else {
 		if (CP_Input_KeyTriggered(KEY_ESCAPE)) {
 			isPaused = 1;
+			isUpgrade = 0;
 		}
 		// Increase speed of the player
 		if (CP_Input_KeyTriggered(KEY_H)){
@@ -100,10 +101,10 @@ void map_Update(void) {
 			P.STATMULT.PICKUP_MULT *= 1.1;
 		}
 		// Open up the Upgrade Screen
-		if (CP_Input_KeyTriggered(KEY_U) && isUpgrade == 0) {
+		/*if (CP_Input_KeyTriggered(KEY_U) && isUpgrade == 0) {
 			isUpgrade = 1;
 			isPaused = 1;
-		}
+		}*/
 		// Testing for leveling up
 		if (CP_Input_KeyDown(KEY_L)) {
 			P.LEVEL.P_EXP += 5;
@@ -226,13 +227,23 @@ void map_Update(void) {
 			if (bulletcd > 0.5)
 				bulletcd = 99;
 		}
-		BulletDraw();
-		CP_Settings_ResetMatrix();
 
+		
+			
+		BulletDraw();
+
+		// Removes displacement from the camera matrix
+		CP_Settings_ResetMatrix();
 		// Time, returns and draws text
 		timer(0, isPaused);
 	}
-	
+
+	// Shows the upgrade screen whenever the player levels up.
+	if (level_up(&P.LEVEL)) {
+		isPaused = 1;
+		isUpgrade = 1;
+		upgrade_screen(&P, &isUpgrade, &isPaused);
+	}
 	Player_Show_Stats(P);
 	show_healthbar(&P);
 	show_level(&P);
