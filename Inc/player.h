@@ -15,6 +15,7 @@ typedef struct PlayerStats {
 	float DEFENSE;
 	float PICKUP;
 	float PROJECTILE_SPD;
+	int Coin_Gained;
 }Stats;
 
 typedef struct PlayerStatsMultiplier {
@@ -62,7 +63,7 @@ typedef struct Player{
 #define ATK_SPD 2.0f
 #define PLAYER_DEFENSE 10
 #define PLAYER_HITBOX 50
-#define PLAYER_PICKUP 50
+#define PLAYER_PICKUP 100
 #define PLAYER_PROJ_SPD 400.0f
 
 

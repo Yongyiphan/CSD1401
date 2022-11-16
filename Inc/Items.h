@@ -8,10 +8,11 @@
 #define ItemDecayTimer 10
 #define Empty -1
 
-#define No_Items 3
+#define No_Items 4
 #define EXP 0
 #define StatBoost 1
 #define MAGNET 2
+#define COIN 3
 
 
 
@@ -36,6 +37,7 @@ typedef struct ItemStat {
 	//0 = initialised value
 	int collected, applying;
 	int knockback;
+	int Dis[2];
 }Item;
 
 
@@ -51,7 +53,7 @@ typedef struct ItemLink {
 typedef struct ItemTracker {
 	//Item** arr;
 	//int arrSize;
-	ItemLink* ExpLL, *ItemLL;
+	ItemLink* ExpLL, *ItemLL, *CoinLL;
 	int DropCount[No_Items][2];
 }ItemTrack;
 
@@ -86,7 +88,7 @@ void DrawItemImage(Item* item);
 
 void CreateItemTracker(void);
 int ItemCountSum(void);
-Item* CreateItemEffect(float x, float y, int exp, int expVal);
+Item* CreateItemEffect(CP_Vector coor, int exp, int expVal);
 void IAffectPlayer(Item* i, int method);
 
 

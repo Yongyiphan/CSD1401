@@ -43,7 +43,7 @@ void map_Init(void) {
 	timer(1, isPaused);
 
 	background = CP_Image_Load("./Assets/background.png");
-	dark_green = CP_Color_Create(20, 50, 0, 255);
+	dark_green = CP_Color_Create(50, 50, 0, 255);
 	CP_Graphics_ClearBackground(dark_green);
 	// Initialize the coordinates and stats of the player
 
@@ -156,10 +156,13 @@ void map_Update(void) {
 						cWave->CurrentCount -= 1;
 						MobCount[w] -= 1;
 						//ItemTracker->exptree = insertItemNode(ItemTracker->exptree, CreateItemEffect(cMob->x, cMob->y, 1, cMob->Title));
-						insertItemLink(&ItemTracker->ExpLL, CreateItemEffect(cMob->coor.x, cMob->coor.y, 1, cMob->Title));
+						insertItemLink(&ItemTracker->ExpLL, CreateItemEffect(cMob->coor, EXP, cMob->Title));
 						float rng = CP_Random_RangeFloat(0, 1);
 						if (rng < 0.23) {
-							insertItemLink(&ItemTracker->ItemLL, CreateItemEffect(cMob->coor.x, cMob->coor.y, 0, 0));
+							insertItemLink(&ItemTracker->ItemLL, CreateItemEffect(cMob->coor, -1, 0));
+						}
+						if (rng < 0.44) {
+							insertItemLink(&ItemTracker->CoinLL, CreateItemEffect(cMob->coor, COIN, 0));
 						}
 						int sub = P.LEVEL.VAL > 0 ? P.LEVEL.VAL : 2;
 						P.CURRENT_HP += sub / 2;
@@ -173,18 +176,16 @@ void map_Update(void) {
 				
 			}
 		}
-	//	if (ItemTracker->exptree != NULL) {
-	//		NoDeleted = 0;
-	//		DrawItemTree(ItemTracker->exptree);
-	//		ItemPlayerCollision();
-	//	}
 		if (ItemTracker->ItemLL != NULL) {
 			ItemTracker->ItemLL = ItemInteraction(ItemTracker->ItemLL);
 		}
 		if (ItemTracker->ExpLL != NULL) {
 			ItemTracker->ExpLL = ItemInteraction(ItemTracker->ExpLL);
 		}
-		//printf("MobCount: %d |\tFPS: %f \n", MobC, CP_System_GetFrameRate());
+		if (ItemTracker->CoinLL != NULL) {
+			ItemTracker->CoinLL = ItemInteraction(ItemTracker->CoinLL);
+		}
+
 		static float bulletcd = 99; // Random big number so no cd on first shot
 		static btype = 2;
 		if (CP_Input_KeyTriggered(KEY_1)) // For testing, keypad 1 to switch to spilt, if spilt then to normal
@@ -231,8 +232,8 @@ void map_Update(void) {
 		timer(0, isPaused);
 	}
 
-	if(MobCycleTimer % (P.LEVEL.VAL + 1 )== 0)
-		P.CURRENT_HP--;
+	//if(MobCycleTimer %  2 == 0)
+		//P.CURRENT_HP-= 1 + P.LEVEL.VAL/4;
 	
 	
 	Player_Show_Stats(P);
@@ -248,6 +249,7 @@ void map_Exit(void) {
 	FreeMobResource();
 	
 	FreeItemResource();
+	printf("Coin Gained: %d", P.STAT.Coin_Gained);
 	
 	//free(ItemTracker);
 }

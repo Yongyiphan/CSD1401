@@ -28,7 +28,7 @@ void Player_Init(Player* P) {
 								 = 100 * 1.2 = 120
 	*/
 	start_vector = CP_Vector_Zero();
-	P_stats = (Stats){ PLAYER_HP, PLAYER_SPEED, PLAYER_DAMAGE, ATK_SPD, PLAYER_DEFENSE , PLAYER_PICKUP, PLAYER_PROJ_SPD };
+	P_stats = (Stats){ PLAYER_HP, PLAYER_SPEED, PLAYER_DAMAGE, ATK_SPD, PLAYER_DEFENSE , PLAYER_PICKUP, PLAYER_PROJ_SPD , 0};
 	P_stats_mult = (StatsMult){ 1, 1, 1, 1, 1, 1, 1 };
 	P_stats_total = (StatsTotal){ PLAYER_HP, PLAYER_SPEED, PLAYER_DAMAGE, ATK_SPD, PLAYER_DEFENSE, PLAYER_PICKUP, PLAYER_PROJ_SPD };
 	level = (LEVEL){ 0, 0, 10 };

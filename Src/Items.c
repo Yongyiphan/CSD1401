@@ -54,13 +54,17 @@ void PrintItemCount(void) {
 
 #include <stdio.h>
 #pragma region
-Item* CreateItemEffect(float x, float y, int exp, int expVal) {
+Item* CreateItemEffect(CP_Vector coor, int exp, int expVal) {
 	//Get Random chance generator
 	float RNG = CP_Random_RangeFloat(0, 1), DropChance;
 	//Get Random Type of effect
-	int noEffect = 1, EType = CP_Random_RangeInt(1, noEffect), cSec = (int)CP_System_GetSeconds();
-	if(exp)
-		EType = 0;
+	int noEffect = 1, EType, cSec = (int)CP_System_GetSeconds();
+	if (exp == -1) {
+		EType = CP_Random_RangeInt(1, noEffect);
+	}
+	else {
+		EType = exp;
+	}
 
 	if (ItemCountSum() > 20) {
 		if (ItemTracker->DropCount[MAGNET][0] == 0) {
@@ -93,12 +97,15 @@ Item* CreateItemEffect(float x, float y, int exp, int expVal) {
 		newItem->Duration = 5;
 		newItem->Hitbox = 32;
 		break;
+	case COIN:
+		newItem->Duration = -1;
+		newItem->Hitbox = 25;
 	}
 	newItem->Start = cSec;
 	newItem->Type = EType;
 	//newItem->x = x;
 	//newItem->y = y;
-	newItem->coor = CP_Vector_Set(x, y);
+	newItem->coor = coor;
 	newItem->collected = 0;
 	newItem->knockback = 5;
 	return newItem;
@@ -145,6 +152,7 @@ void ItemLoadImage(void) {
 		"./Assets/Items/EXP Sprite.png",
 		"./Assets/Items/Base Item Sprite.png",
 		"./Assets/Items/Magnet.png",
+		"./Assets/Items/coin.png",
 	};
 
 	Img_C = (sizeof(FilePaths) / sizeof(FilePaths[0]));
@@ -162,10 +170,21 @@ void DrawItemImage(Item* item) {
 	CP_Image* SImg = ItemSprites[item->Type];
 	int IHeight = CP_Image_GetHeight(SImg),IWidth;
 	int ph = IHeight * item->Hitbox / IHeight, pw = ph;
+	int Displacement[3] = { -1, 0, 1 }, dx, dy;
+	if (item->Dis[0] == 0 && item->Dis[1] == 0 && item->Type != EXP) {
+		do {
+			dx = Displacement[CP_Random_RangeInt(0, 2)];
+			dy = Displacement[CP_Random_RangeInt(0, 2)];
+
+		} while (dx != 0 && dy != 0);
+		item->Dis[0] = dx;
+		item->Dis[1] = dy;
+		item->coor = CP_Vector_Set(item->coor.x + dx * pw, item->coor.y + dy * ph);
+	}
 	switch (item->Type) {
 	case StatBoost:
 		IWidth = CP_Image_GetWidth(SImg) / NoBaseStats;
-		CP_Image_DrawSubImage(SImg, item->coor.x + pw, item->coor.y,pw, ph,
+		CP_Image_DrawSubImage(SImg, item->coor.x, item->coor.y, pw, ph,
 			IWidth * (item->AffectedBaseStat % 5) ,
 			0,
 			IWidth * (item->AffectedBaseStat % 5) + IWidth,
@@ -186,16 +205,14 @@ void DrawItemImage(Item* item) {
 				IHeight - btmOS,		
 				255);
 		break;
-	case MAGNET:
+	default:
 		IWidth = CP_Image_GetWidth(SImg);
-		CP_Image_DrawSubImage(SImg, item->coor.x + pw, item->coor.y,pw, ph,
+		CP_Image_DrawSubImage(SImg, item->coor.x, item->coor.y, pw, ph,
 			0,
 			0,
 			IWidth,
 			IHeight,
 			255);
-		break;
-	default:
 		break;
 	}
 }
@@ -254,6 +271,8 @@ ItemLink* ItemInteraction(ItemLink* head) {
 					deleteItemLink(&head, current->key);
 					current = next;
 					ItemTracker->DropCount[CType][0]--;
+					if (CType == COIN)
+						P.STAT.Coin_Gained += 5;
 					continue;
 				}
 				if (current->key->applying == 0) {
