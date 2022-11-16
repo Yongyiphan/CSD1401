@@ -34,6 +34,7 @@ typedef struct Mob {
 	int Status; 
 	int AnimationCycle;
 	int w, h;
+	int dmginstance;
 	//Dead = 0 | Alive = 1
 } Mob;
 

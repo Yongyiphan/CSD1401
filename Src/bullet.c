@@ -50,16 +50,18 @@ void BulletType(int type, float coordx, float coordy, float angle, int friendly)
 		bullet[bulletcounter].damage = 10 * 1;
 		bullet[bulletcounter].exist = TRUE;
 	}
+
 	if (type == PBULLET_SPILT) // Triple shot of PBULLET_NORMAL
 	{
-		for (int i = 0; i < 3; i++) {
-			if (i == 1) angle += 15; // Bullet right
-			if (i == 2) angle -= 15 * 2; // Bullet left
+		for (int i = 0; i < 2; i++) {
+			if (i == 0) angle += 15; // Bullet right
+			if (i == 1) angle -= 15 * 2; // Bullet left
 			BulletType(PBULLET_NORMAL, coordx, coordy, angle, friendly);
 			bullet[bulletcounter].type = PBULLET_SPILT;
 			bulletcounter++;
 		}
 	}
+
 	if (type == PBULLET_ROCKET) // Bullet Rocket
 	{
 		BulletReset();
@@ -69,15 +71,15 @@ void BulletType(int type, float coordx, float coordy, float angle, int friendly)
 		bullet[bulletcounter].size = 15 * 1;
 		bullet[bulletcounter].speed = 5 * 1;
 		bullet[bulletcounter].maxdistance = 200 * 1;
-		bullet[bulletcounter].damage = 20 * 1;
+		bullet[bulletcounter].damage = 3 * 1;
 		bullet[bulletcounter].timer = 1;
 		bullet[bulletcounter].exist = TRUE;
 	}
+
 	if (type == PBULLET_HOMING)
 	{
 		BulletType(PBULLET_NORMAL, coordx, coordy, angle, friendly);
 		bullet[bulletcounter].type = PBULLET_HOMING;
-		//TBA
 	}
 }
 
@@ -107,18 +109,20 @@ void BulletDraw(void) //Draws the location of all active bullets
 			CP_Settings_RectMode(CP_POSITION_CENTER);
 			CP_Settings_Fill(CP_Color_Create(0, 0, 0, 255));
 			CP_Graphics_DrawRectAdvanced(bullet[i].x, bullet[i].y, bullet[i].size*2, bullet[i].size, bullet[i].degree, 0);
+
 			if (bullet[i].type == PBULLET_ROCKET && bullet[i].exist == FALSE && bullet[i].timer > 0) // PBULLET_ROCKET explosion draw
 			{
-				printf("Rocket pew\n");
 				bullet[i].timer += CP_System_GetDt();
 				CP_Settings_EllipseMode(CP_POSITION_CENTER);
-				CP_Settings_Fill(CP_Color_Create(121, 243, 146, 255));
+				CP_Settings_Fill(CP_Color_Create(121, 243, 146, 0));
 				CP_Graphics_DrawCircle(bullet[i].x, bullet[i].y, bullet[i].size*10);
+
 				if (bullet[i].timer > 2) { // number - 1 = timer explosion lasts (in seconds)
 					bullet[i].timer = 0;
-					bullet[i].type = PBULLET_NORMAL;
+					bullet[i].type = 0;
 				}
 			}
+
 			if (bullet[i].traveldistance < bullet[i].maxdistance && bullet[i].exist == TRUE)
 			{
 				BulletDirection(bullet[i].degree, i);
@@ -136,12 +140,21 @@ int BulletCollision(float targetx, float targety, float width, float height)
 	// Current plan: Use circles for all hitbox, try to make it not look off
 	float distance = 0;
 	for (int i = 0; i < BULLET_CAP; i++) {
+		if (bullet[i].type == PBULLET_ROCKET && bullet[i].exist == FALSE && bullet[i].timer == 1) // Explosion Check
+		{
+			distance = CP_Math_Distance(bullet[i].x, bullet[i].y, targetx, targety);
+			if (distance < bullet[i].size * 10)
+				return i;
+		}
+
 		if (bullet[i].exist == FALSE)
 			continue;
+
 		if (bullet[i].type == PBULLET_HOMING) BulletHomingTrack(targetx, targety, width, i);
-		CP_Graphics_DrawCircle(targetx, targety, width); // Draws hitbox zone of mob
+
+		CP_Graphics_DrawCircle(targetx, targety, width*0.9); // Draws hitbox zone of mob
 		distance = CP_Math_Distance(bullet[i].x, bullet[i].y, targetx, targety);
-		if (distance < width)
+		if (distance < width*0.9)
 			return i;
 	}
 	return -1; // for no collision with any bullets

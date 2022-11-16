@@ -159,6 +159,7 @@ void InitWavesArr(WaveTrack* tracker, int start) {
 		tracker->arr[w]->AnimationCycle = 0;
 		tracker->arr[w]->w = 0;
 		tracker->arr[w]->h = 0;
+		tracker->arr[w]->dmginstance = 0;
 	}
 }
 

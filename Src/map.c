@@ -128,11 +128,11 @@ void map_Update(void) {
 			isPaused = 1;
 		}
 		// Increase speed of the player
-		if (CP_Input_KeyTriggered(KEY_H)){
+		if (CP_Input_KeyTriggered(KEY_H)) {
 			P.STATMULT.SPEED_MULT *= 1.1f;
 			P.HITBOX += 10;
 		}
-		if (CP_Input_KeyTriggered(KEY_M)){
+		if (CP_Input_KeyTriggered(KEY_M)) {
 			P.STATMULT.PICKUP_MULT *= 1.1;
 		}
 		// Open up the Upgrade Screen
@@ -180,8 +180,25 @@ void map_Update(void) {
 					MobTMobCollision(cMob);
 					MobTPlayerCollision(cMob, &P);
 					int bchecker;
-					if ((bchecker = BulletCollision(cMob->x, cMob->y, cMob->w, cMob->h)) >= 0 && bullet[bchecker].friendly == BULLET_PLAYER
-						&& bullet[bchecker].exist == TRUE)
+					//static int breset = BULLET_CAP + 1; // Ensures first run value will be always be different from bchecker
+					bchecker = BulletCollision(cMob->x, cMob->y, cMob->w, cMob->h);
+
+					//if (breset != bchecker) cMob->dmginstance = 0;
+					//breset = bchecker;
+
+					if (bullet[bchecker].type == PBULLET_ROCKET && bullet[bchecker].friendly == BULLET_PLAYER
+						&& bullet[bchecker].exist == FALSE) // Specific type for explosion zone
+					{
+						//if (cMob->dmginstance == 0)
+						//{
+							cMob->CStats.HP -= bullet[bchecker].damage;
+							if (cMob->CStats.HP <= 0)
+								cMob->Status = 0;
+						//	cMob->dmginstance = 1;
+						//}
+					}
+
+					if (bchecker >= 0 && bullet[bchecker].friendly == BULLET_PLAYER && bullet[bchecker].exist == TRUE)
 					{
 						cMob->CStats.HP -= bullet[bchecker].damage;
 						if (cMob->CStats.HP <= 0)
@@ -202,18 +219,18 @@ void map_Update(void) {
 						continue;
 					}
 					//cMob->h == 0 means haven drawn before. / assigned image to it yet
-					if (P.x - WWidth/2 - cMob->w < cMob->x && cMob->x < P.x + WWidth/2 + cMob->w && P.y - WHeight/2 - cMob->h < cMob->y && cMob->y < P.y + WHeight/2 + cMob->h || cMob->h == 0) {
+					if (P.x - WWidth / 2 - cMob->w < cMob->x && cMob->x < P.x + WWidth / 2 + cMob->w && P.y - WHeight / 2 - cMob->h < cMob->y && cMob->y < P.y + WHeight / 2 + cMob->h || cMob->h == 0) {
 						DrawMobImage(cMob, &P);
 					}
 				}
-				
+
 			}
 		}
-	//	if (ItemTracker->exptree != NULL) {
-	//		NoDeleted = 0;
-	//		DrawItemTree(ItemTracker->exptree);
-	//		ItemPlayerCollision();
-	//	}
+		//	if (ItemTracker->exptree != NULL) {
+		//		NoDeleted = 0;
+		//		DrawItemTree(ItemTracker->exptree);
+		//		ItemPlayerCollision();
+		//	}
 		if (ItemTracker->ExpLL != NULL) {
 			ItemTracker->ExpLL = DrawItemLink(ItemTracker->ExpLL);
 		}
@@ -221,45 +238,104 @@ void map_Update(void) {
 			ItemTracker->ItemLL = DrawItemLink(ItemTracker->ItemLL);
 		}
 		//printf("MobCount: %d |\tFPS: %f \n", MobC, CP_System_GetFrameRate());
-		static float bulletcd = 99; // Random big number so no cd on first shot
-		static btype = 1;
-		if (CP_Input_KeyTriggered(KEY_1)) // For testing, keypad 1 to switch to spilt, if spilt then to normal
+
+		// Bullet CD Related stuff below
+		static float bulletcd1 = 99, bulletcd2 = 99, bulletcd3 = 99, bulletcd4 = 99; // Random big number so no cd on first shot
+		static int legal2 = 0, legal3 = 0, legal4 = 0; // For checking if type of bullet should fire
+		float bulletangle = 0;
+		if (CP_Input_KeyTriggered(KEY_1)) // For testing, keypad 1 to toggle on / off
 		{
-			if (btype == PBULLET_SPILT) btype = PBULLET_NORMAL;
-			else btype = PBULLET_SPILT;
+			if (legal2 == 0)
+				legal2 = 1;
+			else
+				legal2 = 0;
 		}
-		if (CP_Input_KeyTriggered(KEY_2)) // For testing, keypad 2 to switch to rocket, if spilt then to normal
+		if (CP_Input_KeyTriggered(KEY_2)) // For testing, keypad 2 to toggle on / off
 		{
-			if (btype == PBULLET_ROCKET) btype = PBULLET_NORMAL;
-			else btype = PBULLET_ROCKET;
+			if (legal3 == 0)
+				legal3 = 1;
+			else
+				legal3 = 0;
 		}
-		if (CP_Input_KeyTriggered(KEY_3)) // For testing, keypad 3 to switch to rocket, if spilt then to normal
+		if (CP_Input_KeyTriggered(KEY_3)) // For testing, keypad 3 to toggle on / off
 		{
-			if (btype == PBULLET_HOMING) {
-				printf("Swap homing\n");  btype = PBULLET_HOMING;
-			}
-			else btype = PBULLET_HOMING;
+			if (legal4 == 0)
+				legal4 = 1;
+			else
+				legal4 = 0;
 		}
+		if (CP_Input_KeyTriggered(KEY_4)) // Toggle all types on / off
+		{
+			if (legal2 == 0 || legal3 == 0 || legal4 == 0)
+				legal2 = legal3 = legal4 = 1;
+			else
+				legal2 = legal3 = legal4 = 0;
+		}
+
 		if (CP_Input_MouseDown(MOUSE_BUTTON_LEFT))
 		{
-			bulletcd += CP_System_GetDt();
-			if (bulletcd > 0.5) { // 0.5 is the cooldown timer; might need seperate timer for different bullet types
-				bulletcd = 0;
-			}
+			// Get details for bullets
+			bulletcd1 += CP_System_GetDt();
+			bulletcd2 += CP_System_GetDt();
+			bulletcd3 += CP_System_GetDt();
+			bulletcd4 += CP_System_GetDt();
 			mousex = CP_Input_GetMouseWorldX();
 			mousey = CP_Input_GetMouseWorldY();
-			if (bulletcd == 0) {
-				float bulletangle = 0;
-				bulletangle = point_point_angle(P.x, P.y, mousex, mousey);
-				BulletShoot(P.x, P.y, bulletangle, btype, BULLET_PLAYER);
+			bulletangle = point_point_angle(P.x, P.y, mousex, mousey);
+
+			// Check valid cd + shoot for each bullet type
+			if (bulletcd1 > 0.5) { // Fixed value is the base cd timer
+				bulletcd1 = 0;
 			}
+			if (bulletcd1 == 0) // Default bullet is always active
+				BulletShoot(P.x, P.y, bulletangle, PBULLET_NORMAL, BULLET_PLAYER);
+
+			if (bulletcd2 > 0.5) { // Fixed value is the base cd timer
+				bulletcd2 = 0;
+			}
+			if (legal2 == 1 && bulletcd2 == 0)
+				BulletShoot(P.x, P.y, bulletangle, PBULLET_SPILT, BULLET_PLAYER);
+
+			if (bulletcd3 > 1.5) { // Fixed value is the base cd timer
+				bulletcd3 = 0;
+			}
+			if (legal3 == 1 && bulletcd3 == 0)
+				BulletShoot(P.x, P.y, bulletangle, PBULLET_ROCKET, BULLET_PLAYER);
+
+			if (bulletcd4 > 1) { // Fixed value is the base cd timer
+				bulletcd4 = 0;
+			}
+			if (legal4 == 1 && bulletcd4 == 0)
+				BulletShoot(P.x, P.y, bulletangle, PBULLET_HOMING, BULLET_PLAYER);
+
 		}
-		if (CP_Input_MouseDown(MOUSE_BUTTON_LEFT) == FALSE && bulletcd != 99) // Keeps bulletcd running even when not on leftclick
+		if (CP_Input_MouseDown(MOUSE_BUTTON_LEFT) == FALSE && bulletcd1 != 99) // Keeps bulletcd running even when not on leftclick
 		{
-			bulletcd += CP_System_GetDt();
-			if (bulletcd > 0.5)
-				bulletcd = 99;
+			bulletcd1 += CP_System_GetDt();
+			if (bulletcd1 > 0.5)
+				bulletcd1 = 99;
 		}
+		if (CP_Input_MouseDown(MOUSE_BUTTON_LEFT) == FALSE && bulletcd2 != 99) // Keeps bulletcd running even when not on leftclick
+		{
+			bulletcd2 += CP_System_GetDt();
+			if (bulletcd2 > 0.5)
+				bulletcd2 = 99;
+		}
+		if (CP_Input_MouseDown(MOUSE_BUTTON_LEFT) == FALSE && bulletcd3 != 99) // Keeps bulletcd running even when not on leftclick
+		{
+			bulletcd3 += CP_System_GetDt();
+			if (bulletcd3 > 0.5)
+				bulletcd3 = 99;
+		}
+		if (CP_Input_MouseDown(MOUSE_BUTTON_LEFT) == FALSE && bulletcd4 != 99) // Keeps bulletcd running even when not on leftclick
+		{
+			bulletcd4 += CP_System_GetDt();
+			if (bulletcd4 > 0.5)
+				bulletcd4 = 99;
+		}
+		// End of bulletcd related stuff
+
+
 		BulletDraw();
 		CP_Settings_ResetMatrix();
 
