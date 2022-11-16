@@ -1,9 +1,11 @@
+#pragma once
 #include "cprocessing.h"
 #include <stdio.h>
-#include "utils.h"
+#include "map.h"
 #include "player.h"
 #include "game.h"
-#include "map.h"
+#include "utils.h"
+#include "Mob.h"
 #include "Items.h"
 
 
@@ -11,19 +13,6 @@
 #define PLAYER_DIAMETER 50.0f
 #define PLAYER_SPEED 20
 #define _countof(array) (sizeof(array) / sizeof(array[0]))
-
-
-int collide_bullet(Player p, Bullet bullet) {
-	if (CP_Math_Distance(p.x, p.y, bullet.x, bullet.y) < p.HITBOX / 2 + bullet.maxdistance / 2) {
-		p.CURRENT_HP -= 5;
-		return 1;
-	}
-	return 0;
-}
-
-void shoot_bullet(Bullet bullet) {
-	
-}
 
 /*
 Shows healthbar of the player. Creates 2 rectangles, one specifying current HP, and the other max HP.
@@ -58,9 +47,9 @@ void level_up(int* exp, int* exp_req, int* level) {
 		*exp_req *= 1.5;
 		*level += 1;
 
-		printf("EXP: %d\tEXP_REQ: %d\tLVL: %d\n", *exp, *exp_req, *level);
+		//printf("EXP: %d\tEXP_REQ: %d\tLVL: %d\n", *exp, *exp_req, *level);
 	}
-	printf("EXP: %d\tEXP_REQ: %d\tLVL: %d\n", *exp, *exp_req, *level);
+	//printf("EXP: %d\tEXP_REQ: %d\tLVL: %d\n", *exp, *exp_req, *level);
 }
 
 void show_level(Player* P) {
@@ -135,6 +124,8 @@ void death_screen(float totalElapsedTime) {
 
 	if (CP_Input_MouseClicked()) {
 		if (IsAreaClicked(middle.x, middle.y, width, height, CP_Input_GetMouseX(), CP_Input_GetMouseY())) {
+			FreeMobResource();
+			FreeItemResource();
 			map_Init();
 		}
 		if (IsAreaClicked(middle.x, middle.y + height + padding, width, height, CP_Input_GetMouseX(), CP_Input_GetMouseY())) {
@@ -237,5 +228,15 @@ void upgrade_screen(Player* P, int* isMenu, int* isPaused) {
 	CP_Settings_Stroke(CP_Color_Create(0, 0, 0, 255));
 }
 
-
+char* PStats[] = {"HEALTH", "SPEED", "DAMAGE", "FIRE RATE", "BULLET SPEED", "MAX HP"};
+int NoBaseStats = 6;
+char* GetBaseStats(int type) {
+	type = type == -1 ? -1 : type % NoBaseStats;
+	switch (type) {
+	case -1:
+		return PStats;
+	default:
+		return PStats[type];
+	}
+}
 

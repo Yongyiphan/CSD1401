@@ -4,12 +4,15 @@
 
 #include "bullet.h"
 
+extern int NoBaseStats;
+
 typedef struct PlayerStats {
 	float MAX_HP;
 	float SPEED;
 	float DAMAGE;
 	float ATK_SPEED;
 	float DEFENSE;
+	float PICKUP;
 }Stats;
 
 typedef struct PlayerStatsMultiplier {
@@ -18,6 +21,7 @@ typedef struct PlayerStatsMultiplier {
 	float DAMAGE_MULT;
 	float ATK_SPEED_MULT;
 	float DEFENSE_MULT;
+	float PICKUP_MULT;
 }StatsMult;
 
 typedef struct PlayerStatsTotal {
@@ -26,6 +30,7 @@ typedef struct PlayerStatsTotal {
 	float DAMAGE_TOTAL;
 	float ATK_SPEED_TOTAL;
 	float DEFENSE_TOTAL;
+	float PICKUP_TOTAL;
 }StatsTotal;
 
 typedef struct LEVEL {
@@ -48,9 +53,9 @@ typedef struct Player{
 
 
 //int collide_mob(Player, Mob);
-int collide_bullet(Player, Bullet);
+//int collide_bullet(Player, Bullet);
 
-void shoot_bullet(Bullet);
+//void shoot_bullet(Bullet);
 
 /*
 Shows healthbar of the player. Creates 2 rectangles, one specifying current HP, and the other max HP.
@@ -76,7 +81,7 @@ When "exp" reaches the value of "exp_req":
 */
 void level_up(int *exp, int *exp_req, int *level);
 
-
+char* GetBaseStats(int type);
 
 
 #endif
