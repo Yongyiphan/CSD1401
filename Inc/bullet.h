@@ -45,6 +45,8 @@ void BulletType(int, float, float, float, int);
 
 // Calculate the direction of the bullet (angle, bulletid)
 void BulletDirection(float, int);
+*/
+
 
 // Call to shoot bullet (playerx, playery, angle, type, bulletowner)
 void BulletShoot(float, float, float, int, int);

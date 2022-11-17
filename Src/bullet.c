@@ -129,6 +129,7 @@ void BulletDraw(void) //Draws the location of all active bullets
 		}
 	
 	}
+	
 }
 
 int BulletCollision(float targetx, float targety, float width, float height)
