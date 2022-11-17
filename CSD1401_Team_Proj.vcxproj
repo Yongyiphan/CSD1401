@@ -103,6 +103,8 @@ xcopy "$(SolutionDir)Assets\*" "$(OutDir)Assets\" /s /r /y /q
   <ItemGroup>
     <Image Include="Assests\DigiPen_Singapore_WEB_RED.png" />
     <Image Include="Assets\background.png" />
+    <Image Include="Assets\Title.png" />
+    <Image Include="Assets\Zombie.png" />
   </ItemGroup>
   <ItemGroup>
     <ClCompile Include="Src\bullet.c" />
@@ -134,6 +136,9 @@ xcopy "$(SolutionDir)Assets\*" "$(OutDir)Assets\" /s /r /y /q
   <ItemGroup>
     <Media Include="Assets\static.mp3" />
     <Media Include="Assets\thememusic.mp3" />
+  </ItemGroup>
+  <ItemGroup>
+    <Text Include="Assets\upgradesdata.txt" />
   </ItemGroup>
   <Import Project="$(VCTargetsPath)\Microsoft.Cpp.targets" />
   <ImportGroup Label="ExtensionTargets">
