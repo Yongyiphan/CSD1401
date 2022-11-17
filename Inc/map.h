@@ -1,6 +1,15 @@
 #pragma once
 #ifndef MAP_H
 #define MAP_H
+#include "player.h"
+
+
+#define Coarse_Spacing 50
+#define Fine_Spacing 10
+extern int WHeight, WWidth;
+extern Player P;
+
+
 
 // Initialize new map
 void map_Init(void);

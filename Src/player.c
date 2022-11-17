@@ -1,34 +1,93 @@
 #pragma once
 #include "cprocessing.h"
 #include <stdio.h>
-#include "utils.h"
+#include "map.h"
 #include "player.h"
 #include "game.h"
-#include "map.h"
+#include "utils.h"
+#include "Mob.h"
 #include "Items.h"
+#include "mainmenu.h"
 
 
 // Player hitbox is a circle
-#define PLAYER_DIAMETER 50.0f
-#define PLAYER_SPEED 20
+
 #define _countof(array) (sizeof(array) / sizeof(array[0]))
 
+//Declaring player variables
+CP_Vector start_vector;
+Stats P_stats; StatsMult P_stats_mult; StatsTotal P_stats_total; LEVEL level;
+
+void Player_Init(Player* P) {
+	/*
+	P_stats: Base stats of the player, can only be altered outside of the game.
+	P_stats_mult: In-game stats upgrade. Player stats are increased by multiplying its value against the player base stats
+	P_stats_total: The total amount of stats by multiplying its value with player base stats.
+	E.G. P_stats's MAX_HP = 100, P_stats_mult's MAX_HP_MULT = 1.2
+	P_stats_total's MAX_HP_TOTAL = MAX_HP * MAX_HP_MULT
+								 = 100 * 1.2 = 120
+	*/
+	start_vector = CP_Vector_Zero();
+	P_stats = (Stats){ PLAYER_HP, PLAYER_SPEED, PLAYER_DAMAGE, ATK_SPD, PLAYER_DEFENSE , PLAYER_PICKUP, PLAYER_PROJ_SPD };
+	P_stats_mult = (StatsMult){ 1, 1, 1, 1, 1, 1, 1 };
+	P_stats_total = (StatsTotal){ PLAYER_HP, PLAYER_SPEED, PLAYER_DAMAGE, ATK_SPD, PLAYER_DEFENSE, PLAYER_PICKUP, PLAYER_PROJ_SPD };
+	level = (LEVEL){ 0, 0, 10 };
+
+	*P = (Player){ start_vector.x, start_vector.y, 90, P_stats, P_stats_mult, P_stats_total, PLAYER_HITBOX, level };
+}
 
 
+// Update Player's Total Stats where the base HP is multiplied by the respective stat multipliers.
+void Player_Stats_Update(Player* P) {
+	P->STATTOTAL.MAX_HP_TOTAL = P->STAT.MAX_HP * P->STATMULT.MAX_HP_MULT;
+	P->STATTOTAL.SPEED_TOTAL = P->STAT.SPEED * P->STATMULT.SPEED_MULT;
+	P->STATTOTAL.DAMAGE_TOTAL = P->STAT.DAMAGE * P->STATMULT.DAMAGE_MULT;
+	P->STATTOTAL.ATK_SPEED_TOTAL = P->STAT.ATK_SPEED * P->STATMULT.ATK_SPEED_MULT;
+	P->STATTOTAL.PICKUP_TOTAL = P->STAT.PICKUP * P->STATMULT.PICKUP_MULT;
+	P->STATTOTAL.PROJECTILE_SPD_TOTAL = P->STAT.PROJECTILE_SPD * P->STATMULT.PROJECTILE_SPD_MULT;
+	
+}
+
+/*
+Shows Player's stats: HP, SPEED, DMG, ATK_SPEED, PICKUP_RADIUS and BULLET_SPD.
+*/
+void Player_Show_Stats(Player P) {
+	float printX = CP_System_GetWindowWidth() * 0.7 / 10;
+	float printY = CP_System_GetWindowHeight() * 7.5 / 10;
+	float padding = 30;
+	char bufferList[6][30] = { {0},{0},{0},{0},{0},{0} };
+	char* bufferName[] = { "HP: ", "SPEED: ", "DAMAGE: ", "FIRE RATE: ", "PICKUP RADIUS: ", "BULLET SPEED: " };
+
+
+	CP_Settings_TextSize(30.0f);
+	CP_Settings_Fill(CP_Color_Create(244, 244, 244, 255));
+	CP_Settings_TextAlignment(CP_TEXT_ALIGN_H_LEFT, CP_TEXT_ALIGN_V_TOP);
+	sprintf_s(bufferList[0], _countof(bufferList[0]), "%.f", P.STATTOTAL.MAX_HP_TOTAL);
+	sprintf_s(bufferList[1], _countof(bufferList[1]), "%.f", P.STATTOTAL.SPEED_TOTAL);
+	sprintf_s(bufferList[2], _countof(bufferList[2]), "%.f", P.STATTOTAL.DAMAGE_TOTAL);
+	sprintf_s(bufferList[3], _countof(bufferList[3]), "%.f", P.STATTOTAL.ATK_SPEED_TOTAL);
+	sprintf_s(bufferList[4], _countof(bufferList[4]), "%.f", P.STATTOTAL.PICKUP_TOTAL);
+	sprintf_s(bufferList[5], _countof(bufferList[5]), "%.f", P.STATTOTAL.PROJECTILE_SPD_TOTAL);
+
+	for (int i = 1; i < 6; i++) {
+		CP_Font_DrawText(bufferName[i], printX, printY + padding * i);
+		CP_Font_DrawText(bufferList[i], printX + 200, printY + padding * i);
+	}
+	/*sprintf_s(buffer, _countof(buffer), "%d", P.STATTOTAL.MAX_HP_TOTAL);
+	CP_Font_DrawText(buffer,)*/
+}
 
 /*
 Shows healthbar of the player. Creates 2 rectangles, one specifying current HP, and the other max HP.
 Current HP is always proportional to the length of max HP.
 */
-void show_healthbar(Player *p) {
+void show_healthbar(Player* p) {
 	CP_Settings_RectMode(CP_POSITION_CORNER);
-	float x_coord = (float) CP_System_GetWindowWidth() * 1 / 10;
-	float y_coord = (float) CP_System_GetWindowHeight() * 0.65 / 10;
+	float x_coord = (float)CP_System_GetWindowWidth() * 1 / 10;
+	float y_coord = (float)CP_System_GetWindowHeight() * 0.65 / 10;
 	int rectWidth = 300;
 	int rectHeight = 30;
-	/*CP_Settings_TextSize(40.0f);
-	CP_Settings_TextAlignment(CP_TEXT_ALIGN_H_LEFT, CP_TEXT_ALIGN_V_TOP);
-	CP_Font_DrawText("Health", 10, 10);*/
+
 	CP_Settings_Fill(CP_Color_Create(255, 200, 200, 255));
 	CP_Settings_StrokeWeight(3.0f);
 	CP_Graphics_DrawRectAdvanced(x_coord, y_coord, rectWidth, rectHeight, 0, 0);
@@ -41,17 +100,15 @@ void show_healthbar(Player *p) {
 
 	CP_Graphics_DrawRectAdvanced(x_coord, y_coord, p->CURRENT_HP / p->STAT.MAX_HP * rectWidth, rectHeight, 0, 0);
 	CP_Settings_RectMode(CP_POSITION_CENTER);
-}
-
-void level_up(int* exp, int* exp_req, int* level) {
-	if (*exp > *exp_req) {
-		*exp = 0;
-		*exp_req *= 1.5;
-		*level += 1;
-
-		printf("EXP: %d\tEXP_REQ: %d\tLVL: %d\n", *exp, *exp_req, *level);
-	}
-	printf("EXP: %d\tEXP_REQ: %d\tLVL: %d\n", *exp, *exp_req, *level);
+	
+	CP_Settings_TextAlignment(CP_TEXT_ALIGN_H_CENTER, CP_TEXT_ALIGN_V_TOP);
+	CP_Settings_Fill(CP_Color_Create(0, 0, 0, 255));
+	char buffer[2][16] = { {0}, {0} };
+	sprintf_s(buffer[0], _countof(buffer[0]), "%.f", P.CURRENT_HP);
+	sprintf_s(buffer[1], _countof(buffer[1]), "%.f", P.STATTOTAL.MAX_HP_TOTAL);
+	CP_Font_DrawText(buffer[0], (x_coord * 2 + rectWidth) / 2 - 40, y_coord);
+	CP_Font_DrawText("/", (x_coord * 2 + rectWidth) / 2, y_coord);
+	CP_Font_DrawText(buffer[1], (x_coord * 2 + rectWidth) / 2 + 40, y_coord);
 }
 
 void show_level(Player* P) {
@@ -72,6 +129,15 @@ void show_level(Player* P) {
 	CP_Settings_Fill(CP_Color_Create(100, 200, 100, 255));
 	CP_Graphics_DrawRectAdvanced(x_coord, y_coord, (P->LEVEL.P_EXP / (float) P->LEVEL.EXP_REQ) * rectWidth, rectHeight, 0, 0);
 	CP_Settings_RectMode(CP_POSITION_CENTER);
+
+	CP_Settings_TextAlignment(CP_TEXT_ALIGN_H_CENTER, CP_TEXT_ALIGN_V_TOP);
+	CP_Settings_Fill(CP_Color_Create(0, 0, 0, 255));
+	char buffer[2][16] = { {0}, {0} };
+	sprintf_s(buffer[0], _countof(buffer[0]), "%d", P->LEVEL.P_EXP);
+	sprintf_s(buffer[1], _countof(buffer[1]), "%d", P->LEVEL.EXP_REQ);
+	CP_Font_DrawText(buffer[0], (x_coord * 2 + rectWidth) / 2 - 40, y_coord);
+	CP_Font_DrawText("/", (x_coord * 2 + rectWidth) / 2, y_coord);
+	CP_Font_DrawText(buffer[1], (x_coord * 2 + rectWidth) / 2 + 40, y_coord);
 }
 
 // Shows a death screen, and gives the player the option whether to restart the game
@@ -112,9 +178,11 @@ void death_screen(float totalElapsedTime) {
 	// Print out the words shown
 	CP_Font_DrawText("You have lasted for ", middle.x - 50, screen_height * 4/10);
 	
+	// Show how long the player survived for
 	sprintf_s(buffer, _countof(buffer), "%.2f", totalElapsedTime);
-	// not working
 	CP_Font_DrawText(buffer, middle.x + 140, screen_height * 4 / 10);
+
+	// The buttons to restart and exit game
 	CP_Font_DrawText("Restart Game?", middle.x, middle.y);
 	CP_Font_DrawText("Exit to main menu", middle.x, middle.y + height + padding);
 
@@ -126,16 +194,30 @@ void death_screen(float totalElapsedTime) {
 
 	if (CP_Input_MouseClicked()) {
 		if (IsAreaClicked(middle.x, middle.y, width, height, CP_Input_GetMouseX(), CP_Input_GetMouseY())) {
+			FreeMobResource();
+			FreeItemResource();
 			map_Init();
 		}
 		if (IsAreaClicked(middle.x, middle.y + height + padding, width, height, CP_Input_GetMouseX(), CP_Input_GetMouseY())) {
-			CP_Engine_SetNextGameState(game_Init, game_Update, game_Exit);
+			CP_Engine_SetNextGameState(Main_Menu_Init, Main_Menu_Update, Main_Menu_Exit);
 		}
 	}
 }
 
+
+int level_up(LEVEL* level) {
+	if (level->P_EXP > level->EXP_REQ) {
+		level->P_EXP = 0;
+		level->EXP_REQ *= 1.5;
+		level->VAL += 1;
+
+		return 1;
+	}
+	return 0;
+}
+
 // Show player's available upgrades
-void upgrade_screen(Player* P, int* isMenu, int* isPaused) {
+void upgrade_screen(Player* P, int* isUpgrade, int* isPaused) {
 	
 	float screen_width = (float) CP_System_GetWindowWidth();
 	float screen_height = (float) CP_System_GetWindowHeight();
@@ -173,7 +255,7 @@ void upgrade_screen(Player* P, int* isMenu, int* isPaused) {
 	CP_Settings_TextSize(30.0f);
 	CP_Settings_TextAlignment(centerHor, centerVert);
 
-	char* name[] = { "Bullet Speed", "Max HP", "Damage", "Speed", "Defense", "Attack Speed" };
+	char* name[] = { "Pickup Radius", "Max HP", "Damage", "Speed", "Bullet Speed", "Attack Speed" };
 	int countStats = 0;
 	// Draw out option boxes with padding applied
 	float background_topX = middle.x - background_width / 2;
@@ -192,22 +274,26 @@ void upgrade_screen(Player* P, int* isMenu, int* isPaused) {
 				if (IsAreaClicked(boxX, boxY, box_width, box_height, CP_Input_GetMouseX(), CP_Input_GetMouseY())) {
 					//stats[countStats % 6] += 1;
 					
-					if (strcmp(name[countStats % 6], "Max HP") == 0) {
-						P->STATMULT.MAX_HP_MULT += 3;
-						printf("%s: %.2f\n", name[countStats % 6], P->STATMULT.MAX_HP_MULT);
+					if (strcmp(name[countStats % 6], "Pickup Radius") == 0) {
+						P->STATMULT.PICKUP_MULT += 3.0 / 100;
+						//printf("%s: %.2f\n", name[countStats % 6], P->STATMULT.MAX_HP_MULT);
 					}
-
+					else if (strcmp(name[countStats % 6], "Max HP") == 0) {
+						P->STATMULT.MAX_HP_MULT += 1.0 / 100;
+					}
 					else if (strcmp(name[countStats % 6], "Damage") == 0) {
-						P->STATMULT.DAMAGE_MULT += 1;
-						printf("%s: %.2f\n", name[countStats % 6], P->STATMULT.DAMAGE_MULT);
+						P->STATMULT.DAMAGE_MULT += 1.0 / 10;
+						//printf("%s: %.2f\n", name[countStats % 6], P->STATMULT.DAMAGE_MULT);
 					}
 					else if (strcmp(name[countStats % 6], "Speed") == 0)
-						P->STATMULT.SPEED_MULT += 2;
-					else if (strcmp(name[countStats % 6], "Defense") == 0)
-						P->STATMULT.DEFENSE_MULT += 1;
+						P->STATMULT.SPEED_MULT += 1.0 / 10;
+					else if (strcmp(name[countStats % 6], "Bullet Speed") == 0)
+						P->STATMULT.PROJECTILE_SPD_MULT += 1.0 / 100;
 					else if (strcmp(name[countStats % 6], "Attack Speed") == 0)
-						P->STATMULT.ATK_SPEED_MULT += 0.5;
+						P->STATMULT.ATK_SPEED_MULT += 0.5 / 100.0;
 
+					*isPaused = 0;
+					*isUpgrade = 0;
 				}
 			}
 				
@@ -220,7 +306,7 @@ void upgrade_screen(Player* P, int* isMenu, int* isPaused) {
 	}
 	if (CP_Input_KeyTriggered(KEY_U)) {
 		*isPaused = 0;
-		*isMenu = 0;
+		*isUpgrade = 0;
 	}
 
 	// Remove rectangle align-center and add stroke back in
@@ -228,5 +314,15 @@ void upgrade_screen(Player* P, int* isMenu, int* isPaused) {
 	CP_Settings_Stroke(CP_Color_Create(0, 0, 0, 255));
 }
 
-
+char* PStats[] = {"HEALTH", "SPEED", "DAMAGE", "FIRE RATE", "BULLET SPEED", "MAX HP"};
+int NoBaseStats = 6;
+char* GetBaseStats(int type) {
+	type = type == -1 ? -1 : type % NoBaseStats;
+	switch (type) {
+	case -1:
+		return PStats;
+	default:
+		return PStats[type];
+	}
+}
 
