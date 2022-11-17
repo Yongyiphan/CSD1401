@@ -156,13 +156,13 @@ void map_Update(void) {
 						cWave->CurrentCount -= 1;
 						MobCount[w] -= 1;
 						//ItemTracker->exptree = insertItemNode(ItemTracker->exptree, CreateItemEffect(cMob->x, cMob->y, 1, cMob->Title));
-						insertItemLink(&ItemTracker->ExpLL, CreateItemEffect(cMob->coor, EXP, cMob->Title));
+						//insertItemLink(&ItemTracker->ExpLL, CreateItemEffect(cMob->coor, EXP, cMob->Title));
 						float rng = CP_Random_RangeFloat(0, 1);
 						if (rng < 0.23) {
 							insertItemLink(&ItemTracker->ItemLL, CreateItemEffect(cMob->coor, -1, 0));
 						}
 						if (rng < 0.44) {
-							insertItemLink(&ItemTracker->CoinLL, CreateItemEffect(cMob->coor, COIN, 0));
+							//insertItemLink(&ItemTracker->CoinLL, CreateItemEffect(cMob->coor, COIN, 0));
 						}
 						int sub = P.LEVEL.VAL > 0 ? P.LEVEL.VAL : 2;
 						P.CURRENT_HP += sub / 2;
@@ -226,6 +226,7 @@ void map_Update(void) {
 				bulletcd = 99;
 		}
 		BulletDraw();
+	//	DrawAppliedEffects();
 		CP_Settings_ResetMatrix();
 
 		// Time, returns and draws text
