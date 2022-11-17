@@ -57,15 +57,15 @@ typedef struct Player{
 	
 }Player;
 
-#define PLAYER_HP 300.0f
+#define PLAYER_HP 400.0f
 #define PLAYER_SPEED 300.0f
-#define PLAYER_DAMAGE 1.0f
-#define ATK_SPD 2.0f
+#define PLAYER_DAMAGE 5.0f
+#define ATK_SPD 5.0f
 #define PLAYER_DEFENSE 10
 #define PLAYER_HITBOX 50
 //#define PLAYER_PICKUP 500
 #define PLAYER_PICKUP 80
-#define PLAYER_PROJ_SPD 400.0f
+#define PLAYER_PROJ_SPD 1.3f
 
 
 

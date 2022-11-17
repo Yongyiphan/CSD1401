@@ -64,14 +64,14 @@ Item* CreateItemEffect(CP_Vector coor, int exp, int expVal) {
 	int B_RNG = CP_Random_RangeInt(2, 4);
 	int noEffect = 1, EType;
 	if (exp == -1) {
-		EType = CP_Random_RangeInt(1, No_Items - 1);
+		EType = CP_Random_RangeInt(1, 2);
 	}
 	else {
 		EType = exp;
 	}
 
-	if (ItemCountSum() > 20) {
-		if (ItemTracker->DropCount[MAGNET][0] == 0) {
+	if (ItemCountSum() > 50) {
+		if (ItemTracker->DropCount[MAGNET][0] < ItemTracker->DropCount[MAGNET][1]) {
 			EType = MAGNET;
 			printf("Creating a magnet\n");
 		}
@@ -96,7 +96,7 @@ Item* CreateItemEffect(CP_Vector coor, int exp, int expVal) {
 		if (statgen == 0) {
 			newItem->Duration = -1;
 		}
-		newItem->Modifier = 0.30;
+		newItem->Modifier = 0.10;
 		newItem->Hitbox = 42;
 		break;
 	case MAGNET:
@@ -134,7 +134,7 @@ void IAffectPlayer(Item* item, int method) {
 		case StatBoost://Affect Base Stats
 		switch (item->AffectedBaseStat) {
 			case 0://HP
-				P.CURRENT_HP += (item->Modifier * 200);
+				P.CURRENT_HP += (item->Modifier * 1000);
 				break;
 			case 1://Movement Speed
 				P.STATMULT.SPEED_MULT += boost;
@@ -190,9 +190,9 @@ void ItemLoadImage(void) {
 	char* FilePaths[] = {
 		"./Assets/Items/EXP Sprite.png",
 		"./Assets/Items/Base Item Sprite.png",
+		"./Assets/Items/placeholderbullet.png",
 		"./Assets/Items/Magnet.png",
 		"./Assets/Items/coin.png",
-		"./Assets/Items/placeholderbullet.png",
 	};
 
 	Img_C = (sizeof(FilePaths) / sizeof(FilePaths[0]));

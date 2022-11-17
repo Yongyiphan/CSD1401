@@ -179,14 +179,14 @@ void map_Update(void) {
 						//ItemTracker->exptree = insertItemNode(ItemTracker->exptree, CreateItemEffect(cMob->x, cMob->y, 1, cMob->Title));
 						insertItemLink(&ItemTracker->ExpLL, CreateItemEffect(cMob->coor, EXP, cMob->Title));
 						float rng = CP_Random_RangeFloat(0, 1);
-						if (rng < 0.83) {
+						if (rng < 0.33) {
 							insertItemLink(&ItemTracker->ItemLL, CreateItemEffect(cMob->coor, -1, 0));
 						}
 						if (rng < 0.44) {
 							insertItemLink(&ItemTracker->CoinLL, CreateItemEffect(cMob->coor, COIN, 0));
 						}
 						int sub = P.LEVEL.VAL > 0 ? P.LEVEL.VAL : 2;
-						P.CURRENT_HP += sub / 2;
+						P.CURRENT_HP += sub;
 						continue;
 					}
 					//cMob->h == 0 means haven drawn before. / assigned image to it yet
@@ -206,14 +206,14 @@ void map_Update(void) {
 		if (ItemTracker->CoinLL != NULL) {
 			ItemTracker->CoinLL = ItemInteraction(ItemTracker->CoinLL);
 		}
-		if (MobCycleTimer % 2 == 0) {
-			P.CURRENT_HP -= 1 + P.LEVEL.VAL / 4;
-			if (P.CURRENT_HP < 1)
-				P.CURRENT_HP = 1;
+		//PrintItemCount();
+		if (MobCycleTimer % Wave_Timer == 0) {
+			float deduct = 1 + P.LEVEL.VAL / 4;
+			deduct = deduct > P.STATTOTAL.MAX_HP_TOTAL / 2 ? P.STATTOTAL.MAX_HP_TOTAL / 2 : deduct;
+			P.CURRENT_HP -= deduct;
 		}
 		static float bulletcd = 99; // Random big number so no cd on first shot
 		static btype = 2;
-		if (CP_Input_KeyTriggered(KEY_1)) // For testing, keypad 1 to switch to spilt, if spilt then to normal
 
 		//printf("MobCount: %d |\tFPS: %f \n", MobC, CP_System_GetFrameRate());
 
@@ -265,8 +265,10 @@ void map_Update(void) {
 			if (bulletcd1 > 1 / P.STATTOTAL.ATK_SPEED_TOTAL) { // Fixed value is the base cd timer
 				bulletcd1 = 0;
 			}
-			if (bulletcd1 == 0) // Default bullet is always active
+			if (bulletcd1 == 0) {
+				// Default bullet is always active
 				BulletShoot(P.x, P.y, bulletangle, PBULLET_NORMAL, BULLET_PLAYER);
+			}
 
 			if (bulletcd2 > 1 / P.STATTOTAL.ATK_SPEED_TOTAL) { // Fixed value is the base cd timer
 				bulletcd2 = 0;

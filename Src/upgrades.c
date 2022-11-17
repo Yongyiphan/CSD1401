@@ -163,13 +163,13 @@ void upgrades_Update(void)
 void upgrades_read_from_file(void)
 {
 	FILE* upgradesfile = openfile("./assets/upgradesdata.txt", "r");
-	{
+	//{
 		if (upgradesfile)
 		{
 			fscanf_s(upgradesfile, "%d %f %d %f %d %f %d %f %d %f %d %f %d %f", &upgrades[0].level, &upgrades[0].stat, &upgrades[1].level, &upgrades[1].stat, &upgrades[2].level, &upgrades[2].stat, &upgrades[3].level, &upgrades[3].stat, &upgrades[4].level, &upgrades[4].stat, &upgrades[5].level, &upgrades[5].stat, &upgrades[6].level, &upgrades[6].stat);
 			printf("%d %f %d %f %d %f %d %f %d %f %d %f %d %f", upgrades[0].level, upgrades[0].stat, upgrades[1].level, upgrades[1].stat, upgrades[2].level, upgrades[2].stat, upgrades[3].level, upgrades[3].stat, upgrades[4].level, upgrades[4].stat, upgrades[5].level, upgrades[5].stat, upgrades[6].level, upgrades[6].stat);
 		}
-	}
+	//}
 	closefile(upgradesfile);
 }
 //save data to upgradesdata.txt

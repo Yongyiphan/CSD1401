@@ -26,7 +26,7 @@ void BulletReset() //Reset active bullet
 
 void Bulletinit() //Include this in mapinit (Reset for all bullets)
 {
-	for (bulletcounter = 0; bulletcounter < BULLET_CAP; bulletcounter++)
+	for (bulletcounter = 0; bulletcounter < (BULLET_CAP - 1); bulletcounter++)
 		BulletReset();
 }
 
@@ -88,7 +88,7 @@ void BulletType(int type, float coordx, float coordy, float angle, int friendly)
 void BulletShoot(float coordx, float coordy, float angle, int type, int friendly) // Sets bullet to active
 {
 	BulletType(type, coordx, coordy, angle, friendly); // Set necessary data to the bullet
-	if (bulletcounter < BULLET_CAP) // Adjustments to bullet data should be before this to prevent buffer overrun
+	if (bulletcounter < (BULLET_CAP - 1)) // Adjustments to bullet data should be before this to prevent buffer overrun
 		bulletcounter++;
 	else bulletcounter = 0;
 }

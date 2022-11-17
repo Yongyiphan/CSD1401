@@ -19,8 +19,10 @@
 @returns	Updated base stats with new values
 */
 int MobCosts[MobTypes] = { 1,2,3, 4, 5};
+float statscale;
 void CreateBaseStat(MobStats* cStat, int type)
 {
+	
     switch (type) {
 		//Mob Format:
 		//int HP;
@@ -31,20 +33,20 @@ void CreateBaseStat(MobStats* cStat, int type)
 		//int Dmg;
 		//int size;
 		case SmallMob:
-			cStat->HP = 5;
-			cStat->DEF = 10;
-			cStat->Speed = 8;
-			cStat->Range = 0;
-			cStat->Dmg = 1;
-			cStat->size = 10;
+			cStat->HP = 5 * statscale * 2;
+			cStat->DEF = 10 + statscale;
+			cStat->Speed = 8 + statscale;
+			cStat->Range = 0 + statscale;
+			cStat->Dmg = 1 + statscale;
+			cStat->size = 50;
 			break;
 		case MediumMob:
-			cStat->HP = 5;
+			cStat->HP = 10 * statscale * 2;
 			cStat->DEF = 10;
-			cStat->Speed = 5;
-			cStat->Range = 0;
-			cStat->Dmg = 1;
-			cStat->size = 15;
+			cStat->Speed = 5 + statscale;
+			cStat->Range = 0 + statscale;
+			cStat->Dmg = 2 + statscale;
+			cStat->size = 60 + statscale;
 			break;
 		case BigMob:
 			cStat->HP = 5;
@@ -122,7 +124,7 @@ int MobCount[NO_WAVES];
 WaveTrack WaveTracker[NO_WAVES];
 void CreateWaveTracker(void) {
 	CWave = 0, MaxMob = MaxMobGrowthRate, CWaveCost = WaveCostGrowthRate;
-	MobCycleTimer = 0;
+	MobCycleTimer = 0, statscale = 1.1;
 	for (int i = 0; i < NO_WAVES; i++) {
 		WaveTracker[i] = (WaveTrack){
 			MaxMob, //Max Mob
@@ -206,9 +208,12 @@ void GenerateMobs(WaveTrack* tracker, Player* p) {
 void GenerateWaves(void) {
 	if (MobCycleTimer != (int)CP_System_GetSeconds()) {
 		MobCycleTimer = (int)CP_System_GetSeconds() - MobCycleTimer > 1 ? (int)CP_System_GetSeconds() : MobCycleTimer + 1;
+		printf("Mob Cycle Timer: %d | Stat Scale: %f\n",MobCycleTimer, statscale);
 		//printf("Current FPS: %f\n", CP_System_GetFrameRate());
-		if (MobCycleTimer % Wave_Timer == 0)
+		if (MobCycleTimer % Wave_Timer == 0) {
+			statscale *= 1.1;
 			MaxMob += MaxMobGrowthRate;
+		}
 		if (MobCycleTimer % Spawn_Timer == 0) {
 			for (int i = 0; i < NO_WAVES; i++)
 			{
@@ -275,7 +280,7 @@ void DrawMobImage(Mob* m, Player* p) {
 	
 	int IHeight, IWidth, alpha = 255,original_Size, scale, leftOS = 0, rightOS = 0, topOS = 0, btmOS = 0;
 	int SizeDef = 5, StartImgI = m->Title * 2, flip = 0;
-	int FrameStep = 0, targetFPS = 6, targetSize = 80;
+	int FrameStep = 0, targetFPS = 6;
 	m->AnimationCycle += 1;
 	int u0 = 0, v0 = 0, u1 = 0, v1 = 0;
 	/*
@@ -297,7 +302,7 @@ void DrawMobImage(Mob* m, Player* p) {
 	float t;
 	switch (m->Title) {
 		case SmallMob:
-			original_Size = 32, targetSize = 50;
+			original_Size = 32;
 			SizeDef = 5, targetFPS = 6;
 			scale = IHeight / original_Size;
 			IWidth = CP_Image_GetWidth(SImg) / SizeDef;
@@ -310,8 +315,8 @@ void DrawMobImage(Mob* m, Player* p) {
 				h = original_Size * scale - topOS - btmOS;
 				w = original_Size * scale - leftOS - rightOS;
 				t = (float) h/ (float)w;
-				m->h = targetSize;
-				m->w = targetSize * t;
+				m->h = m->BaseStats.size;
+				m->w = m->BaseStats.size * t;
 			}
 
 			FrameStep = (m->AnimationCycle / targetFPS) % SizeDef;
@@ -324,7 +329,7 @@ void DrawMobImage(Mob* m, Player* p) {
 				alpha);
 			break;
 		case MediumMob:
-			original_Size = 32, targetSize = 50;
+			original_Size = 32;
 			SizeDef = 2, targetFPS = 4;
 			scale = IHeight / original_Size;
 			IWidth = CP_Image_GetWidth(SImg) / SizeDef;
@@ -336,8 +341,8 @@ void DrawMobImage(Mob* m, Player* p) {
 				h = original_Size * scale - topOS - btmOS;
 				w = original_Size * scale - leftOS - rightOS;
 				t = (float) h/ (float)w;
-				m->h = targetSize;
-				m->w = targetSize * t;
+				m->h = m->BaseStats.size;
+				m->w = m->BaseStats.size * t;
 			}
 			FrameStep = (m->AnimationCycle / targetFPS) % SizeDef;
 			CP_Image_DrawSubImage(SImg, m->coor.x, m->coor.y, m->w, m->h,
@@ -466,7 +471,7 @@ void MobTMobCollision(Mob* m) {
 void MobTPlayerCollision(Mob* m, Player* p) {
 	
 	if (CP_Vector_Length(CP_Vector_Subtract(m->coor, p->coor)) <= p->HITBOX) {
-		//m->CStats.HP -= p->STATTOTAL.DAMAGE_TOTAL;
+		m->CStats.HP -= p->STATTOTAL.DAMAGE_TOTAL;
 		p->CURRENT_HP -= m->CStats.Dmg;
 	}
 	if (m->CStats.HP <= 0) {
@@ -510,51 +515,3 @@ void FreeMobResource(void) {
 	free(MobSprites);
 
 }
-//
-//
-//
-
-/*
-//			Old Code(Scraped)
-//			  Ignore Below
-//*/
-//					//tmRad = (pow(tm->w / 2, 2) + pow(tm->h / 2, 2));
-//					//dMtoTM = (pow(m->x - tm->x, 2) + pow(m->y - tm->y, 2));
-//					//dTMtoP = (pow(p->x - tm->x, 2) + pow(p->y - tm->y, 2));
-//					//if (dMtoTM <= mRad + tmRad) {
-//					//	goto BasicMovement;
-//					//}
-//					//if (dMtoP < dTMtoP ) {
-//					//	main = m;
-//					//	bounce = tm;
-//					//	/*
-//					//	Require:
-//					//		Vector bounce to main
-//					//		Vector bounce to p
-//					//	*/
-//					//	CP_Vector vBounceToMain = CP_Vector_Set(m->x - tm->x, m->y - tm->y);
-//					//	CP_Vector vBounceToP = CP_Vector_Set(p->x - tm->x, p->y - tm->y);
-//					//	if (vBounceToMain.x == vBounceToP.x && vBounceToMain.y == vBounceToMain.y) {
-//					//		goto BasicMovement;
-//					//	}
-//					//	float BouncePAngle = CP_Vector_Angle(vBounceToMain, vBounceToP);
-//					//	if (_isnanf(BouncePAngle)) {
-//					//		goto BasicMovement;
-//					//	}
-//					//	float nAngle = CP_Random_RangeFloat(0, BouncePAngle);
-//					//	//Using vBounceToP as main directional vector -> find new angle from it -> transform it -> move bounce in reverse direction
-//					//	CP_Matrix rot = CP_Matrix_Set(
-//					//		cos(nAngle), -sin(nAngle), 0,
-//					//		sin(nAngle), cos(nAngle), 0,
-//					//		0, 0, 0
-//					//	);
-//					//	CP_Vector nDirection = CP_Vector_Normalize(CP_Vector_MatrixMultiply(rot, vBounceToP));
-//					//	CP_Vector mainDirection = CP_Vector_Scale(CP_Vector_Normalize(CP_Vector_Set(p->x - m->x, p->y - m->y)), m->CStats.Speed);
-//					//	bounce->x -= nDirection.x;
-//					//	bounce->y -= nDirection.y;
-//					//	if (m != main) {
-//					//		main->x += mainDirection.x;
-//					//		main->y += mainDirection.y;
-//					//		status = 1;
-//					//	}
-//					//	goto BasicMovement;

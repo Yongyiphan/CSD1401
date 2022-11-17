@@ -36,8 +36,7 @@ void Player_Init(Player* P) {
 	P_stats_total = (StatsTotal){ PLAYER_HP, PLAYER_SPEED, PLAYER_DAMAGE, ATK_SPD, PLAYER_DEFENSE, PLAYER_PICKUP, PLAYER_PROJ_SPD};
 	level = (LEVEL){ 0, 0, 10 };
 
-	*P = (Player){ start_vector.x, start_vector.y, 90 + upgrades[0].stat, P_stats, P_stats_mult, P_stats_total, PLAYER_HITBOX, level};
-	*P = (Player){ start_vector.x, start_vector.y, PLAYER_HP, P_stats, P_stats_mult, P_stats_total, PLAYER_HITBOX, level};
+	*P = (Player){ start_vector.x, start_vector.y, PLAYER_HP + upgrades[0].stat, P_stats, P_stats_mult, P_stats_total, PLAYER_HITBOX, level};
 	P->coor = CP_Vector_Set(P->x, P->y);
 }
 
@@ -70,9 +69,9 @@ void Player_Show_Stats(Player P) {
 	sprintf_s(bufferList[0], _countof(bufferList[0]), "%.f", P.STATTOTAL.MAX_HP_TOTAL);
 	sprintf_s(bufferList[1], _countof(bufferList[1]), "%.f", P.STATTOTAL.SPEED_TOTAL);
 	sprintf_s(bufferList[2], _countof(bufferList[2]), "%.f", P.STATTOTAL.DAMAGE_TOTAL);
-	sprintf_s(bufferList[3], _countof(bufferList[3]), "%.f", P.STATTOTAL.ATK_SPEED_TOTAL);
+	sprintf_s(bufferList[3], _countof(bufferList[3]), "%.2f", P.STATTOTAL.ATK_SPEED_TOTAL);
 	sprintf_s(bufferList[4], _countof(bufferList[4]), "%.f", P.STATTOTAL.PICKUP_TOTAL);
-	sprintf_s(bufferList[5], _countof(bufferList[5]), "%.f", P.STATTOTAL.PROJECTILE_SPD_TOTAL);
+	sprintf_s(bufferList[5], _countof(bufferList[5]), "%.2f", P.STATTOTAL.PROJECTILE_SPD_TOTAL);
 
 	for (int i = 1; i < 6; i++) {
 		CP_Font_DrawText(bufferName[i], printX, printY + padding * i);
@@ -137,12 +136,15 @@ void show_level(Player* P) {
 
 	CP_Settings_TextAlignment(CP_TEXT_ALIGN_H_CENTER, CP_TEXT_ALIGN_V_TOP);
 	CP_Settings_Fill(CP_Color_Create(0, 0, 0, 255));
-	char buffer[2][16] = { {0}, {0} };
-	sprintf_s(buffer[0], _countof(buffer[0]), "%d", P->LEVEL.P_EXP);
-	sprintf_s(buffer[1], _countof(buffer[1]), "%d", P->LEVEL.EXP_REQ);
-	CP_Font_DrawText(buffer[0], (x_coord * 2 + rectWidth) / 2 - 40, y_coord);
+	char buffer[3][16] = { {0}, {0}, {0} };
+	sprintf_s(buffer[0], _countof(buffer[0]), "%d", P->LEVEL.VAL);
+	sprintf_s(buffer[1], _countof(buffer[1]), "%d", P->LEVEL.P_EXP);
+	sprintf_s(buffer[2], _countof(buffer[2]), "%d", P->LEVEL.EXP_REQ);
+	CP_Font_DrawText("Lv:", (x_coord * 2 + rectWidth) / 2 - 110, y_coord);
+	CP_Font_DrawText(buffer[0], (x_coord * 2 + rectWidth) / 2 - 85, y_coord);
+	CP_Font_DrawText(buffer[1], (x_coord * 2 + rectWidth) / 2 - 40, y_coord);
 	CP_Font_DrawText("/", (x_coord * 2 + rectWidth) / 2, y_coord);
-	CP_Font_DrawText(buffer[1], (x_coord * 2 + rectWidth) / 2 + 40, y_coord);
+	CP_Font_DrawText(buffer[2], (x_coord * 2 + rectWidth) / 2 + 40, y_coord);
 }
 
 // Shows a death screen, and gives the player the option whether to restart the game

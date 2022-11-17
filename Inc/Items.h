@@ -11,9 +11,9 @@
 #define No_Items 5
 #define EXP 0
 #define StatBoost 1
-#define MAGNET 2
-#define COIN 3
-#define BULLETType 4
+#define BULLETType 2
+#define MAGNET 3
+#define COIN 4
 
 
 
@@ -94,6 +94,7 @@ void CreateItemTracker(void);
 int ItemCountSum(void);
 Item* CreateItemEffect(CP_Vector coor, int exp, int expVal);
 void IAffectPlayer(Item* i, int method);
+void PrintItemCount(void);
 
 
 
