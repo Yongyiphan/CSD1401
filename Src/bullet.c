@@ -4,6 +4,7 @@
 #include <math.h>
 #include "bullet.h"
 #include "utils.h"
+#include "player.h"
 
 static int bulletcounter = 0;
 
@@ -46,8 +47,8 @@ void BulletType(int type, float coordx, float coordy, float angle, int friendly)
 		if (friendly == BULLET_MOB) bullet[bulletcounter].friendly = BULLET_MOB; else bullet[bulletcounter].friendly = BULLET_PLAYER;
 		bullet[bulletcounter].type = PBULLET_NORMAL;
 		bullet[bulletcounter].size = 10 * 1;
-		bullet[bulletcounter].speed = 30 * 1;
-		bullet[bulletcounter].maxdistance = 200 * 1;
+		bullet[bulletcounter].speed = 30 * P.STATTOTAL.PROJECTILE_SPD_TOTAL;
+		bullet[bulletcounter].maxdistance = 300 * 1;
 		bullet[bulletcounter].damage = 10 * 1;
 		bullet[bulletcounter].exist = TRUE;
 	}
@@ -70,9 +71,9 @@ void BulletType(int type, float coordx, float coordy, float angle, int friendly)
 		if (friendly == BULLET_MOB) bullet[bulletcounter].friendly = BULLET_MOB; else bullet[bulletcounter].friendly = BULLET_PLAYER;
 		bullet[bulletcounter].type = PBULLET_ROCKET;
 		bullet[bulletcounter].size = 15 * 1;
-		bullet[bulletcounter].speed = 5 * 1;
-		bullet[bulletcounter].maxdistance = 200 * 1;
-		bullet[bulletcounter].damage = 3 * 1;
+		bullet[bulletcounter].speed = 5 * P.STATTOTAL.PROJECTILE_SPD_TOTAL;
+		bullet[bulletcounter].maxdistance = 300 * 1;
+		bullet[bulletcounter].damage = 20 * 1;
 		bullet[bulletcounter].timer = 1;
 		bullet[bulletcounter].exist = TRUE;
 	}
@@ -118,7 +119,7 @@ void BulletDraw(void) //Draws the location of all active bullets
 				CP_Settings_Fill(CP_Color_Create(121, 243, 146, 0));
 				CP_Graphics_DrawCircle(bullet[i].x, bullet[i].y, bullet[i].size*10);
 
-				if (bullet[i].timer > 2) { // number - 1 = timer explosion lasts (in seconds)
+				if (bullet[i].timer > 2) { // number - 1 = timer explosion effects lasts (in seconds)
 					bullet[i].timer = 0;
 					bullet[i].type = 0;
 				}

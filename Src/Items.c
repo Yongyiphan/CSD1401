@@ -20,7 +20,7 @@
 #  include <assert.h>
 #endif
 
-
+static int blegal2 = 0, blegal3 = 0, blegal4 = 0;
 ItemTrack* ItemTracker;
 void CreateItemTracker() {
     ItemTracker = malloc(sizeof(ItemTrack));
@@ -59,8 +59,10 @@ Item* CreateItemEffect(CP_Vector coor, int exp, int expVal) {
 	float RNG = CP_Random_RangeFloat(0, 1), DropChance;
 	//Get Random Type of effect
 	int noEffect = 1, EType, cSec = (int)CP_System_GetSeconds();
+	// Get Random Type of bullet
+	int B_RNG = CP_Random_RangeInt(2, 4);
 	if (exp == -1) {
-		EType = CP_Random_RangeInt(1, noEffect);
+		EType = CP_Random_RangeInt(1, No_Items - 1);
 	}
 	else {
 		EType = exp;
@@ -100,6 +102,14 @@ Item* CreateItemEffect(CP_Vector coor, int exp, int expVal) {
 	case COIN:
 		newItem->Duration = -1;
 		newItem->Hitbox = 25;
+		break;
+	case BULLETType:
+		newItem->Duration = 5;
+		newItem->Hitbox = 25;
+		newItem->AffectedBaseStat = B_RNG;
+		printf("BulletType! %d", B_RNG);
+		break;
+
 	}
 	newItem->Start = cSec;
 	newItem->Type = EType;
@@ -131,6 +141,7 @@ void IAffectPlayer(Item* item, int method) {
 				P.STAT.ATK_SPEED += boost;
 				break;
 			case 4://Bullet Speed
+				// P.STAT.PROJECTILE_SPD += boost;
 				break;
 			case 5:
 				P.STAT.MAX_HP += boost;
@@ -140,6 +151,29 @@ void IAffectPlayer(Item* item, int method) {
 			P.LEVEL.P_EXP += item->Modifier;
 			level_up(&P.LEVEL);
 			//printf("Item x: %f | y: %f\n", item->x, item->y);
+			break;
+
+		case BULLETType:
+		switch (item->AffectedBaseStat) {
+			case 2: // Bullet Spilt
+				if (method == -1)
+					blegal2 = 0;
+				else blegal2 = 1;
+				printf("Bullet spilt check\n");
+				break;
+			case 3: // Bullet Rocket
+				if (method == -1)
+					blegal3 = 0;
+				else blegal3 = 1;
+				printf("Bullet rocket check\n");
+				break;
+			case 4: // Bullet Homing
+				if (method == -1)
+					blegal4 = 0;
+				else blegal4 = 1;
+				printf("Bullet homing check\n");
+				break;
+			}
 			break;
 	}
 }
@@ -153,6 +187,7 @@ void ItemLoadImage(void) {
 		"./Assets/Items/Base Item Sprite.png",
 		"./Assets/Items/Magnet.png",
 		"./Assets/Items/coin.png",
+		"./Assets/Items/placeholderbullet.png",
 	};
 
 	Img_C = (sizeof(FilePaths) / sizeof(FilePaths[0]));
@@ -386,4 +421,23 @@ void FreeItemResource(void) {
 	printf("Freeing Item Structures\n");
 }
 
+int Bulletlegal(int i)
+{
+	switch (i) {
+	case 2:
+		if (blegal2 == 1)
+			return 1;
+		break;
+	case 3:
+		if (blegal3 == 1)
+			return 1;
+		break;
+	case 4:
+		if (blegal4 == 1)
+			return 1;
+		break;
+	default:
+		return 0;
+	}
+}
 

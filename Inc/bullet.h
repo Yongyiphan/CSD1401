@@ -3,7 +3,7 @@
 #define BULLET_H
 
 
-#define BULLET_CAP 50
+#define BULLET_CAP 100
 #define BULLET_MOB 0
 #define BULLET_PLAYER 1
 #define TRUE 1

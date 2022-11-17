@@ -64,7 +64,7 @@ typedef struct Player{
 #define PLAYER_DEFENSE 10
 #define PLAYER_HITBOX 50
 #define PLAYER_PICKUP 100
-#define PLAYER_PROJ_SPD 400.0f
+#define PLAYER_PROJ_SPD 1.0f
 
 
 

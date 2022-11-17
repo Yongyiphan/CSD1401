@@ -144,7 +144,7 @@ void map_Update(void) {
 					MobTPlayerCollision(cMob, &P);
 					int bchecker;
 					//static int breset = BULLET_CAP + 1; // Ensures first run value will be always be different from bchecker
-					bchecker = BulletCollision(cMob->x, cMob->y, cMob->w, cMob->h);
+					bchecker = BulletCollision(cMob->coor.x, cMob->coor.y, cMob->w, cMob->h);
 
 					//if (breset != bchecker) cMob->dmginstance = 0;
 					//breset = bchecker;
@@ -202,15 +202,13 @@ void map_Update(void) {
 		if (ItemTracker->CoinLL != NULL) {
 			ItemTracker->CoinLL = ItemInteraction(ItemTracker->CoinLL);
 		}
-		if (ItemTracker->ItemLL != NULL) {
-			ItemTracker->ItemLL = DrawItemLink(ItemTracker->ItemLL);
-		}
+
 		//printf("MobCount: %d |\tFPS: %f \n", MobC, CP_System_GetFrameRate());
 
 		// Bullet CD Related stuff below
-		static float bulletcd1 = 99, bulletcd2 = 99, bulletcd3 = 99, bulletcd4 = 99; // Random big number so no cd on first shot
-		static int legal2 = 0, legal3 = 0, legal4 = 0; // For checking if type of bullet should fire
 		float bulletangle = 0;
+		static float bulletcd1 = 99, bulletcd2 = 99, bulletcd3 = 99, bulletcd4 = 99; // Random big number so no cd on first shot
+		static int legal2 = 0, legal3 = 0, legal4 = 0; // Manual overwrite for bullet types, for testing use
 		if (CP_Input_KeyTriggered(KEY_1)) // For testing, keypad 1 to toggle on / off
 		{
 			if (legal2 == 0)
@@ -252,28 +250,28 @@ void map_Update(void) {
 			bulletangle = point_point_angle(P.x, P.y, mousex, mousey);
 
 			// Check valid cd + shoot for each bullet type
-			if (bulletcd1 > 0.5) { // Fixed value is the base cd timer
+			if (bulletcd1 > 1 / P.STATTOTAL.ATK_SPEED_TOTAL) { // Fixed value is the base cd timer
 				bulletcd1 = 0;
 			}
 			if (bulletcd1 == 0) // Default bullet is always active
 				BulletShoot(P.x, P.y, bulletangle, PBULLET_NORMAL, BULLET_PLAYER);
 
-			if (bulletcd2 > 0.5) { // Fixed value is the base cd timer
+			if (bulletcd2 > 1 / P.STATTOTAL.ATK_SPEED_TOTAL) { // Fixed value is the base cd timer
 				bulletcd2 = 0;
 			}
-			if (legal2 == 1 && bulletcd2 == 0)
+			if ((Bulletlegal(2) == 1 || legal2 == 1) && bulletcd2 == 0)
 				BulletShoot(P.x, P.y, bulletangle, PBULLET_SPILT, BULLET_PLAYER);
 
-			if (bulletcd3 > 1.5) { // Fixed value is the base cd timer
+			if (bulletcd3 > 3 / P.STATTOTAL.ATK_SPEED_TOTAL) { // Fixed value is the base cd timer
 				bulletcd3 = 0;
 			}
-			if (legal3 == 1 && bulletcd3 == 0)
+			if ((Bulletlegal(3) == 1 || legal3 == 1) && bulletcd3 == 0)
 				BulletShoot(P.x, P.y, bulletangle, PBULLET_ROCKET, BULLET_PLAYER);
 
-			if (bulletcd4 > 1) { // Fixed value is the base cd timer
+			if (bulletcd4 > 2 / P.STATTOTAL.ATK_SPEED_TOTAL) { // Fixed value is the base cd timer
 				bulletcd4 = 0;
 			}
-			if (legal4 == 1 && bulletcd4 == 0)
+			if ((Bulletlegal(4) == 1 || legal4 == 1) && bulletcd4 == 0)
 				BulletShoot(P.x, P.y, bulletangle, PBULLET_HOMING, BULLET_PLAYER);
 
 		}
