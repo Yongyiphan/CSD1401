@@ -145,7 +145,8 @@ void IAffectPlayer(Item* item, int method) {
 		}
 		case EXP:
 			P.LEVEL.P_EXP += item->Modifier;
-			level_up(&P.LEVEL);
+			//level_up(&P.LEVEL);
+			//printf("Item x: %f | y: %f\n", item->x, item->y);
 			break;
 	}
 }
@@ -239,8 +240,7 @@ void UpdateAppliedEffects(Item* item) {
 			head->key->Duration = item->Duration;
 			head->key->Start = MobCycleTimer;
 			found = 1;
-			printf("Duration Left: %f\n", durationleft);
-			//printf("Add on N Start: %d | N Duration: %d\n", head->key->Start, head->key->Duration);
+			//Found existing applied effect, break, time for next loop -> iter == 1
 			break;
 		}
 		head = head->next;
@@ -249,7 +249,6 @@ void UpdateAppliedEffects(Item* item) {
 		//item not currently being applied
 		ItemLink* nLink = malloc(sizeof(ItemLink));
 		Item* nitem = malloc(sizeof(Item));
-		printf("Here\n");
 		//nitem = &(Item) { 0 };
 		nitem->Type = item->Type;
 		nitem->AffectedBaseStat = item->AffectedBaseStat;
@@ -265,7 +264,6 @@ UpdateEffects:
 		float timeLeft = head->key->Duration - ( MobCycleTimer - head->key->Start);
 		if (timeLeft <= 0) {
 			ItemLink* next = head->next;
-			printf("Delete\n");
 			deleteItemLink(&AppliedEffects, head->key);
 			head = next;
 			continue;
@@ -299,7 +297,6 @@ void DrawAppliedEffects() {
 				IWidth * SpriteIndex + IWidth,
 				IHeight,
 				255);
-
 			break;
 		default:
 			IWidth = CP_Image_GetWidth(SImg);

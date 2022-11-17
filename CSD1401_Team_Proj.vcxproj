@@ -105,6 +105,7 @@ xcopy "$(SolutionDir)Assets\*" "$(OutDir)Assets\" /s /r /y /q
     <Image Include="Assets\background.png" />
   </ItemGroup>
   <ItemGroup>
+    <ClCompile Include="Src\audio_manager.c" />
     <ClCompile Include="Src\bullet.c" />
     <ClCompile Include="Src\Camera.c" />
     <ClCompile Include="Src\game.c" />
@@ -119,6 +120,7 @@ xcopy "$(SolutionDir)Assets\*" "$(OutDir)Assets\" /s /r /y /q
     <ClCompile Include="Src\Mob.c" />
   </ItemGroup>
   <ItemGroup>
+    <ClInclude Include="Inc\audio_manager.h" />
     <ClInclude Include="Inc\bullet.h" />
     <ClInclude Include="Inc\Camera.h" />
     <ClInclude Include="Inc\game.h" />
@@ -132,8 +134,16 @@ xcopy "$(SolutionDir)Assets\*" "$(OutDir)Assets\" /s /r /y /q
     <ClInclude Include="Inc\Mob.h" />
   </ItemGroup>
   <ItemGroup>
-    <Media Include="Assets\static.mp3" />
-    <Media Include="Assets\thememusic.mp3" />
+    <Media Include="Assets\Sound\click.wav" />
+    <Media Include="Assets\Sound\hitHurt.wav" />
+    <Media Include="Assets\Sound\ingameBGM.mp3" />
+    <Media Include="Assets\Sound\laserShoot.wav" />
+    <Media Include="Assets\Sound\levelUp.wav" />
+    <Media Include="Assets\Sound\mainmenuBGM.mp3" />
+    <Media Include="Assets\Sound\pickupCoin.wav" />
+    <Media Include="Assets\Sound\powerUp.wav" />
+    <Media Include="Assets\Sound\static.mp3" />
+    <Media Include="Assets\Sound\thememusic.mp3" />
   </ItemGroup>
   <Import Project="$(VCTargetsPath)\Microsoft.Cpp.targets" />
   <ImportGroup Label="ExtensionTargets">

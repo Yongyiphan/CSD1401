@@ -7,6 +7,7 @@
 #include "utils.h"
 #include "Mob.h"
 #include "Items.h"
+#include "mainmenu.h"
 
 
 // Player hitbox is a circle
@@ -49,6 +50,9 @@ void Player_Stats_Update(Player* P) {
 	
 }
 
+/*
+Shows Player's stats: HP, SPEED, DMG, ATK_SPEED, PICKUP_RADIUS and BULLET_SPD.
+*/
 void Player_Show_Stats(Player P) {
 	float printX = CP_System_GetWindowWidth() * 0.7 / 10;
 	float printY = CP_System_GetWindowHeight() * 7.5 / 10;
@@ -79,27 +83,6 @@ void Player_Show_Stats(Player P) {
 Shows healthbar of the player. Creates 2 rectangles, one specifying current HP, and the other max HP.
 Current HP is always proportional to the length of max HP.
 */
-
-
-//void level_up(int* exp, int* exp_req, int* level) {
-//	if (*exp > *exp_req) {
-//		*exp = 0;
-//		*exp_req *= 1.5;
-//		*level += 1;
-//
-//		//printf("EXP: %d\tEXP_REQ: %d\tLVL: %d\n", *exp, *exp_req, *level);
-//	}
-//	//printf("EXP: %d\tEXP_REQ: %d\tLVL: %d\n", *exp, *exp_req, *level);
-//}
-
-void level_up(LEVEL* level) {
-	if (level->P_EXP > level->EXP_REQ) {
-		level->P_EXP = 0;
-		level->EXP_REQ *= 1.5;
-		level->VAL += 1;
-	}
-}
-
 void show_healthbar(Player* p) {
 	CP_Settings_RectMode(CP_POSITION_CORNER);
 	float x_coord = (float)CP_System_GetWindowWidth() * 1 / 10;
@@ -197,9 +180,11 @@ void death_screen(float totalElapsedTime) {
 	// Print out the words shown
 	CP_Font_DrawText("You have lasted for ", middle.x - 50, screen_height * 4/10);
 	
+	// Show how long the player survived for
 	sprintf_s(buffer, _countof(buffer), "%.2f", totalElapsedTime);
-	// not working
 	CP_Font_DrawText(buffer, middle.x + 140, screen_height * 4 / 10);
+
+	// The buttons to restart and exit game
 	CP_Font_DrawText("Restart Game?", middle.x, middle.y);
 	CP_Font_DrawText("Exit to main menu", middle.x, middle.y + height + padding);
 
@@ -216,13 +201,25 @@ void death_screen(float totalElapsedTime) {
 			map_Init();
 		}
 		if (IsAreaClicked(middle.x, middle.y + height + padding, width, height, CP_Input_GetMouseX(), CP_Input_GetMouseY())) {
-			CP_Engine_SetNextGameState(game_Init, game_Update, game_Exit);
+			CP_Engine_SetNextGameState(Main_Menu_Init, Main_Menu_Update, Main_Menu_Exit);
 		}
 	}
 }
 
+
+int level_up(LEVEL* level) {
+	if (level->P_EXP > level->EXP_REQ) {
+		level->P_EXP = 0;
+		level->EXP_REQ *= 1.5;
+		level->VAL += 1;
+
+		return 1;
+	}
+	return 0;
+}
+
 // Show player's available upgrades
-void upgrade_screen(Player* P, int* isMenu, int* isPaused) {
+void upgrade_screen(Player* P, int* isUpgrade, int* isPaused) {
 	
 	float screen_width = (float) CP_System_GetWindowWidth();
 	float screen_height = (float) CP_System_GetWindowHeight();
@@ -260,7 +257,7 @@ void upgrade_screen(Player* P, int* isMenu, int* isPaused) {
 	CP_Settings_TextSize(30.0f);
 	CP_Settings_TextAlignment(centerHor, centerVert);
 
-	char* name[] = { "Bullet Speed", "Max HP", "Damage", "Speed", "Defense", "Attack Speed" };
+	char* name[] = { "Pickup Radius", "Max HP", "Damage", "Speed", "Bullet Speed", "Attack Speed" };
 	int countStats = 0;
 	// Draw out option boxes with padding applied
 	float background_topX = middle.x - background_width / 2;
@@ -279,22 +276,26 @@ void upgrade_screen(Player* P, int* isMenu, int* isPaused) {
 				if (IsAreaClicked(boxX, boxY, box_width, box_height, CP_Input_GetMouseX(), CP_Input_GetMouseY())) {
 					//stats[countStats % 6] += 1;
 					
-					if (strcmp(name[countStats % 6], "Max HP") == 0) {
-						P->STATMULT.MAX_HP_MULT += 3;
-						printf("%s: %.2f\n", name[countStats % 6], P->STATMULT.MAX_HP_MULT);
+					if (strcmp(name[countStats % 6], "Pickup Radius") == 0) {
+						P->STATMULT.PICKUP_MULT += 3.0 / 100;
+						//printf("%s: %.2f\n", name[countStats % 6], P->STATMULT.MAX_HP_MULT);
 					}
-
+					else if (strcmp(name[countStats % 6], "Max HP") == 0) {
+						P->STATMULT.MAX_HP_MULT += 1.0 / 100;
+					}
 					else if (strcmp(name[countStats % 6], "Damage") == 0) {
-						P->STATMULT.DAMAGE_MULT += 1;
-						printf("%s: %.2f\n", name[countStats % 6], P->STATMULT.DAMAGE_MULT);
+						P->STATMULT.DAMAGE_MULT += 1.0 / 10;
+						//printf("%s: %.2f\n", name[countStats % 6], P->STATMULT.DAMAGE_MULT);
 					}
 					else if (strcmp(name[countStats % 6], "Speed") == 0)
-						P->STATMULT.SPEED_MULT += 2;
-					else if (strcmp(name[countStats % 6], "Defense") == 0)
-						P->STATMULT.DEFENSE_MULT += 1;
+						P->STATMULT.SPEED_MULT += 1.0 / 10;
+					else if (strcmp(name[countStats % 6], "Bullet Speed") == 0)
+						P->STATMULT.PROJECTILE_SPD_MULT += 1.0 / 100;
 					else if (strcmp(name[countStats % 6], "Attack Speed") == 0)
-						P->STATMULT.ATK_SPEED_MULT += 0.5;
+						P->STATMULT.ATK_SPEED_MULT += 0.5 / 100.0;
 
+					*isPaused = 0;
+					*isUpgrade = 0;
 				}
 			}
 				
@@ -307,7 +308,7 @@ void upgrade_screen(Player* P, int* isMenu, int* isPaused) {
 	}
 	if (CP_Input_KeyTriggered(KEY_U)) {
 		*isPaused = 0;
-		*isMenu = 0;
+		*isUpgrade = 0;
 	}
 
 	// Remove rectangle align-center and add stroke back in

@@ -85,7 +85,7 @@ void show_level(Player* player);
 void death_screen(float time);
 
 // Show the upgrade screen for players to upgrade their stats.
-void upgrade_screen(Player* player, int* isMenu, int* isPaused);
+void upgrade_screen(Player* player, int* isUpgrade, int* isPaused);
 
 
 /*
@@ -95,7 +95,7 @@ When "exp" reaches the value of "exp_req":
 	"level" will increase by 1
 	"exp_req" will increase, making it harder to level up
 */
-void level_up(LEVEL *level);
+int level_up(LEVEL *level);
 
 char* GetBaseStats(int type);
 
