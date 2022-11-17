@@ -111,5 +111,6 @@ void CameraDemo_Update(Player *player, CP_Matrix *trans)
 	CP_Settings_Fill(CP_Color_Create(0, 0, 255, 255));
 	player->x = offsetVector.x;
 	player->y = offsetVector.y;
+	player->coor = offsetVector;
 	CP_Graphics_DrawCircle(player->x, player->y, 50.0f);
 }

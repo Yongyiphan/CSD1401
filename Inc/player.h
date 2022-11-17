@@ -3,6 +3,7 @@
 #define PLAYER_H
 
 #include "bullet.h"
+#include "cprocessing.h"
 
 extern int NoBaseStats;
 
@@ -14,6 +15,7 @@ typedef struct PlayerStats {
 	float DEFENSE;
 	float PICKUP;
 	float PROJECTILE_SPD;
+	int Coin_Gained;
 }Stats;
 
 typedef struct PlayerStatsMultiplier {
@@ -51,20 +53,22 @@ typedef struct Player{
 	StatsTotal STATTOTAL;
 	int HITBOX;
 	LEVEL LEVEL;
+	CP_Vector coor;
 	
 }Player;
 
-#define PLAYER_HP 100.0f
+#define PLAYER_HP 300.0f
 #define PLAYER_SPEED 300.0f
 #define PLAYER_DAMAGE 1.0f
 #define ATK_SPD 2.0f
 #define PLAYER_DEFENSE 10
 #define PLAYER_HITBOX 50
-#define PLAYER_PICKUP 50
+#define PLAYER_PICKUP 500
 #define PLAYER_PROJ_SPD 400.0f
 
 
 
+extern Player P;
 
 // Initializes player stats
 void Player_Init(Player* player);

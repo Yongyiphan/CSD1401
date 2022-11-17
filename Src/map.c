@@ -21,7 +21,6 @@ int WHeight, WWidth;
 CP_Color dark_green;
 CP_Matrix transform;
 
-Player P;
 Mob* cMob;
 WaveTrack *cWave; // pause state for the game when paused.
 
@@ -44,7 +43,7 @@ void map_Init(void) {
 	timer(1, isPaused);
 
 	background = CP_Image_Load("./Assets/background.png");
-	dark_green = CP_Color_Create(20, 50, 0, 255);
+	dark_green = CP_Color_Create(50, 50, 0, 255);
 	CP_Graphics_ClearBackground(dark_green);
 	// Initialize the coordinates and stats of the player
 
@@ -53,9 +52,6 @@ void map_Init(void) {
 	CreateItemTracker();
 	MobLoadImage();
 	ItemLoadImage();
-	//Item* one = CreateItemEffect(600, 500);
-	//ItemTracker->tree = insertItemNode(ItemTracker->tree, one);
-	
 	Player_Init(&P);
 	CameraDemo_Init();
 	Bulletinit();
@@ -93,13 +89,12 @@ void map_Update(void) {
 			isUpgrade = 0;
 		}
 		// Increase speed of the player
-		if (CP_Input_KeyTriggered(KEY_H)){
-			P.STATMULT.SPEED_MULT *= 1.1f;
-			P.HITBOX += 10;
-		}
-		if (CP_Input_KeyTriggered(KEY_M)){
-			P.STATMULT.PICKUP_MULT *= 1.1;
-		}
+		//if (CP_Input_KeyTriggered(KEY_H)){
+		//	P.STATMULT.SPEED_MULT /= 1.1f;
+		//}
+		//if (CP_Input_KeyTriggered(KEY_M)){
+		//	P.STATMULT.PICKUP_MULT *= 1.1;
+		//}
 		// Open up the Upgrade Screen
 		/*if (CP_Input_KeyTriggered(KEY_U) && isUpgrade == 0) {
 			isUpgrade = 1;
@@ -126,12 +121,14 @@ void map_Update(void) {
 		// Any objects below this function will be displaced by the camera movement
 		CameraDemo_Update(&P, &transform);
 		GenerateWaves();
+		CP_Settings_NoFill();
+		CP_Graphics_DrawCircle(P.x, P.y, P.STATTOTAL.PICKUP_TOTAL);
 		for (int w = 0; w < NO_WAVES; w++) {
 			if (WaveIDQueue[w] == -1) {
 				continue;
 			}
 			cWave = &WaveTracker[w];
-			if (cWave->CurrentCount == 0 || (MobCycleTimer % 10 == 0 && cWave->CurrentCount == 1)) {
+			if (cWave->CurrentCount == 0 || (MobCycleTimer % 3 == 0 && cWave->CurrentCount == 1)) {
 				//if all mobs are dead
 				//return index to wave queue
 				WaveIDQueue[w] = -1;
@@ -147,7 +144,7 @@ void map_Update(void) {
 					MobTMobCollision(cMob);
 					MobTPlayerCollision(cMob, &P);
 					int bchecker;
-					if ((bchecker = BulletCollision(cMob->x, cMob->y, cMob->w, cMob->h)) >= 0 && bullet[bchecker].friendly == BULLET_PLAYER
+					if ((bchecker = BulletCollision(cMob->coor.x, cMob->coor.y, cMob->w, cMob->h)) >= 0 && bullet[bchecker].friendly == BULLET_PLAYER
 						&& bullet[bchecker].exist == TRUE)
 					{
 						cMob->CStats.HP -= bullet[bchecker].damage;
@@ -160,36 +157,38 @@ void map_Update(void) {
 						cWave->CurrentCount -= 1;
 						MobCount[w] -= 1;
 						//ItemTracker->exptree = insertItemNode(ItemTracker->exptree, CreateItemEffect(cMob->x, cMob->y, 1, cMob->Title));
-						insertItemLink(&ItemTracker->ExpLL, CreateItemEffect(cMob->x, cMob->y, 1, cMob->Title));
+						//insertItemLink(&ItemTracker->ExpLL, CreateItemEffect(cMob->coor, EXP, cMob->Title));
 						float rng = CP_Random_RangeFloat(0, 1);
-						if (rng < 0.3) {
-							insertItemLink(&ItemTracker->ItemLL, CreateItemEffect(cMob->x, cMob->y, 0, 0));
-							ItemTracker->ItemCount++;
+						if (rng < 0.23) {
+							insertItemLink(&ItemTracker->ItemLL, CreateItemEffect(cMob->coor, -1, 0));
 						}
+						if (rng < 0.44) {
+							//insertItemLink(&ItemTracker->CoinLL, CreateItemEffect(cMob->coor, COIN, 0));
+						}
+						int sub = P.LEVEL.VAL > 0 ? P.LEVEL.VAL : 2;
+						P.CURRENT_HP += sub / 2;
 						continue;
 					}
 					//cMob->h == 0 means haven drawn before. / assigned image to it yet
-					if (P.x - WWidth/2 - cMob->w < cMob->x && cMob->x < P.x + WWidth/2 + cMob->w && P.y - WHeight/2 - cMob->h < cMob->y && cMob->y < P.y + WHeight/2 + cMob->h || cMob->h == 0) {
+					if (P.x - WWidth/2 - cMob->w < cMob->coor.x && cMob->coor.x < P.x + WWidth/2 + cMob->w && P.y - WHeight/2 - cMob->h < cMob->coor.y && cMob->coor.y < P.y + WHeight/2 + cMob->h || cMob->h == 0) {
 						DrawMobImage(cMob, &P);
 					}
 				}
 				
 			}
 		}
-	//	if (ItemTracker->exptree != NULL) {
-	//		NoDeleted = 0;
-	//		DrawItemTree(ItemTracker->exptree);
-	//		ItemPlayerCollision();
-	//	}
-		if (ItemTracker->ExpLL != NULL) {
-			ItemTracker->ExpLL = DrawItemLink(ItemTracker->ExpLL);
-		}
 		if (ItemTracker->ItemLL != NULL) {
-			ItemTracker->ItemLL = DrawItemLink(ItemTracker->ItemLL);
+			ItemTracker->ItemLL = ItemInteraction(ItemTracker->ItemLL);
 		}
-		//printf("MobCount: %d |\tFPS: %f \n", MobC, CP_System_GetFrameRate());
+		if (ItemTracker->ExpLL != NULL) {
+			ItemTracker->ExpLL = ItemInteraction(ItemTracker->ExpLL);
+		}
+		if (ItemTracker->CoinLL != NULL) {
+			ItemTracker->CoinLL = ItemInteraction(ItemTracker->CoinLL);
+		}
+
 		static float bulletcd = 99; // Random big number so no cd on first shot
-		static btype = 1;
+		static btype = 2;
 		if (CP_Input_KeyTriggered(KEY_1)) // For testing, keypad 1 to switch to spilt, if spilt then to normal
 		{
 			if (btype == PBULLET_SPILT) btype = PBULLET_NORMAL;
@@ -257,6 +256,7 @@ void map_Exit(void) {
 	FreeMobResource();
 	
 	FreeItemResource();
+	printf("Coin Gained: %d", P.STAT.Coin_Gained);
 	
 	//free(ItemTracker);
 }
