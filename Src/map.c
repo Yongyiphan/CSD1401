@@ -160,24 +160,24 @@ void map_Update(void) {
 						cWave->CurrentCount -= 1;
 						MobCount[w] -= 1;
 						//ItemTracker->exptree = insertItemNode(ItemTracker->exptree, CreateItemEffect(cMob->x, cMob->y, 1, cMob->Title));
-						//insertItemLink(&ItemTracker->ExpLL, CreateItemEffect(cMob->coor, EXP, cMob->Title));
+						insertItemLink(&ItemTracker->ExpLL, CreateItemEffect(cMob->coor, EXP, cMob->Title));
 						float rng = CP_Random_RangeFloat(0, 1);
 						if (rng < 0.83) {
 							insertItemLink(&ItemTracker->ItemLL, CreateItemEffect(cMob->coor, -1, 0));
 						}
 						if (rng < 0.44) {
-							//insertItemLink(&ItemTracker->CoinLL, CreateItemEffect(cMob->coor, COIN, 0));
+							insertItemLink(&ItemTracker->CoinLL, CreateItemEffect(cMob->coor, COIN, 0));
 						}
 						int sub = P.LEVEL.VAL > 0 ? P.LEVEL.VAL : 2;
 						P.CURRENT_HP += sub / 2;
 						continue;
 					}
 					//cMob->h == 0 means haven drawn before. / assigned image to it yet
-					if (P.x - WWidth/2 - cMob->w < cMob->coor.x && cMob->coor.x < P.x + WWidth/2 + cMob->w && P.y - WHeight/2 - cMob->h < cMob->coor.y && cMob->coor.y < P.y + WHeight/2 + cMob->h || cMob->h == 0) {
+					if (P.x - WWidth / 2 - cMob->w < cMob->coor.x && cMob->coor.x < P.x + WWidth / 2 + cMob->w && P.y - WHeight / 2 - cMob->h < cMob->coor.y && cMob->coor.y < P.y + WHeight / 2 + cMob->h || cMob->h == 0) {
 						DrawMobImage(cMob, &P);
 					}
 				}
-				
+
 			}
 		}
 		if (ItemTracker->ItemLL != NULL) {
@@ -189,7 +189,11 @@ void map_Update(void) {
 		if (ItemTracker->CoinLL != NULL) {
 			ItemTracker->CoinLL = ItemInteraction(ItemTracker->CoinLL);
 		}
-
+		if (MobCycleTimer % 2 == 0) {
+			P.CURRENT_HP -= 1 + P.LEVEL.VAL / 4;
+			if (P.CURRENT_HP < 1)
+				P.CURRENT_HP = 1;
+		}
 		static float bulletcd = 99; // Random big number so no cd on first shot
 		static btype = 2;
 		if (CP_Input_KeyTriggered(KEY_1)) // For testing, keypad 1 to switch to spilt, if spilt then to normal

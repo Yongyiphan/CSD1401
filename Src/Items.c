@@ -99,7 +99,7 @@ Item* CreateItemEffect(CP_Vector coor, int exp, int expVal) {
 		newItem->Hitbox = 42;
 		break;
 	case MAGNET:
-		newItem->Duration = 5;
+		newItem->Duration = 2;
 		newItem->Hitbox = 32;
 		break;
 	case COIN:
@@ -125,7 +125,7 @@ void IAffectPlayer(Item* item, int method) {
 		case StatBoost://Affect Base Stats
 		switch (item->AffectedBaseStat) {
 			case 0://HP
-				P.CURRENT_HP += item->Modifier * 100;
+				P.CURRENT_HP += (item->Modifier * 200);
 				break;
 			case 1://Movement Speed
 				P.STATMULT.SPEED_MULT += boost;
