@@ -1,3 +1,4 @@
+#pragma once
 #include "map.h"
 #include "cprocessing.h"
 #include <stdlib.h>
@@ -9,54 +10,25 @@
 #include "bullet.h"
 #include "Items.h"
 
-#define _COUNT(x) (sizeof(x) / sizeof(x)[0])
+
 #define MAP_SIZEX 1300
 #define MAP_SIZEY 900
-#define PLAYER_HP 100.0f
-#define PLAYER_SPEED 300.0f
-#define PLAYER_DAMAGE 10.0f
-#define ATK_SPEED 5.0f
-#define PLAYER_DEFENSE 10
-#define PLAYER_HITBOX 50
-#define PROJECTILE_SPEED 200
 
-int wHeight, wWidth;
 
-//Declaring player variables
-Player P; Stats P_stats; StatsMult P_stats_mult; StatsTotal P_stats_total; LEVEL level;
 
-//Sprite Stuff
-#define Mob_Img 4
-CP_Image** MobSprites;
+int WHeight, WWidth;
 
-CP_Vector start_vector;
-CP_Color grey, black, red, green, blue, white;
+CP_Color dark_green;
 CP_Matrix transform;
 
-//Starting Quantity
-int StartMobQuantity = 1000, StartItemQuantity = 1000;
-
-//Mob Stuff
-#define NO_WAVES 5
-#define Spawn_Timer 1
-#define Wave_Timer 5
-#define MaxMobGrowthRate 550
-#define WaveCostGrowthRate 140
-#define SpawnAreaOffset 1500
-
+Player P;
 Mob* cMob;
-int cWaveCost, MaxMob;
-int currentSec = 0;
-int WaveIDQueue[NO_WAVES];
-WaveTrack WaveTracker[NO_WAVES], *cWave; // pause state for the game when paused.
-
-//Bullet bulletList[500];
-CP_Vector mouseCoord;
+WaveTrack *cWave; // pause state for the game when paused.
 
 //Might be useful variable for Waves Tracking
-int totalWave = 0, MobCount[NO_WAVES];
-//float mousex, mousey;
-int isPaused, isMenu, isDead;
+int totalWave = 0;
+float mousex, mousey;
+int isPaused, isUpgrade, isDead;
 
 //Images
 CP_Image background = NULL;
@@ -64,101 +36,41 @@ CP_Image background = NULL;
 void map_Init(void) {
 	//CP_System_SetFrameRate(60);
 	CP_System_SetWindowSize(MAP_SIZEX, MAP_SIZEY);
-	wHeight = CP_System_GetWindowHeight() / 2;
-	wWidth = CP_System_GetWindowWidth() / 2;
+	WHeight = CP_System_GetWindowHeight();
+	WWidth = CP_System_GetWindowWidth();
 	//CP_System_Fullscreen();
-	isPaused = 0; isMenu = 0; isDead = 0;
+	isPaused = 0, isUpgrade = 0, isDead = 0;
 	// initialize the timer to start from 0 
 	timer(1, isPaused);
 	mouseCoord = CP_Vector_Set(CP_Input_GetMouseX(), CP_Input_GetMouseY());
 
 	background = CP_Image_Load("./Assets/background.png");
-
-	start_vector = CP_Vector_Zero();
+	dark_green = CP_Color_Create(20, 50, 0, 255);
+	CP_Graphics_ClearBackground(dark_green);
 	// Initialize the coordinates and stats of the player
 
-	/*
-	P_stats: Base stats of the player, can only be altered outside of the game.
-	P_stats_mult: In-game stats upgrade. Player stats are increased by multiplying its value against the player base stats
-	P_stats_total: The total amount of stats by multiplying its value with player base stats.
-	E.G. P_stats's MAX_HP = 100, P_stats_mult's MAX_HP_MULT = 1.2
-	P_stats_total's MAX_HP_TOTAL = MAX_HP * MAX_HP_MULT
-								 = 100 * 1.2 = 120
-	*/
-	P_stats = (Stats){ PLAYER_HP, PLAYER_SPEED, PLAYER_DAMAGE, ATK_SPEED, PLAYER_DEFENSE, PROJECTILE_SPEED };
-	P_stats_mult = (StatsMult){ 1, 1, 1, 1, 1, 1 };
-	P_stats_total = (StatsTotal){ PLAYER_HP, PLAYER_SPEED, PLAYER_DAMAGE, ATK_SPEED, PLAYER_DEFENSE, PROJECTILE_SPEED };
-	level = (LEVEL){ 0, 0, 10 };
 	
-	P = (Player) { start_vector.x, start_vector.y, 90, P_stats, P_stats_mult, P_stats_total, PLAYER_HITBOX, level};
-	cWaveCost = 10;
-	MaxMob = 200;
-	cWaveCost = WaveCostGrowthRate;
-	MaxMob = MaxMobGrowthRate;
-	for (int i = 0; i < NO_WAVES; i++) {
-		WaveTracker[i] = (WaveTrack){
-			MaxMob, //Max Mob
-			0, //MobCount
-			0, //Current Mob Count
-			0, //Wave Cost
-			StartMobQuantity, //Array Size 
-			SpawnAreaOffset, //Spawn offset
-			malloc(sizeof(Mob*) * StartMobQuantity) //, //Arr
-		};
-	//		white //Wave Color
-	//	};
-		InitWavesArr(&WaveTracker[i], 0);
-		WaveIDQueue[i] = -1;
-	}
-	//ItemTracker = &(ItemTrack){malloc(sizeof(Item*) * StartItemQuantity), StartItemQuantity, 0};
-	//InitItemArr(ItemTracker);
-	MobSprites = malloc(sizeof(CP_Image*) * Mob_Img);
-	MobLoadImage(MobSprites, Mob_Img);
+	CreateWaveTracker();
+	CreateItemTracker();
+	MobLoadImage();
+	ItemLoadImage();
+	//Item* one = CreateItemEffect(600, 500);
+	//ItemTracker->tree = insertItemNode(ItemTracker->tree, one);
 	
-	
+	Player_Init(&P);
 	CameraDemo_Init();
 	Bullet_Init(500, P);
 }
 
 void map_Update(void) {
-	P.STATTOTAL.MAX_HP_TOTAL = P.STAT.MAX_HP * P.STATMULT.MAX_HP_MULT;
-	P.STATTOTAL.SPEED_TOTAL = P.STAT.SPEED * P.STATMULT.SPEED_MULT;
-	P.STATTOTAL.DAMAGE_TOTAL = P.STAT.DAMAGE * P.STATMULT.DAMAGE_MULT;
-	P.STATTOTAL.DEFENSE_TOTAL = P.STAT.DEFENSE * P.STATMULT.DEFENSE_MULT;
-
 	
-#pragma region
-	//mouseCoord = CP_Vector_Set(CP_Input_GetMouseX(), CP_Input_GetMouseY());
-	/*
-	CP_Settings_ApplyMatrix(transform);
-	CP_Settings_StrokeWeight(0.0);
-	for (int x_pos = -1; x_pos < 2; x_pos++) {
-		for (int y_pos = -1; y_pos < 2; y_pos++) {
-			//if (P.x)
-			float mapX = MAP_SIZEX / 2;
-			float mapY = MAP_SIZEY / 2;
-
-			int playerMapx = P.x / MAP_SIZEX - 650;
-			int playerMapy = P.y / MAP_SIZEY - 450;
-			
-			/*CP_Image_Draw(background, playerMapx * mapX * x_pos, playerMapy * mapY * y_pos, MAP_SIZEX, MAP_SIZEY, 255);
-			printf("playerMapx: %d\tmap coords: %f\tplayer coords:%f\t%f\n", playerMapx, playerMapx * mapX * x_pos, P.x, P.y);
-
-			// center of the map
-	CP_Image_DrawAdvanced(background, mapX + (MAP_SIZEX * x_pos), mapY + (MAP_SIZEY * y_pos), MAP_SIZEX, MAP_SIZEY, 255, 0);
-}
-	}*/
-
-	/*Check the player coordinates
-	create the map in a 3 x 3 dimension starting from the center
-	everytime the player moves to more than half of the width or height of the image
-	generate images in that direction*/
-	//CP_Settings_ResetMatrix();
-
+	// Update player stats, inclusive of base stats and multipliers.
+	Player_Stats_Update(&P);
+#pragma region	
 	if (isPaused) {
 		// Opens up the Upgrade Screen for players to pick their upgrades
-		if (isMenu) {
-			upgrade_screen(&P, &isMenu, &isPaused);
+		if (isUpgrade) {
+			upgrade_screen(&P, &isUpgrade, &isPaused);
 			//printf("Player max hp: %f\n", P.MAX_HP);
 		}
 		// Opens up the Pause Screen
@@ -177,28 +89,28 @@ void map_Update(void) {
 	}
 	// if game is not paused
 	else {
-		
-		
-		if (CP_Input_KeyTriggered(KEY_ESCAPE))
+		if (CP_Input_KeyTriggered(KEY_ESCAPE)) {
 			isPaused = 1;
-
+			isUpgrade = 0;
+		}
 		// Increase speed of the player
-		if (CP_Input_KeyTriggered(KEY_H)) {
+		if (CP_Input_KeyTriggered(KEY_H)){
 			P.STATMULT.SPEED_MULT *= 1.1f;
+			P.HITBOX += 10;
 		}
-
+		if (CP_Input_KeyTriggered(KEY_M)){
+			P.STATMULT.PICKUP_MULT *= 1.1;
+		}
 		// Open up the Upgrade Screen
-		if (CP_Input_KeyTriggered(KEY_U) && isMenu == 0) {
-			isMenu = 1;
+		/*if (CP_Input_KeyTriggered(KEY_U) && isUpgrade == 0) {
+			isUpgrade = 1;
 			isPaused = 1;
-		}
-
+		}*/
 		// Testing for leveling up
 		if (CP_Input_KeyDown(KEY_L)) {
 			P.LEVEL.P_EXP += 5;
-			level_up(&P.LEVEL.P_EXP, &P.LEVEL.EXP_REQ, &P.LEVEL.VAL);
+			level_up(&P.LEVEL);
 		}
-
 		// Manually control the HP of the player for testing
 		if (CP_Input_KeyDown(KEY_Q)) {
 			P.CURRENT_HP -= 4;
@@ -206,52 +118,21 @@ void map_Update(void) {
 		else if (CP_Input_KeyDown(KEY_E)) {
 			P.CURRENT_HP += 4;
 		}
-
 		if (P.CURRENT_HP <= 0) {
 			isDead = 1;
 			isPaused = 1;
 		}
+
+#pragma endregion
 		// Any objects below this function will be displaced by the camera movement
 		CameraDemo_Update(&P, &transform);
-
-		if ((int)CP_System_GetSeconds() != currentSec) {
-			currentSec = (int)CP_System_GetSeconds();
-			printf("\n\tCurrent Sec: %d | Current FPS:%f\n", currentSec, CP_System_GetFrameRate());
-			//Every SpawnTime interval spawn wave
-			if (currentSec % Wave_Timer == 0) {
-				//Growth Per Wave
-				MaxMob += MaxMobGrowthRate;
-				//printf("Max Mobs Increased to %d\n", MaxMob);
-			}
-			if (currentSec % Spawn_Timer == 0) {
-				//Growth Per Wave
-				cWaveCost += WaveCostGrowthRate;
-				/*
-				Generate Waves
-				-) Update/ Reference == Require Pointers
-				===== Params ================
-					-> Player (Reference)
-					-> WaveTrack Arr (Update)
-					-> WaveID Queue (Update)
-					-> No of spawnable Waves
-					-> WaveCost Growth
-					-> MaxMob Growth
-				===== Optional =============== (May be deleted accordingly if unnecessary)
-					-> Total Wave Count (Update)
-					-> Mob Count (Update)
-				*/
-				GenerateWaves(&P, &WaveTracker, &WaveIDQueue, NO_WAVES, cWaveCost, MaxMob, &totalWave, &MobCount);
-				//Used to print current wave statistics, can be removed :)
-				//PrintWaveStats(&totalWave, NO_WAVES, &WaveIDQueue, &MobCount);
-			}
-		}
-
+		GenerateWaves();
 		for (int w = 0; w < NO_WAVES; w++) {
-			cWave = &WaveTracker[w];
 			if (WaveIDQueue[w] == -1) {
 				continue;
 			}
-			if (cWave->CurrentCount == 0) {
+			cWave = &WaveTracker[w];
+			if (cWave->CurrentCount == 0 || (MobCycleTimer % 10 == 0 && cWave->CurrentCount == 1)) {
 				//if all mobs are dead
 				//return index to wave queue
 				WaveIDQueue[w] = -1;
@@ -264,64 +145,119 @@ void map_Update(void) {
 				//Dead = 0, Alive = 1
 				if (cMob->Status == 1) {
 					//MobTPlayerCollision(cMob, &P);
-					MobTMobCollision(cMob, &P, &WaveTracker, NO_WAVES);
+					MobTMobCollision(cMob);
 					MobTPlayerCollision(cMob, &P);
-					Bullet_Collision(cMob, 200, P);
-
-					/*int bchecker;
-					if ((bchecker = BulletCollision(cMob->x, cMob->y, cMob->CStats.size)) >= 0 && bullet[bchecker].friendly == BULLET_PLAYER)
+					int bchecker;
+					if ((bchecker = BulletCollision(cMob->x, cMob->y, cMob->w, cMob->h)) >= 0 && bullet[bchecker].friendly == BULLET_PLAYER
+						&& bullet[bchecker].exist == TRUE)
 					{
 						cMob->CStats.HP -= bullet[bchecker].damage;
 						if (cMob->CStats.HP <= 0)
 							cMob->Status = 0;
 						bullet[bchecker].exist = FALSE;
-					}*/
+					}
+
 					if (cMob->Status == 0) {
 						cWave->CurrentCount -= 1;
 						MobCount[w] -= 1;
+						//ItemTracker->exptree = insertItemNode(ItemTracker->exptree, CreateItemEffect(cMob->x, cMob->y, 1, cMob->Title));
+						insertItemLink(&ItemTracker->ExpLL, CreateItemEffect(cMob->x, cMob->y, 1, cMob->Title));
+						float rng = CP_Random_RangeFloat(0, 1);
+						if (rng < 0.3) {
+							insertItemLink(&ItemTracker->ItemLL, CreateItemEffect(cMob->x, cMob->y, 0, 0));
+							ItemTracker->ItemCount++;
+						}
 						continue;
 					}
 					//cMob->h == 0 means haven drawn before. / assigned image to it yet
-					if (P.x - wWidth - cMob->w < cMob->x && cMob->x < P.x + wWidth + cMob->w && P.y - wHeight - cMob->h < cMob->y && cMob->y < P.y + wHeight + cMob->h || cMob->h == 0) {
-						DrawMobImage(MobSprites, cMob, &P);
+					if (P.x - WWidth/2 - cMob->w < cMob->x && cMob->x < P.x + WWidth/2 + cMob->w && P.y - WHeight/2 - cMob->h < cMob->y && cMob->y < P.y + WHeight/2 + cMob->h || cMob->h == 0) {
+						DrawMobImage(cMob, &P);
 					}
 				}
-
+				
 			}
 		}
+	//	if (ItemTracker->exptree != NULL) {
+	//		NoDeleted = 0;
+	//		DrawItemTree(ItemTracker->exptree);
+	//		ItemPlayerCollision();
+	//	}
+		if (ItemTracker->ExpLL != NULL) {
+			ItemTracker->ExpLL = DrawItemLink(ItemTracker->ExpLL);
+		}
+		if (ItemTracker->ItemLL != NULL) {
+			ItemTracker->ItemLL = DrawItemLink(ItemTracker->ItemLL);
+		}
 		//printf("MobCount: %d |\tFPS: %f \n", MobC, CP_System_GetFrameRate());
-#pragma endregion
-
-		// This is the entire mechanism for shooting
+		static float bulletcd = 99; // Random big number so no cd on first shot
+		static btype = 1;
+		if (CP_Input_KeyTriggered(KEY_1)) // For testing, keypad 1 to switch to spilt, if spilt then to normal
+		{
+			if (btype == PBULLET_SPILT) btype = PBULLET_NORMAL;
+			else btype = PBULLET_SPILT;
+		}
+		if (CP_Input_KeyTriggered(KEY_2)) // For testing, keypad 2 to switch to rocket, if spilt then to normal
+		{
+			if (btype == PBULLET_ROCKET) btype = PBULLET_NORMAL;
+			else btype = PBULLET_ROCKET;
+		}
+		if (CP_Input_KeyTriggered(KEY_3)) // For testing, keypad 3 to switch to rocket, if spilt then to normal
+		{
+			if (btype == PBULLET_HOMING) {
+				printf("Swap homing\n");  btype = PBULLET_HOMING;
+			}
+			else btype = PBULLET_HOMING;
+		}
 		if (CP_Input_MouseDown(MOUSE_BUTTON_LEFT))
 		{
-			mouseCoord = CP_Vector_Set(CP_Input_GetMouseWorldX(), CP_Input_GetMouseWorldY());
-			Bullet_Spawn(200, P, mouseCoord);
+			bulletcd += CP_System_GetDt();
+			if (bulletcd > 0.5) { // 0.5 is the cooldown timer; might need seperate timer for different bullet types
+				bulletcd = 0;
+			}
+			mousex = CP_Input_GetMouseWorldX();
+			mousey = CP_Input_GetMouseWorldY();
+			if (bulletcd == 0) {
+				float bulletangle = 0;
+				bulletangle = point_point_angle(P.x, P.y, mousex, mousey);
+				BulletShoot(P.x, P.y, bulletangle, btype, BULLET_PLAYER);
+			}
 		}
-		Bullet_Update(200, P);
-		Bullet_Draw(_COUNT(BulletList));
+		if (CP_Input_MouseDown(MOUSE_BUTTON_LEFT) == FALSE && bulletcd != 99) // Keeps bulletcd running even when not on leftclick
+		{
+			bulletcd += CP_System_GetDt();
+			if (bulletcd > 0.5)
+				bulletcd = 99;
+		}
 
-		// Prevents any objects below from getting offsetted by camera
+		
+			
+		BulletDraw();
+
+		// Removes displacement from the camera matrix
 		CP_Settings_ResetMatrix();
-
 		// Time, returns and draws text
 		timer(0, isPaused);
 	}
-	
-	
+
+	// Shows the upgrade screen whenever the player levels up.
+	if (level_up(&P.LEVEL)) {
+		isPaused = 1;
+		isUpgrade = 1;
+		upgrade_screen(&P, &isUpgrade, &isPaused);
+	}
+	Player_Show_Stats(P);
 	show_healthbar(&P);
 	show_level(&P);
 
 	if (CP_Input_KeyTriggered(KEY_SPACE))
 		CP_Engine_Terminate();
-
-	
+	CP_Graphics_ClearBackground(dark_green);
 }
 
 void map_Exit(void) {
-	FreeMobResource(&WaveTracker, NO_WAVES, MobSprites, Mob_Img);
-	free(MobSprites);
+	FreeMobResource();
 	
-	//FreeItemResource(&ItemTracker);
+	FreeItemResource();
+	
 	//free(ItemTracker);
 }

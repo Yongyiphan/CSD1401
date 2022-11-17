@@ -1,3 +1,4 @@
+#pragma once
 #include "cprocessing.h"
 #include "utils.h"
 #include "mainmenu.h"
@@ -9,7 +10,7 @@
 #define WINDOWSIZEY 900
 
 CP_Image logo;
-CP_Color white, black, grey; 
+CP_Color white, black, grey, dark_green; 
 CP_Sound BGM = NULL, shitSound = NULL;
 float width, height;
 float songLength = 500;
@@ -22,9 +23,10 @@ void Main_Menu_Init(void)
 	white = CP_Color_Create(255, 255, 255, 255);
 	black = CP_Color_Create(0, 0, 0, 255);
 	grey = CP_Color_Create(100, 100, 100, 255);
+	dark_green = CP_Color_Create(0, 168, 204, 255);
 	CP_System_SetWindowSize(WINDOWSIZEX, WINDOWSIZEY);
 	//CP_System_Fullscreen()
-	CP_Graphics_ClearBackground(grey);
+	CP_Graphics_ClearBackground(dark_green);
 	width = CP_System_GetWindowWidth();
 	height = CP_System_GetWindowHeight();
 	//BGM = CP_Sound_Load("./Assets/thememusic.mp3");
@@ -40,7 +42,7 @@ void Main_Menu_Init(void)
 void Main_Menu_Update()
 {
 
-	CP_Graphics_ClearBackground(grey);
+	//CP_Graphics_ClearBackground(grey);
 	CP_Settings_RectMode(CP_POSITION_CENTER);
 
 	char* text[] = {"PLAY", "UPGRADES", "OPTIONS", "CREDITS", "EXIT"};

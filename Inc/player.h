@@ -2,13 +2,18 @@
 #ifndef PLAYER_H
 #define PLAYER_H
 
+#include "bullet.h"
+
+extern int NoBaseStats;
+
 typedef struct PlayerStats {
 	float MAX_HP;
 	float SPEED;
 	float DAMAGE;
 	float ATK_SPEED;
 	float DEFENSE;
-	float PROJECTILE_SPEED;
+	float PICKUP;
+	float PROJECTILE_SPD;
 }Stats;
 
 typedef struct PlayerStatsMultiplier {
@@ -17,7 +22,8 @@ typedef struct PlayerStatsMultiplier {
 	float DAMAGE_MULT;
 	float ATK_SPEED_MULT;
 	float DEFENSE_MULT;
-	float PROJECTILE_SPEED;
+	float PICKUP_MULT;
+	float PROJECTILE_SPD_MULT;
 }StatsMult;
 
 typedef struct PlayerStatsTotal {
@@ -26,7 +32,8 @@ typedef struct PlayerStatsTotal {
 	float DAMAGE_TOTAL;
 	float ATK_SPEED_TOTAL;
 	float DEFENSE_TOTAL;
-	float PROJECTILE_SPEED_TOTAL;
+	float PICKUP_TOTAL;
+	float PROJECTILE_SPD_TOTAL;
 }StatsTotal;
 
 typedef struct LEVEL {
@@ -47,11 +54,25 @@ typedef struct Player{
 	
 }Player;
 
+#define PLAYER_HP 100.0f
+#define PLAYER_SPEED 300.0f
+#define PLAYER_DAMAGE 1.0f
+#define ATK_SPD 2.0f
+#define PLAYER_DEFENSE 10
+#define PLAYER_HITBOX 50
+#define PLAYER_PICKUP 50
+#define PLAYER_PROJ_SPD 400.0f
 
-/*
-Shows healthbar of the player. Creates 2 rectangles, one specifying current HP, and the other max HP.
-Current HP is always proportional to the length of max HP.
-*/
+
+
+
+// Initializes player stats
+void Player_Init(Player* player);
+
+void Player_Stats_Update(Player* player);
+
+void Player_Show_Stats(Player player);
+
 void show_healthbar(Player* player);
 
 void show_level(Player* player);
@@ -60,7 +81,7 @@ void show_level(Player* player);
 void death_screen(float time);
 
 // Show the upgrade screen for players to upgrade their stats.
-void upgrade_screen(Player* player, int* isMenu, int* isPaused);
+void upgrade_screen(Player* player, int* isUpgrade, int* isPaused);
 
 
 /*
@@ -70,9 +91,9 @@ When "exp" reaches the value of "exp_req":
 	"level" will increase by 1
 	"exp_req" will increase, making it harder to level up
 */
-void level_up(int *exp, int *exp_req, int *level);
+int level_up(LEVEL *level);
 
-
+char* GetBaseStats(int type);
 
 
 #endif

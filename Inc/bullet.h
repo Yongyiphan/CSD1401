@@ -1,14 +1,17 @@
 #pragma once
-#include "cprocessing.h"
-#include "Mob.h"
-#include "player.h"
-
 #ifndef BULLET_H
 #define BULLET_H
 
 
-#define ACTIVE 1
-#define INACTIVE 0
+#define BULLET_CAP 50
+#define BULLET_MOB 0
+#define BULLET_PLAYER 1
+#define TRUE 1
+#define FALSE 0
+#define PBULLET_NORMAL 1
+#define PBULLET_SPILT 2
+#define PBULLET_ROCKET 3
+#define PBULLET_HOMING 4 
 
 typedef struct Bullet
 {
@@ -37,26 +40,24 @@ void Bullet_Init(int size, Player P);
 // Sets the bullet Coords and angle (x,y,degree)
 void BulletCoor(float, float, float);
 
-// Sets the data for bullet type presets
-void BulletType(int);
+// Sets the data for bullet type presets (type, x, y, angle, friendly)
+void BulletType(int, float, float, float, int);
 
-// Calculate the direction of the bullet
+// Calculate the direction of the bullet (angle, bulletid)
 void BulletDirection(float, int);
 */
 
 
-// Shoots bullet and returns the bullet that had just been turned active
-void Bullet_Update(int count, Player P);
+// Call to shoot bullet (playerx, playery, angle, type, bulletowner)
+void BulletShoot(float, float, float, int, int);
 
-// Spawn bullet
-void Bullet_Spawn(int count, Player P, CP_Vector shoot_direction);
+// Draws the location of all bullets
+void BulletDraw(void);
 
-// Draws all bullets
-void Bullet_Draw(int count);
+// Check existing bullets collision against a target (x, y, w, h)
+int BulletCollision(float, float, float, float);
 
-// Check collision against mob
-// If collided, the mob is damaged according to player damage
-void Bullet_Collision(Mob* mob, int count, Player P);
-
+// Updates homing bullet angle to lock onto mob
+void BulletHomingTrack(float targetx, float targety, float size, int i);
 
 #endif
