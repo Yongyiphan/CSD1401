@@ -11,6 +11,8 @@
 #define WINDOWSIZEY 900
 
 CP_Image logo;
+CP_Image title;
+CP_Image zombie;
 CP_Color white, black, grey, dark_green; 
 CP_Sound BGM = NULL, shitSound = NULL;
 float width, height;
@@ -19,15 +21,16 @@ int isPlaying = 0;
 float SFX_vol, BGM_vol;
 void Main_Menu_Init(void)
 {
-	
+	title = CP_Image_Load("./Assets/Title.png");
+	zombie = CP_Image_Load("./Assets/Zombie.png");
 	logo = CP_Image_Load(". /Assets/DigiPen_Singapore_WEB_RED.png");
 	white = CP_Color_Create(255, 255, 255, 255);
 	black = CP_Color_Create(0, 0, 0, 255);
 	grey = CP_Color_Create(100, 100, 100, 255);
-	dark_green = CP_Color_Create(0, 168, 204, 255);
+	dark_green = CP_Color_Create(17, 39, 0, 255);
 	CP_System_SetWindowSize(WINDOWSIZEX, WINDOWSIZEY);
 	//CP_System_Fullscreen()
-	CP_Graphics_ClearBackground(dark_green);
+	//CP_Graphics_ClearBackground(dark_green);
 	width = CP_System_GetWindowWidth();
 	height = CP_System_GetWindowHeight();
 	Audio_Init();
@@ -37,7 +40,10 @@ void Main_Menu_Init(void)
 
 void Main_Menu_Update()
 {
-
+	CP_Image_Draw(title, width / 2, height / 5, width / 3, height / 4, 255);
+	CP_Image_Draw(zombie, width / 2 + width / 3, height / 2, width / 4, height / 3, 255);
+	CP_Image_Draw(zombie, width / 2 - width / 3, height / 2, width / 4, height / 3, 255);
+	CP_Graphics_ClearBackground(dark_green);
 	//CP_Graphics_ClearBackground(grey);
 	CP_Settings_RectMode(CP_POSITION_CENTER);
 
@@ -77,6 +83,7 @@ void Main_Menu_Update()
 		if (IsAreaClicked(width / 2, (height / 2) - (height / 10) + (height / 10 * 4), (width / 5), ((height / 6) / 2), CP_Input_GetMouseX(), CP_Input_GetMouseY()))
 		{
 			CP_Engine_Terminate();
+			save_all_upgrades_to_file();
 		}
 	}
 
