@@ -13,25 +13,13 @@
 
 #define MAP_SIZEX 1300
 #define MAP_SIZEY 900
-#define PLAYER_HP 100.0f
-#define PLAYER_SPEED 300.0f
-#define PLAYER_DAMAGE 1.0f
-#define ATK_SPEED 2.0f
-#define PLAYER_DEFENSE 10
-#define PLAYER_HITBOX 50
-#define PLAYER_PICKUP 50
+
 
 
 int WHeight, WWidth;
 
-//Declaring player variables
-Player P; Stats P_stats; StatsMult P_stats_mult; StatsTotal P_stats_total; LEVEL level;
-
-
-CP_Vector start_vector;
-CP_Color grey, black, red, green, blue, white;
+CP_Color dark_green;
 CP_Matrix transform;
-
 
 Mob* cMob;
 WaveTrack *cWave; // pause state for the game when paused.
@@ -39,7 +27,7 @@ WaveTrack *cWave; // pause state for the game when paused.
 //Might be useful variable for Waves Tracking
 int totalWave = 0;
 float mousex, mousey;
-int isPaused, isMenu, isDead;
+int isPaused, isUpgrade, isDead;
 
 //Images
 CP_Image background = NULL;
@@ -50,62 +38,34 @@ void map_Init(void) {
 	WHeight = CP_System_GetWindowHeight();
 	WWidth = CP_System_GetWindowWidth();
 	//CP_System_Fullscreen();
-	isPaused = 0;
-	isMenu = 0;
-	isDead = 0;
+	isPaused = 0, isUpgrade = 0, isDead = 0;
 	// initialize the timer to start from 0 
 	timer(1, isPaused);
 
-
-	grey = CP_Color_Create(111, 111, 111, 255);
-	white = CP_Color_Create(255, 255, 255, 255);
-	red = CP_Color_Create(255, 0, 0, 255);
-	green = CP_Color_Create(0, 255, 0, 255);
-	blue = CP_Color_Create(0, 0, 255, 255);
-
 	background = CP_Image_Load("./Assets/background.png");
-
-	start_vector = CP_Vector_Zero();
+	dark_green = CP_Color_Create(50, 50, 0, 255);
+	CP_Graphics_ClearBackground(dark_green);
 	// Initialize the coordinates and stats of the player
 
-	/*
-	P_stats: Base stats of the player, can only be altered outside of the game.
-	P_stats_mult: In-game stats upgrade. Player stats are increased by multiplying its value against the player base stats
-	P_stats_total: The total amount of stats by multiplying its value with player base stats.
-	E.G. P_stats's MAX_HP = 100, P_stats_mult's MAX_HP_MULT = 1.2
-	P_stats_total's MAX_HP_TOTAL = MAX_HP * MAX_HP_MULT
-								 = 100 * 1.2 = 120
-	*/
-	P_stats = (Stats){ PLAYER_HP, PLAYER_SPEED, PLAYER_DAMAGE, ATK_SPEED, PLAYER_DEFENSE , PLAYER_PICKUP};
-	P_stats_mult = (StatsMult){ 1, 1, 1, 1, 1,1 };
-	P_stats_total = (StatsTotal){ PLAYER_HP, PLAYER_SPEED, PLAYER_DAMAGE, ATK_SPEED, PLAYER_DEFENSE, PLAYER_PICKUP };
-	level = (LEVEL){ 0, 0, 10 };
 	
-	P = (Player) { start_vector.x, start_vector.y, 90, P_stats, P_stats_mult, P_stats_total, PLAYER_HITBOX, level};
 	CreateWaveTracker();
 	CreateItemTracker();
 	MobLoadImage();
 	ItemLoadImage();
-	//Item* one = CreateItemEffect(600, 500);
-	//ItemTracker->tree = insertItemNode(ItemTracker->tree, one);
-	
+	Player_Init(&P);
 	CameraDemo_Init();
 	Bulletinit();
 }
 
 void map_Update(void) {
-#pragma region
-	P.STATTOTAL.MAX_HP_TOTAL = P.STAT.MAX_HP * P.STATMULT.MAX_HP_MULT;
-	P.STATTOTAL.SPEED_TOTAL = P.STAT.SPEED * P.STATMULT.SPEED_MULT;
-	P.STATTOTAL.DAMAGE_TOTAL = P.STAT.DAMAGE * P.STATMULT.DAMAGE_MULT;
-	P.STATTOTAL.DEFENSE_TOTAL = P.STAT.DEFENSE * P.STATMULT.DEFENSE_MULT;
-	P.STATTOTAL.PICKUP_TOTAL = P.STAT.PICKUP * P.STATMULT.PICKUP_MULT;
-
 	
+	// Update player stats, inclusive of base stats and multipliers.
+	Player_Stats_Update(&P);
+#pragma region	
 	if (isPaused) {
 		// Opens up the Upgrade Screen for players to pick their upgrades
-		if (isMenu) {
-			upgrade_screen(&P, &isMenu, &isPaused);
+		if (isUpgrade) {
+			upgrade_screen(&P, &isUpgrade, &isPaused);
 			//printf("Player max hp: %f\n", P.MAX_HP);
 		}
 		// Opens up the Pause Screen
@@ -128,22 +88,21 @@ void map_Update(void) {
 			isPaused = 1;
 		}
 		// Increase speed of the player
-		if (CP_Input_KeyTriggered(KEY_H)) {
-			P.STATMULT.SPEED_MULT *= 1.1f;
-			P.HITBOX += 10;
-		}
-		if (CP_Input_KeyTriggered(KEY_M)) {
-			P.STATMULT.PICKUP_MULT *= 1.1;
-		}
+		//if (CP_Input_KeyTriggered(KEY_H)){
+		//	P.STATMULT.SPEED_MULT /= 1.1f;
+		//}
+		//if (CP_Input_KeyTriggered(KEY_M)){
+		//	P.STATMULT.PICKUP_MULT *= 1.1;
+		//}
 		// Open up the Upgrade Screen
-		if (CP_Input_KeyTriggered(KEY_U) && isMenu == 0) {
-			isMenu = 1;
+		if (CP_Input_KeyTriggered(KEY_U) && isUpgrade == 0) {
+			isUpgrade = 1;
 			isPaused = 1;
 		}
 		// Testing for leveling up
 		if (CP_Input_KeyDown(KEY_L)) {
 			P.LEVEL.P_EXP += 5;
-			level_up(&P.LEVEL.P_EXP, &P.LEVEL.EXP_REQ, &P.LEVEL.VAL);
+			level_up(&P.LEVEL);
 		}
 		// Manually control the HP of the player for testing
 		if (CP_Input_KeyDown(KEY_Q)) {
@@ -156,15 +115,19 @@ void map_Update(void) {
 			isDead = 1;
 			isPaused = 1;
 		}
+
+#pragma endregion
 		// Any objects below this function will be displaced by the camera movement
 		CameraDemo_Update(&P, &transform);
 		GenerateWaves();
+		CP_Settings_NoFill();
+		CP_Graphics_DrawCircle(P.x, P.y, P.STATTOTAL.PICKUP_TOTAL);
 		for (int w = 0; w < NO_WAVES; w++) {
 			if (WaveIDQueue[w] == -1) {
 				continue;
 			}
 			cWave = &WaveTracker[w];
-			if (cWave->CurrentCount == 0 || (MobCycleTimer % 10 == 0 && cWave->CurrentCount == 1)) {
+			if (cWave->CurrentCount == 0 || (MobCycleTimer % 3 == 0 && cWave->CurrentCount == 1)) {
 				//if all mobs are dead
 				//return index to wave queue
 				WaveIDQueue[w] = -1;
@@ -205,34 +168,39 @@ void map_Update(void) {
 							cMob->Status = 0;
 						bullet[bchecker].exist = FALSE;
 					}
-#pragma endregion
+
 					if (cMob->Status == 0) {
 						cWave->CurrentCount -= 1;
 						MobCount[w] -= 1;
 						//ItemTracker->exptree = insertItemNode(ItemTracker->exptree, CreateItemEffect(cMob->x, cMob->y, 1, cMob->Title));
-						insertItemLink(&ItemTracker->ExpLL, CreateItemEffect(cMob->x, cMob->y, 1, cMob->Title));
+						insertItemLink(&ItemTracker->ExpLL, CreateItemEffect(cMob->coor, EXP, cMob->Title));
 						float rng = CP_Random_RangeFloat(0, 1);
-						if (rng < 0.3) {
-							insertItemLink(&ItemTracker->ItemLL, CreateItemEffect(cMob->x, cMob->y, 0, 0));
-							ItemTracker->ItemCount++;
+						if (rng < 0.23) {
+							insertItemLink(&ItemTracker->ItemLL, CreateItemEffect(cMob->coor, -1, 0));
 						}
+						if (rng < 0.44) {
+							insertItemLink(&ItemTracker->CoinLL, CreateItemEffect(cMob->coor, COIN, 0));
+						}
+						int sub = P.LEVEL.VAL > 0 ? P.LEVEL.VAL : 2;
+						P.CURRENT_HP += sub / 2;
 						continue;
 					}
 					//cMob->h == 0 means haven drawn before. / assigned image to it yet
-					if (P.x - WWidth / 2 - cMob->w < cMob->x && cMob->x < P.x + WWidth / 2 + cMob->w && P.y - WHeight / 2 - cMob->h < cMob->y && cMob->y < P.y + WHeight / 2 + cMob->h || cMob->h == 0) {
+					if (P.x - WWidth/2 - cMob->w < cMob->coor.x && cMob->coor.x < P.x + WWidth/2 + cMob->w && P.y - WHeight/2 - cMob->h < cMob->coor.y && cMob->coor.y < P.y + WHeight/2 + cMob->h || cMob->h == 0) {
 						DrawMobImage(cMob, &P);
 					}
 				}
 
 			}
 		}
-		//	if (ItemTracker->exptree != NULL) {
-		//		NoDeleted = 0;
-		//		DrawItemTree(ItemTracker->exptree);
-		//		ItemPlayerCollision();
-		//	}
+		if (ItemTracker->ItemLL != NULL) {
+			ItemTracker->ItemLL = ItemInteraction(ItemTracker->ItemLL);
+		}
 		if (ItemTracker->ExpLL != NULL) {
-			ItemTracker->ExpLL = DrawItemLink(ItemTracker->ExpLL);
+			ItemTracker->ExpLL = ItemInteraction(ItemTracker->ExpLL);
+		}
+		if (ItemTracker->CoinLL != NULL) {
+			ItemTracker->CoinLL = ItemInteraction(ItemTracker->CoinLL);
 		}
 		if (ItemTracker->ItemLL != NULL) {
 			ItemTracker->ItemLL = DrawItemLink(ItemTracker->ItemLL);
@@ -342,20 +310,25 @@ void map_Update(void) {
 		// Time, returns and draws text
 		timer(0, isPaused);
 	}
+
+	//if(MobCycleTimer %  2 == 0)
+		//P.CURRENT_HP-= 1 + P.LEVEL.VAL/4;
 	
 	
+	Player_Show_Stats(P);
 	show_healthbar(&P);
 	show_level(&P);
 
 	if (CP_Input_KeyTriggered(KEY_SPACE))
 		CP_Engine_Terminate();
-
+	CP_Graphics_ClearBackground(dark_green);
 }
 
 void map_Exit(void) {
 	FreeMobResource();
 	
 	FreeItemResource();
+	printf("Coin Gained: %d", P.STAT.Coin_Gained);
 	
 	//free(ItemTracker);
 }

@@ -3,6 +3,7 @@
 #define PLAYER_H
 
 #include "bullet.h"
+#include "cprocessing.h"
 
 extern int NoBaseStats;
 
@@ -13,6 +14,8 @@ typedef struct PlayerStats {
 	float ATK_SPEED;
 	float DEFENSE;
 	float PICKUP;
+	float PROJECTILE_SPD;
+	int Coin_Gained;
 }Stats;
 
 typedef struct PlayerStatsMultiplier {
@@ -22,6 +25,7 @@ typedef struct PlayerStatsMultiplier {
 	float ATK_SPEED_MULT;
 	float DEFENSE_MULT;
 	float PICKUP_MULT;
+	float PROJECTILE_SPD_MULT;
 }StatsMult;
 
 typedef struct PlayerStatsTotal {
@@ -31,6 +35,7 @@ typedef struct PlayerStatsTotal {
 	float ATK_SPEED_TOTAL;
 	float DEFENSE_TOTAL;
 	float PICKUP_TOTAL;
+	float PROJECTILE_SPD_TOTAL;
 }StatsTotal;
 
 typedef struct LEVEL {
@@ -48,19 +53,30 @@ typedef struct Player{
 	StatsTotal STATTOTAL;
 	int HITBOX;
 	LEVEL LEVEL;
+	CP_Vector coor;
 	
 }Player;
 
+#define PLAYER_HP 300.0f
+#define PLAYER_SPEED 300.0f
+#define PLAYER_DAMAGE 1.0f
+#define ATK_SPD 2.0f
+#define PLAYER_DEFENSE 10
+#define PLAYER_HITBOX 50
+#define PLAYER_PICKUP 100
+#define PLAYER_PROJ_SPD 400.0f
 
-//int collide_mob(Player, Mob);
-//int collide_bullet(Player, Bullet);
 
-//void shoot_bullet(Bullet);
 
-/*
-Shows healthbar of the player. Creates 2 rectangles, one specifying current HP, and the other max HP.
-Current HP is always proportional to the length of max HP.
-*/
+extern Player P;
+
+// Initializes player stats
+void Player_Init(Player* player);
+
+void Player_Stats_Update(Player* player);
+
+void Player_Show_Stats(Player player);
+
 void show_healthbar(Player* player);
 
 void show_level(Player* player);
@@ -79,7 +95,7 @@ When "exp" reaches the value of "exp_req":
 	"level" will increase by 1
 	"exp_req" will increase, making it harder to level up
 */
-void level_up(int *exp, int *exp_req, int *level);
+void level_up(LEVEL *level);
 
 char* GetBaseStats(int type);
 

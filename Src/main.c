@@ -1,6 +1,8 @@
 #pragma once
 #include "cprocessing.h"
 #include "mainmenu.h"
+#include <stdio.h>
+
 
 int main(void)
 {

@@ -30,7 +30,8 @@ typedef struct Mob {
 
 	MobStats BaseStats;
 	MobStats CStats;
-	float x, y;
+	//float x, y;
+	CP_Vector coor;
 	int Status; 
 	int AnimationCycle;
 	int w, h;
@@ -38,6 +39,7 @@ typedef struct Mob {
 	//Dead = 0 | Alive = 1
 } Mob;
 
+static const struct Mob EmptyMob;
  
 
 typedef struct WaveTracker {
@@ -63,9 +65,9 @@ extern int Mob_Img;
 #define NO_WAVES 4
 #define Spawn_Timer 1
 #define Wave_Timer 5
-#define MaxMobGrowthRate 60
-#define MaxUpperLimit 100
-#define WaveCostGrowthRate 15
+#define MaxMobGrowthRate 20
+#define MaxUpperLimit 200
+#define WaveCostGrowthRate 10
 #define SpawnAreaOffset 500
 #define StartMobQuantity 150
 

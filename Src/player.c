@@ -10,23 +10,103 @@
 
 
 // Player hitbox is a circle
-#define PLAYER_DIAMETER 50.0f
-#define PLAYER_SPEED 20
+
 #define _countof(array) (sizeof(array) / sizeof(array[0]))
+
+//Declaring player variables
+CP_Vector start_vector;
+Stats P_stats; StatsMult P_stats_mult; StatsTotal P_stats_total; LEVEL level;
+
+Player P;
+void Player_Init(Player* P) {
+	/*
+	P_stats: Base stats of the player, can only be altered outside of the game.
+	P_stats_mult: In-game stats upgrade. Player stats are increased by multiplying its value against the player base stats
+	P_stats_total: The total amount of stats by multiplying its value with player base stats.
+	E.G. P_stats's MAX_HP = 100, P_stats_mult's MAX_HP_MULT = 1.2
+	P_stats_total's MAX_HP_TOTAL = MAX_HP * MAX_HP_MULT
+								 = 100 * 1.2 = 120
+	*/
+	start_vector = CP_Vector_Zero();
+	P_stats = (Stats){ PLAYER_HP, PLAYER_SPEED, PLAYER_DAMAGE, ATK_SPD, PLAYER_DEFENSE , PLAYER_PICKUP, PLAYER_PROJ_SPD , 0};
+	P_stats_mult = (StatsMult){ 1, 1, 1, 1, 1, 1, 1 };
+	P_stats_total = (StatsTotal){ PLAYER_HP, PLAYER_SPEED, PLAYER_DAMAGE, ATK_SPD, PLAYER_DEFENSE, PLAYER_PICKUP, PLAYER_PROJ_SPD };
+	level = (LEVEL){ 0, 0, 10 };
+
+	*P = (Player){ start_vector.x, start_vector.y, PLAYER_HP, P_stats, P_stats_mult, P_stats_total, PLAYER_HITBOX, level};
+	P->coor = CP_Vector_Set(P->x, P->y);
+}
+
+
+// Update Player's Total Stats where the base HP is multiplied by the respective stat multipliers.
+void Player_Stats_Update(Player* P) {
+	P->STATTOTAL.MAX_HP_TOTAL = P->STAT.MAX_HP * P->STATMULT.MAX_HP_MULT;
+	P->STATTOTAL.SPEED_TOTAL = P->STAT.SPEED * P->STATMULT.SPEED_MULT;
+	P->STATTOTAL.DAMAGE_TOTAL = P->STAT.DAMAGE * P->STATMULT.DAMAGE_MULT;
+	P->STATTOTAL.ATK_SPEED_TOTAL = P->STAT.ATK_SPEED * P->STATMULT.ATK_SPEED_MULT;
+	P->STATTOTAL.PICKUP_TOTAL = P->STAT.PICKUP * P->STATMULT.PICKUP_MULT;
+	P->STATTOTAL.PROJECTILE_SPD_TOTAL = P->STAT.PROJECTILE_SPD * P->STATMULT.PROJECTILE_SPD_MULT;
+	
+}
+
+void Player_Show_Stats(Player P) {
+	float printX = CP_System_GetWindowWidth() * 0.7 / 10;
+	float printY = CP_System_GetWindowHeight() * 7.5 / 10;
+	float padding = 30;
+	char bufferList[6][30] = { {0},{0},{0},{0},{0},{0} };
+	char* bufferName[] = { "HP: ", "SPEED: ", "DAMAGE: ", "FIRE RATE: ", "PICKUP RADIUS: ", "BULLET SPEED: " };
+
+
+	CP_Settings_TextSize(30.0f);
+	CP_Settings_Fill(CP_Color_Create(244, 244, 244, 255));
+	CP_Settings_TextAlignment(CP_TEXT_ALIGN_H_LEFT, CP_TEXT_ALIGN_V_TOP);
+	sprintf_s(bufferList[0], _countof(bufferList[0]), "%.f", P.STATTOTAL.MAX_HP_TOTAL);
+	sprintf_s(bufferList[1], _countof(bufferList[1]), "%.f", P.STATTOTAL.SPEED_TOTAL);
+	sprintf_s(bufferList[2], _countof(bufferList[2]), "%.f", P.STATTOTAL.DAMAGE_TOTAL);
+	sprintf_s(bufferList[3], _countof(bufferList[3]), "%.f", P.STATTOTAL.ATK_SPEED_TOTAL);
+	sprintf_s(bufferList[4], _countof(bufferList[4]), "%.f", P.STATTOTAL.PICKUP_TOTAL);
+	sprintf_s(bufferList[5], _countof(bufferList[5]), "%.f", P.STATTOTAL.PROJECTILE_SPD_TOTAL);
+
+	for (int i = 1; i < 6; i++) {
+		CP_Font_DrawText(bufferName[i], printX, printY + padding * i);
+		CP_Font_DrawText(bufferList[i], printX + 200, printY + padding * i);
+	}
+	/*sprintf_s(buffer, _countof(buffer), "%d", P.STATTOTAL.MAX_HP_TOTAL);
+	CP_Font_DrawText(buffer,)*/
+}
 
 /*
 Shows healthbar of the player. Creates 2 rectangles, one specifying current HP, and the other max HP.
 Current HP is always proportional to the length of max HP.
 */
-void show_healthbar(Player *p) {
+
+
+//void level_up(int* exp, int* exp_req, int* level) {
+//	if (*exp > *exp_req) {
+//		*exp = 0;
+//		*exp_req *= 1.5;
+//		*level += 1;
+//
+//		//printf("EXP: %d\tEXP_REQ: %d\tLVL: %d\n", *exp, *exp_req, *level);
+//	}
+//	//printf("EXP: %d\tEXP_REQ: %d\tLVL: %d\n", *exp, *exp_req, *level);
+//}
+
+void level_up(LEVEL* level) {
+	if (level->P_EXP > level->EXP_REQ) {
+		level->P_EXP = 0;
+		level->EXP_REQ *= 1.5;
+		level->VAL += 1;
+	}
+}
+
+void show_healthbar(Player* p) {
 	CP_Settings_RectMode(CP_POSITION_CORNER);
-	float x_coord = (float) CP_System_GetWindowWidth() * 1 / 10;
-	float y_coord = (float) CP_System_GetWindowHeight() * 0.65 / 10;
+	float x_coord = (float)CP_System_GetWindowWidth() * 1 / 10;
+	float y_coord = (float)CP_System_GetWindowHeight() * 0.65 / 10;
 	int rectWidth = 300;
 	int rectHeight = 30;
-	/*CP_Settings_TextSize(40.0f);
-	CP_Settings_TextAlignment(CP_TEXT_ALIGN_H_LEFT, CP_TEXT_ALIGN_V_TOP);
-	CP_Font_DrawText("Health", 10, 10);*/
+
 	CP_Settings_Fill(CP_Color_Create(255, 200, 200, 255));
 	CP_Settings_StrokeWeight(3.0f);
 	CP_Graphics_DrawRectAdvanced(x_coord, y_coord, rectWidth, rectHeight, 0, 0);
@@ -39,17 +119,15 @@ void show_healthbar(Player *p) {
 
 	CP_Graphics_DrawRectAdvanced(x_coord, y_coord, p->CURRENT_HP / p->STAT.MAX_HP * rectWidth, rectHeight, 0, 0);
 	CP_Settings_RectMode(CP_POSITION_CENTER);
-}
-
-void level_up(int* exp, int* exp_req, int* level) {
-	if (*exp > *exp_req) {
-		*exp = 0;
-		*exp_req *= 1.5;
-		*level += 1;
-
-		//printf("EXP: %d\tEXP_REQ: %d\tLVL: %d\n", *exp, *exp_req, *level);
-	}
-	//printf("EXP: %d\tEXP_REQ: %d\tLVL: %d\n", *exp, *exp_req, *level);
+	
+	CP_Settings_TextAlignment(CP_TEXT_ALIGN_H_CENTER, CP_TEXT_ALIGN_V_TOP);
+	CP_Settings_Fill(CP_Color_Create(0, 0, 0, 255));
+	char buffer[2][16] = { {0}, {0} };
+	sprintf_s(buffer[0], _countof(buffer[0]), "%.f", P.CURRENT_HP);
+	sprintf_s(buffer[1], _countof(buffer[1]), "%.f", P.STATTOTAL.MAX_HP_TOTAL);
+	CP_Font_DrawText(buffer[0], (x_coord * 2 + rectWidth) / 2 - 40, y_coord);
+	CP_Font_DrawText("/", (x_coord * 2 + rectWidth) / 2, y_coord);
+	CP_Font_DrawText(buffer[1], (x_coord * 2 + rectWidth) / 2 + 40, y_coord);
 }
 
 void show_level(Player* P) {
@@ -70,6 +148,15 @@ void show_level(Player* P) {
 	CP_Settings_Fill(CP_Color_Create(100, 200, 100, 255));
 	CP_Graphics_DrawRectAdvanced(x_coord, y_coord, (P->LEVEL.P_EXP / (float) P->LEVEL.EXP_REQ) * rectWidth, rectHeight, 0, 0);
 	CP_Settings_RectMode(CP_POSITION_CENTER);
+
+	CP_Settings_TextAlignment(CP_TEXT_ALIGN_H_CENTER, CP_TEXT_ALIGN_V_TOP);
+	CP_Settings_Fill(CP_Color_Create(0, 0, 0, 255));
+	char buffer[2][16] = { {0}, {0} };
+	sprintf_s(buffer[0], _countof(buffer[0]), "%d", P->LEVEL.P_EXP);
+	sprintf_s(buffer[1], _countof(buffer[1]), "%d", P->LEVEL.EXP_REQ);
+	CP_Font_DrawText(buffer[0], (x_coord * 2 + rectWidth) / 2 - 40, y_coord);
+	CP_Font_DrawText("/", (x_coord * 2 + rectWidth) / 2, y_coord);
+	CP_Font_DrawText(buffer[1], (x_coord * 2 + rectWidth) / 2 + 40, y_coord);
 }
 
 // Shows a death screen, and gives the player the option whether to restart the game

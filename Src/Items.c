@@ -24,57 +24,92 @@
 ItemTrack* ItemTracker;
 void CreateItemTracker() {
     ItemTracker = malloc(sizeof(ItemTrack));
-	ItemTracker->ExpLL = NULL;
-	ItemTracker->expDrops = 0;
-	ItemTracker->ItemLL = NULL;
-	ItemTracker->ItemCount = 0;
-	printf("Size of ItemTrack %d | Pointer: %d\n", sizeof(ItemTrack), sizeof(ItemTrack*));
-	printf("Size of ItemLink %d | Pointer: %d\n", sizeof(ItemLink), sizeof(ItemLink*));
-	printf("Size of Item %d | Pointer: %d\n", sizeof(Item), sizeof(Item*));
-	printf("Stat\n");
+	*ItemTracker = (ItemTrack){ 0 };
+	for (int i = 0; i < No_Items; i++) {
+		ItemTracker->DropCount[i][0] = 0;
+		ItemTracker->DropCount[i][1] = 0;
+	}
+	//Specific Drop Limitations
+	ItemTracker->DropCount[MAGNET][1] = 1;
 }
+int ItemCountSum(void) {
+	int s = 0;
+	for (int i = 0; i < No_Items; i++)
+		s += ItemTracker->DropCount[i][0];
+	return s;
+}
+/*
+ItemTracker->DropCount[] = {EXP,..., Magnet etc)
+	-> [0,1]
+	-> 0 = Count
+	-> 1 = Limit (-1 = ignore limit)
+*/
 
+void PrintItemCount(void) {
+	printf("EXP Drop count: %d | Limit: %d\n", ItemTracker->DropCount[EXP][0], ItemTracker->DropCount[EXP][1]);
+	printf("Stat Drop count: %d | Limit: %d\n", ItemTracker->DropCount[StatBoost][0], ItemTracker->DropCount[StatBoost][1]);
+	printf("Magnet Drop count: %d | Limit: %d\n", ItemTracker->DropCount[MAGNET][0], ItemTracker->DropCount[MAGNET][1]);
+}
 
 
 #include <stdio.h>
 #pragma region
-Item* CreateItemEffect(float x, float y, int exp, int expVal) {
+Item* CreateItemEffect(CP_Vector coor, int exp, int expVal) {
 	//Get Random chance generator
 	float RNG = CP_Random_RangeFloat(0, 1), DropChance;
 	//Get Random Type of effect
-	int noEffect = 2, EType = CP_Random_RangeInt(1, noEffect - 1), cSec = (int)CP_System_GetSeconds();
-	if(exp)
-		EType = 0;
-	char* StatType;
+	int noEffect = 1, EType, cSec = (int)CP_System_GetSeconds();
+	if (exp == -1) {
+		EType = CP_Random_RangeInt(1, noEffect);
+	}
+	else {
+		EType = exp;
+	}
+
+	if (ItemCountSum() > 20) {
+		if (ItemTracker->DropCount[MAGNET][0] == 0) {
+			EType = MAGNET;
+			printf("Creating a magnet\n");
+		}
+	}
+
 	Item* newItem = malloc(sizeof(Item));
+	*newItem = EmptyItem;
+
 	switch (EType) {
-	//char* PStats[] = {"HEALTH", "SPEED", "DAMAGE", "FIRE RATE", "BULLET SPEED"};
 	case EXP:
 		newItem->AffectedBaseStat = expVal;
 		newItem->Duration = -1;
-		newItem->Modifier = pow(5, expVal + 1);
-		newItem->Hitbox = 32;
+		newItem->Modifier = (float)pow(5, expVal + 1);
+		newItem->Hitbox = 25;
+
 		break;
 	case StatBoost: //All Base Stats Upgrade
+		//char* PStats[] = {"HEALTH", "SPEED", "DAMAGE", "FIRE RATE", "BULLET SPEED"};
 		newItem->AffectedBaseStat = CP_Random_RangeInt(0, NoBaseStats - 1);
-		newItem->Duration = 5; //in secs
-		newItem->Modifier = 10;
+		newItem->Duration = 2; //in secs
+		if (newItem->AffectedBaseStat == 0)
+			newItem->Duration = -1;
+		newItem->Modifier = 30;
 		newItem->Hitbox = 32;
 		break;
-	case 2:
+	case MAGNET:
+		newItem->Duration = 5;
+		newItem->Hitbox = 32;
 		break;
+	case COIN:
+		newItem->Duration = -1;
+		newItem->Hitbox = 25;
 	}
 	newItem->Start = cSec;
 	newItem->Type = EType;
-	newItem->x = x;
-	newItem->y = y;
+	//newItem->x = x;
+	//newItem->y = y;
+	newItem->coor = coor;
 	newItem->collected = 0;
+	newItem->knockback = 5;
 	return newItem;
 };
-
-
-
-
 
 
 void IAffectPlayer(Item* item, int method) {
@@ -84,7 +119,7 @@ void IAffectPlayer(Item* item, int method) {
 		case StatBoost://Affect Base Stats
 		switch (item->AffectedBaseStat) {
 			case 0://HP
-				P.CURRENT_HP += boost;
+				P.CURRENT_HP += item->Modifier;
 				break;
 			case 1://Movement Speed
 				P.STAT.SPEED += boost;
@@ -101,10 +136,9 @@ void IAffectPlayer(Item* item, int method) {
 				P.STAT.MAX_HP += boost;
 				break;
 		}
-		//printf("Player %s increased by %d\n", GetBaseStats(item->AffectedBaseStat), item->Modifier);
 		case EXP:
 			P.LEVEL.P_EXP += item->Modifier;
-			level_up(&P.LEVEL.P_EXP, &P.LEVEL.EXP_REQ, &P.LEVEL.VAL);
+			level_up(&P.LEVEL);
 			//printf("Item x: %f | y: %f\n", item->x, item->y);
 			break;
 	}
@@ -117,6 +151,8 @@ void ItemLoadImage(void) {
 	char* FilePaths[] = {
 		"./Assets/Items/EXP Sprite.png",
 		"./Assets/Items/Base Item Sprite.png",
+		"./Assets/Items/Magnet.png",
+		"./Assets/Items/coin.png",
 	};
 
 	Img_C = (sizeof(FilePaths) / sizeof(FilePaths[0]));
@@ -134,10 +170,21 @@ void DrawItemImage(Item* item) {
 	CP_Image* SImg = ItemSprites[item->Type];
 	int IHeight = CP_Image_GetHeight(SImg),IWidth;
 	int ph = IHeight * item->Hitbox / IHeight, pw = ph;
+	int Displacement[3] = { -1, 0, 1 }, dx, dy;
+	if (item->Dis[0] == 0 && item->Dis[1] == 0 && item->Type != EXP) {
+		do {
+			dx = Displacement[CP_Random_RangeInt(0, 2)];
+			dy = Displacement[CP_Random_RangeInt(0, 2)];
+
+		} while (dx != 0 && dy != 0);
+		item->Dis[0] = dx;
+		item->Dis[1] = dy;
+		item->coor = CP_Vector_Set(item->coor.x + dx * pw, item->coor.y + dy * ph);
+	}
 	switch (item->Type) {
 	case StatBoost:
 		IWidth = CP_Image_GetWidth(SImg) / NoBaseStats;
-		CP_Image_DrawSubImage(SImg, item->x + pw, item->y,pw, ph,
+		CP_Image_DrawSubImage(SImg, item->coor.x, item->coor.y, pw, ph,
 			IWidth * (item->AffectedBaseStat % 5) ,
 			0,
 			IWidth * (item->AffectedBaseStat % 5) + IWidth,
@@ -151,165 +198,122 @@ void DrawItemImage(Item* item) {
 		topOS = scale * 0, btmOS = scale * 10;
 		IWidth = CP_Image_GetWidth(SImg) / 3; //theres only 3 types of exp
 		//Update when exp get increase as progression
-		CP_Image_DrawSubImage(SImg, item->x, item->y,pw, ph, 
+		CP_Image_DrawSubImage(SImg, item->coor.x, item->coor.y,pw, ph, 
 				item->AffectedBaseStat * IWidth + leftOS,
 				topOS,
 				item->AffectedBaseStat * IWidth + IWidth - rightOS,
 				IHeight - btmOS,		
 				255);
-
 		break;
 	default:
+		IWidth = CP_Image_GetWidth(SImg);
+		CP_Image_DrawSubImage(SImg, item->coor.x, item->coor.y, pw, ph,
+			0,
+			0,
+			IWidth,
+			IHeight,
+			255);
 		break;
 	}
 }
-
-
-
-int NoDeleted = 0;
-/*
-void DrawItemTree(ItemNode* node) {
-	if (!node)
-		return;
-	if (node) {
-		if (node->key) {
-			CP_Vector target = CP_Vector_Set(P.x - node->key->x, P.y - node->key->y);
-			float dist = CP_Vector_Length(target);
-			if ( dist <= P.STATTOTAL.PICKUP_TOTAL) {
-				CP_Vector npoint = CP_Vector_Add(CP_Vector_Set(node->key->x, node->key->y), CP_Vector_Scale(CP_Vector_Normalize(target), 10));
-				node->key->x = npoint.x;
-				node->key->y = npoint.y;
-				node->point = npoint;
-			}
-			if (dist < P.HITBOX)
-				NoDeleted++;
-			//else
-				DrawItemImage(node->key);
-		}
-		if(node->left)
-			DrawItemTree(node->left);
-		if (node->right)
-			DrawItemTree(node->right);
-
-	}
-}
-#define COUNT 10
-void PrintTree(ItemNode* root, int space, int depth) {
-	if (root == NULL)
-		return;
-	space += COUNT;
-	char d = depth % Dimension == 0 ? 'X' : 'Y';
-	PrintTree(root->right, space, depth + 1);
-	printf("\n");
-	for (int i = COUNT; i < space; i++)
-        printf(" ");
-    printf("L(%c): %d | X: %4.3f | Y: %4.3f\n",d,depth, root->key->x, root->key->y);
- 
-	PrintTree(root->left, space, depth + 1);
-}
-
-#include <math.h>
-int deadcheck = 0;
-int failedDelete = 0;
-void ItemPlayerCollision(void) {
-	//if (ItemTracker->exptree != NULL) {
-	//	CP_Vector target = CP_Vector_Set(P.x, P.y);
-
-	//	ItemNode * nearest = nearestNeighbour(ItemTracker->exptree, target, 0);
-	//	float dist1 = CP_Math_Distance(target.x, target.y, nearest->point.x, nearest->point.y);
-	//	CP_Graphics_DrawLine(target.x, target.y, nearest->point.x, nearest->point.y);
-	//		
-	//	if (dist1 <= P.HITBOX) {
-	//		deadcheck = 0;
-	//		IAffectPlayer(nearest->key, 1);
-	//		printf("Removing %p | X: %f | Y: %f\n", nearest, nearest->point.x, nearest->point.y);
-	//		if (deadcheck == 0) {
-	//			failedDelete++;
-
-	//			printf("\nFailed Delete\nPointer: %p | X: %f | Y: %f\n", nearest, nearest->point.x, nearest->point.y);
-	//			printf("Printing Tree\n\n");
-	//			//CP_Engine_Terminate();
-	//		}
-	//		else
-	//			printf("Delete Successful %d\n", deadcheck);
-	//		
-	//	}
-	//}
-}
-
-void copyItem(Item* dst, Item* src) {
-	dst->AffectedBaseStat = src->AffectedBaseStat;
-	dst->Duration = src->Duration;
-	dst->Hitbox = src->Hitbox;
-	dst->Modifier = src->Modifier;
-	dst->Start = src->Start;
-	dst->Type = src->Type;
-	dst->x = src->x;
-	dst->y = src->y;
-}
-
-*/
 
 /*
 *	LINKED LIST IMPLEMENTATION
 */
 #pragma region
 
-ItemLink* DrawItemLink(ItemLink* head) {
+int IsMagnet = 0, ToCollect = 0;
+ItemLink* ItemInteraction(ItemLink* head) {
 	if (head == NULL)
 		return;
 	
 	ItemLink* current = head, *next = NULL;
+	//assert(_CrtCheckMemory());
 	while (current != NULL) {
-	assert(_CrtCheckMemory());
-		if (current->key->collected == -1) {
-			goto SkipThis;
+		int CType = current->key->Type;
+		if (CType == MAGNET && current->key->applying == 1) {
+			printf("IM MAGNET.\n");
+			IsMagnet = 1;
+			P.STATTOTAL.PICKUP_TOTAL = 3000;
+			CP_Graphics_DrawCircle(P.x, P.y, P.STATTOTAL.PICKUP_TOTAL);
 		}
-		CP_Vector target = CP_Vector_Set(P.x - current->key->x, P.y - current->key->y);
+		CP_Vector target = CP_Vector_Subtract(CP_Vector_Set(P.x, P.y), current->key->coor);
 		float dist = CP_Vector_Length(target);
-		if ( dist <= P.STATTOTAL.PICKUP_TOTAL) {
-			CP_Vector npoint = CP_Vector_Add(CP_Vector_Set(current->key->x, current->key->y), CP_Vector_Scale(CP_Vector_Normalize(target), 10));
-			current->key->x = npoint.x;
-			current->key->y = npoint.y;
+		if (dist < P.STATTOTAL.PICKUP_TOTAL)
+			current->key->collected = -1;
+		if (current->key->collected == -1) {
+			float speed = dist * CP_System_GetDt() * 2;
+			//speed = speed > slowest ? speed : slowest;
+			CP_Vector Movement = CP_Vector_Scale(CP_Vector_Normalize(target), speed * (P.STATTOTAL.SPEED_TOTAL / 100));
+			current->key->coor = CP_Vector_Add(current->key->coor, Movement);
 		}
+		/* ITEM DELETE CONDITIONS
+		* -> WITHIN P HITBOX
+		* -> ITEM EFFECTS ENDED
+		*  ITEM DRAWING CONDITIONS
+		* -> OUTSIDE P HITBOX
+		* -> ITEM NOT APPLYING EFFECTS
+		*/
 		if (dist < P.HITBOX) {
-			if(current->key->Type == EXP) {
+			if(CType == EXP) {
 				IAffectPlayer(current->key, 1);
 				next = current->next;
 				deleteItemLink(&head, current->key);
 				current = next;
-				ItemTracker->expDrops--;
+				ItemTracker->DropCount[EXP][0]--;
 				continue;
 			}
 			else {
 				//if collected item, start its duration timer
-				IAffectPlayer(current->key, 1);
-				current->key->Start = (int)CP_System_GetSeconds();
-				current->key->collected = -1;
-				goto SkipThis;
+				if (current->key->Duration == -1) {
+					IAffectPlayer(current->key, 1);
+					next = current->next;
+					deleteItemLink(&head, current->key);
+					current = next;
+					ItemTracker->DropCount[CType][0]--;
+					if (CType == COIN)
+						P.STAT.Coin_Gained += 5;
+					continue;
+				}
+				if (current->key->applying == 0) {
+					IAffectPlayer(current->key, 1);
+					current->key->Start = (int)CP_System_GetSeconds();
+					current->key->applying = 1;
+				}
 			}
 		}
-		if (current->key->Type != EXP) {
-			if (current->key->collected == -1 && (int)CP_System_GetSeconds() - current->key->Start > current->key->Duration) {
+	
+		int timeDiff = (int)CP_System_GetSeconds() - current->key->Start;
+		if (CType != EXP) {
+			if (timeDiff > current->key->Duration && current->key->applying == 1) {
 				//time to delete item's stat boost
+				if (CType == MAGNET) {
+					printf("IM NOT MAGNET.\n");
+					IsMagnet = 0;
+				}
 				IAffectPlayer(current->key, -1);
 				next = current->next;
 				deleteItemLink(&head, current->key);
 				current = next;
-				ItemTracker->ItemCount--;
+				ItemTracker->DropCount[CType][0]--;
 				continue;
 			}
 		}
+
+
 		//only draw items that are newly initialised or not collected
-		DrawItemImage(current->key);
-	SkipThis:
+		if (current->key->collected = -1 && current->key->applying != 1) {
+			DrawItemImage(current->key);
+		}
 		current = current->next;
 	}
+
 	return head;
 }
 
 ItemLink* newLink(Item *item) {
 	ItemLink* link = malloc(sizeof(ItemLink));
+
 	link->key = item;
 	link->next = NULL;
 	return link;
@@ -317,18 +321,21 @@ ItemLink* newLink(Item *item) {
 
 void insertItemLink(ItemLink** head, Item* item) {
 	ItemLink* nLink = newLink(item);
-	switch (item->Type) {
-		case EXP:
-			ItemTracker->expDrops++;
-			break;
-		case StatBoost:
-			ItemTracker->ItemCount++;
-			break;
+	ItemTracker->DropCount[item->Type][0]++;
+	//PrintItemCount();
+	//Maintain Magnet Item as head of linkedlist
+	if ((*head) != NULL && (*head)->key->Type == MAGNET) {
+		ItemLink* cnext = (*head)->next;
+		(*head)->next = nLink;
+		nLink->next = cnext;
 	}
-	nLink->next = (*head);
-	(*head) = nLink;
+	else {
+		nLink->next = (*head);
+		(*head) = nLink;
+	}
 
 }
+
 void deleteItemLink(ItemLink**head, Item* item) {
 	ItemLink* curr = *head, * prev = NULL;
 
@@ -365,189 +372,7 @@ void freeLink(ItemLink* head) {
 #pragma endregion
 
 
-/*
-* KD TREE IMPLEMENTATION
-*/
-/*
-#pragma region
-
-ItemNode* newNode(Item *item) {
-	ItemNode* result = malloc(sizeof(ItemNode));
-	result->key = item;
-	//result->point = CP_Vector_Set(item.x, item.y);
-	result->point = CP_Vector_Set(item->x, item->y);
-	result->left = NULL;
-	result->right = NULL;
-	result->prev = NULL;
-	return result;
-}
-
-
-ItemNode* insertItemNode(ItemNode* root, Item *item) {
-	return insertItemRec(NULL, root, item, 0);
-}
-
-ItemNode* insertItemRec(ItemNode* prev, ItemNode* root, Item* item, unsigned depth) {
-	if (root == NULL) {
-		ItemNode* n = newNode(item);
-		n->prev = prev;
-		ItemTracker->expDrops++;
-		return n;
-	}
-	unsigned cd = depth % Dimension;
-	CP_Vector point = CP_Vector_Set(item->x, item->y);
-	//If root->prev == NULL, root == head
-	if (CP_Math_Distance((int)point.x, (int)point.y, (int)root->point.x, (int)root->point.y) <= item->Hitbox && item->Type == EXP) {
-		root->key->Modifier += 5;
-		return root;
-	}
-	if (point.v[cd] < root->point.v[cd]) 
-		root->left = insertItemRec(root, root->left, item, depth + 1);
-	else
-		root->right = insertItemRec(root, root->right, item, depth + 1);
-	return root;
-}
-
-
-ItemNode* minNode(ItemNode* root, ItemNode* left, ItemNode* right, int d) {
-	ItemNode* res = root;
-	if (left != NULL && left->point.v[d] < res->point.v[d])
-		res = left;
-	if (right != NULL && right->point.v[d] < res->point.v[d])
-		res = right;
-	return res;
-}
-
-ItemNode* findMin(ItemNode* root, int d, unsigned int depth) {
-	if (root == NULL)
-		return NULL;
-	unsigned cd = depth % Dimension;
-	if (cd == d) {
-	if (root->left == NULL)
-			return root;
-		return findMin(root->left, d, depth + 1);
-	}
-	//compare root, left, right
-	return minNode(root, 
-		findMin(root->left, d, depth + 1),
-		findMin(root->right, d, depth + 1),
-		d);
-}
-
-ItemNode* deleteItemNode(ItemNode* root, CP_Vector point, unsigned int depth) {
-	if (root == NULL)
-		return NULL;
-	unsigned int cd = depth % Dimension;
-	if (point.x == root->point.x && point.y == root->point.y) {
-		if (root->left == NULL && root->right == NULL) {
-			free(root);
-			root = NULL;
-			deadcheck = 1;
-			return NULL;
-		}
-		if (root->right != NULL) {
-			ItemNode* min = findMin(root->right, cd, 0);
-			free(root->key);
-			root->key = NULL;
-			root->key = min->key;
-
-			root->point = CP_Vector_Set(min->point.x, min->point.y);
-			root->right = deleteItemNode(root->right, min->point, depth + 1);
-		}
-		if(root->left != NULL) {
-			ItemNode* min = findMin(root->left, cd, 0);
-			free(root->key);
-			root->key = NULL;
-			root->key = min->key;
-
-			root->point = CP_Vector_Set(min->point.x, min->point.y);
-			root->right = deleteItemNode(root->left, min->point, depth + 1);
-			if (root->right == root->left)
-				root->left = NULL;
-		}
-		return root;
-	}
-	if(point.v[cd]<root->point.v[cd])
-		root->left = deleteItemNode(root->left, point, depth + 1);
-	else
-		root->right = deleteItemNode(root->right, point, depth + 1);
-	return root;
-}
-
-
-// SEARCH //
-#pragma region
-//returns the searched item node
-ItemNode* nearestNeighbour(ItemNode* root, CP_Vector point, unsigned int depth) {
-	if (root == NULL)
-		return NULL;
-
-	if (root->left == NULL && root->right == NULL)
-		return root;
-
-	unsigned int cd = depth % Dimension;
-	ItemNode* nextbranch, *otherbranch;
-	if (point.v[cd] < root->point.v[cd]) {
-		nextbranch = root->left;
-		otherbranch = root->right;
-	}
-	else {
-		nextbranch = root->right;
-		otherbranch = root->left;
-	}
-
-	ItemNode* temp = nearestNeighbour(nextbranch, point, depth + 1);
-	ItemNode* best = closest(temp, root, point);
-
-	float r = squareDist(best->point.x - point.x, best->point.y - point.y);
-	float rprime = point.v[cd] - root->point.v[cd];
-	if (r > squareDist(rprime, 0)) {
-		temp = nearestNeighbour(otherbranch, point, depth + 1);
-		best = closest(temp, best, point);
-	}
-
-	return best;
-}
-
-ItemNode* closest(ItemNode* n0, ItemNode* n1, CP_Vector point) {
-	//n0 = left
-	//n1 = right
-	if (n0 == NULL)
-		return n1;
-	if (n1 == NULL)
-		return n0;
-	float d0 = squareDist(point.x - n0->point.x, point.y - n0->point.y);
-	float d1 = squareDist(point.x - n1->point.x, point.y - n1->point.y);
-	
-	return d0 < d1 ? n0 : n1;
-}
-#pragma endregion
-
-#pragma endregion
-*/
-
-// CLEAN UP //
-#pragma region
-//void CleanTree(ItemNode* root) {
-//	if (NULL == root)
-//		return;
-//
-//	if (CP_Vector_Distance(CP_Vector_Set(P.x, P.y), root->point) <= 50) {
-//		//ItemTracker->exptree = deleteItemNode(ItemTracker->exptree, root->point, 0);
-//		failedDelete--;
-//		return;
-//	}
-//	CleanTree(root->left);
-//	CleanTree(root->right);
-//}
-
 void FreeItemResource(void) {
-
-	//for (int i = 0; i < ItemTracker->arrSize;i++) {
-	//	free(ItemTracker->arr[i]);
-	//}
-	//free(ItemTracker->arr);
-	
 	printf("Freeing Item Images\n");
 	for (int i = 0; i < Img_C; i++) {
 		CP_Image* c = ItemSprites[i];
@@ -555,26 +380,10 @@ void FreeItemResource(void) {
 		free(ItemSprites[i]);
 	}
 	free(ItemSprites);
-	freeLink(ItemTracker->ItemLL);
 	freeLink(ItemTracker->ExpLL);
+	freeLink(ItemTracker->ItemLL);
 	free(ItemTracker);
-	//assert(_CrtCheckMemory());
 	printf("Freeing Item Structures\n");
 }
 
-
-//void freeTree(ItemNode* root) {
-//	if (root == NULL)
-//		return NULL;
-//	free(root->key);
-//	root->key = NULL;
-//	freeTree(root->left);
-//	root->left = NULL;
-//	freeTree(root->right);
-//	root->right = NULL;
-//	free(root);
-//	root = NULL;
-//}
-
-#pragma endregion
 
