@@ -282,22 +282,22 @@ void upgrade_screen(Player* P, int* isUpgrade, int* isPaused) {
 					//stats[countStats % 6] += 1;
 					
 					if (strcmp(name[countStats % 6], "Pickup Radius") == 0) {
-						P->STATMULT.PICKUP_MULT += 3.0 / 100;
+						P->STATMULT.PICKUP_MULT += 0.2;
 						//printf("%s: %.2f\n", name[countStats % 6], P->STATMULT.MAX_HP_MULT);
 					}
 					else if (strcmp(name[countStats % 6], "Max HP") == 0) {
 						P->STATMULT.MAX_HP_MULT += 1.0 / 100;
 					}
 					else if (strcmp(name[countStats % 6], "Damage") == 0) {
-						P->STATMULT.DAMAGE_MULT += 1.0 / 10;
+						P->STATMULT.DAMAGE_MULT += 0.3;
 						//printf("%s: %.2f\n", name[countStats % 6], P->STATMULT.DAMAGE_MULT);
 					}
 					else if (strcmp(name[countStats % 6], "Speed") == 0)
-						P->STATMULT.SPEED_MULT += 1.0 / 10;
+						P->STATMULT.SPEED_MULT += 0.2;
 					else if (strcmp(name[countStats % 6], "Bullet Speed") == 0)
-						P->STATMULT.PROJECTILE_SPD_MULT += 1.0 / 100;
+						P->STATMULT.PROJECTILE_SPD_MULT += 0.15;
 					else if (strcmp(name[countStats % 6], "Attack Speed") == 0)
-						P->STATMULT.ATK_SPEED_MULT += 0.5 / 100.0;
+						P->STATMULT.ATK_SPEED_MULT += 0.05;
 
 					*isPaused = 0;
 					*isUpgrade = 0;

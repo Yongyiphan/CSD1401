@@ -64,12 +64,13 @@ extern int Mob_Img;
 //Mob Stuff
 #define NO_WAVES 4
 #define Spawn_Timer 1
-#define Wave_Timer 5
+#define Wave_Timer 10
 #define MaxMobGrowthRate 20
 #define MaxUpperLimit 200
 #define WaveCostGrowthRate 10
 #define SpawnAreaOffset 500
 #define StartMobQuantity 150
+#define MobStatScale 1.02
 
 extern int WaveIDQueue[NO_WAVES], MobCount[NO_WAVES], CWave, CWaveCost, CMaxMob;
 extern WaveTrack WaveTracker[NO_WAVES];

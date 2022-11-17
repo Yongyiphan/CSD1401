@@ -211,7 +211,7 @@ void GenerateWaves(void) {
 		printf("Mob Cycle Timer: %d | Stat Scale: %f\n",MobCycleTimer, statscale);
 		//printf("Current FPS: %f\n", CP_System_GetFrameRate());
 		if (MobCycleTimer % Wave_Timer == 0) {
-			statscale *= 1.1;
+			statscale *= MobStatScale;
 			MaxMob += MaxMobGrowthRate;
 		}
 		if (MobCycleTimer % Spawn_Timer == 0) {
@@ -471,7 +471,7 @@ void MobTMobCollision(Mob* m) {
 void MobTPlayerCollision(Mob* m, Player* p) {
 	
 	if (CP_Vector_Length(CP_Vector_Subtract(m->coor, p->coor)) <= p->HITBOX) {
-		m->CStats.HP -= p->STATTOTAL.DAMAGE_TOTAL;
+		//m->CStats.HP -= p->STATTOTAL.DAMAGE_TOTAL / 4;
 		p->CURRENT_HP -= m->CStats.Dmg;
 	}
 	if (m->CStats.HP <= 0) {
