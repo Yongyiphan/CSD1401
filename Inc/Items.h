@@ -8,11 +8,12 @@
 #define ItemDecayTimer 10
 #define Empty -1
 
-#define No_Items 4
+#define No_Items 5
 #define EXP 0
 #define StatBoost 1
 #define MAGNET 2
 #define COIN 3
+#define BULLETType 4
 
 
 
@@ -107,7 +108,7 @@ void freeLink(ItemLink* head);
 
 void FreeItemResource(void);
 
-
+int Bulletlegal(int);
 
 
 #endif

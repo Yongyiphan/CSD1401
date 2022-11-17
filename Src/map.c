@@ -147,8 +147,25 @@ void map_Update(void) {
 					MobTMobCollision(cMob);
 					MobTPlayerCollision(cMob, &P);
 					int bchecker;
-					if ((bchecker = BulletCollision(cMob->coor.x, cMob->coor.y, cMob->w, cMob->h)) >= 0 && bullet[bchecker].friendly == BULLET_PLAYER
-						&& bullet[bchecker].exist == TRUE)
+					//static int breset = BULLET_CAP + 1; // Ensures first run value will be always be different from bchecker
+					bchecker = BulletCollision(cMob->coor.x, cMob->coor.y, cMob->w, cMob->h);
+
+					//if (breset != bchecker) cMob->dmginstance = 0;
+					//breset = bchecker;
+
+					if (bullet[bchecker].type == PBULLET_ROCKET && bullet[bchecker].friendly == BULLET_PLAYER
+						&& bullet[bchecker].exist == FALSE) // Specific type for explosion zone
+					{
+						//if (cMob->dmginstance == 0)
+						//{
+							cMob->CStats.HP -= bullet[bchecker].damage;
+							if (cMob->CStats.HP <= 0)
+								cMob->Status = 0;
+						//	cMob->dmginstance = 1;
+						//}
+					}
+
+					if (bchecker >= 0 && bullet[bchecker].friendly == BULLET_PLAYER && bullet[bchecker].exist == TRUE)
 					{
 						cMob->CStats.HP -= bullet[bchecker].damage;
 						if (cMob->CStats.HP <= 0)
@@ -197,41 +214,102 @@ void map_Update(void) {
 		static float bulletcd = 99; // Random big number so no cd on first shot
 		static btype = 2;
 		if (CP_Input_KeyTriggered(KEY_1)) // For testing, keypad 1 to switch to spilt, if spilt then to normal
+
+		//printf("MobCount: %d |\tFPS: %f \n", MobC, CP_System_GetFrameRate());
+
+		// Bullet CD Related stuff below
+		float bulletangle = 0;
+		static float bulletcd1 = 99, bulletcd2 = 99, bulletcd3 = 99, bulletcd4 = 99; // Random big number so no cd on first shot
+		static int legal2 = 0, legal3 = 0, legal4 = 0; // Manual overwrite for bullet types, for testing use
+		if (CP_Input_KeyTriggered(KEY_1)) // For testing, keypad 1 to toggle on / off
 		{
-			if (btype == PBULLET_SPILT) btype = PBULLET_NORMAL;
-			else btype = PBULLET_SPILT;
+			if (legal2 == 0)
+				legal2 = 1;
+			else
+				legal2 = 0;
 		}
-		if (CP_Input_KeyTriggered(KEY_2)) // For testing, keypad 2 to switch to rocket, if spilt then to normal
+		if (CP_Input_KeyTriggered(KEY_2)) // For testing, keypad 2 to toggle on / off
 		{
-			if (btype == PBULLET_ROCKET) btype = PBULLET_NORMAL;
-			else btype = PBULLET_ROCKET;
+			if (legal3 == 0)
+				legal3 = 1;
+			else
+				legal3 = 0;
 		}
-		if (CP_Input_KeyTriggered(KEY_3)) // For testing, keypad 3 to switch to rocket, if spilt then to normal
+		if (CP_Input_KeyTriggered(KEY_3)) // For testing, keypad 3 to toggle on / off
 		{
-			if (btype == PBULLET_HOMING) {
-				printf("Swap homing\n");  btype = PBULLET_HOMING;
-			}
-			else btype = PBULLET_HOMING;
+			if (legal4 == 0)
+				legal4 = 1;
+			else
+				legal4 = 0;
 		}
+		if (CP_Input_KeyTriggered(KEY_4)) // Toggle all types on / off
+		{
+			if (legal2 == 0 || legal3 == 0 || legal4 == 0)
+				legal2 = legal3 = legal4 = 1;
+			else
+				legal2 = legal3 = legal4 = 0;
+		}
+
 		if (CP_Input_MouseDown(MOUSE_BUTTON_LEFT))
 		{
-			bulletcd += CP_System_GetDt();
-			if (bulletcd > 0.5) { // 0.5 is the cooldown timer; might need seperate timer for different bullet types
-				bulletcd = 0;
-			}
+			// Get details for bullets
+			bulletcd1 += CP_System_GetDt();
+			bulletcd2 += CP_System_GetDt();
+			bulletcd3 += CP_System_GetDt();
+			bulletcd4 += CP_System_GetDt();
 			mousex = CP_Input_GetMouseWorldX();
 			mousey = CP_Input_GetMouseWorldY();
-			if (bulletcd == 0) {
-				float bulletangle = 0;
-				bulletangle = point_point_angle(P.x, P.y, mousex, mousey);
-				BulletShoot(P.x, P.y, bulletangle, btype, BULLET_PLAYER);
+			bulletangle = point_point_angle(P.x, P.y, mousex, mousey);
+
+			// Check valid cd + shoot for each bullet type
+			if (bulletcd1 > 1 / P.STATTOTAL.ATK_SPEED_TOTAL) { // Fixed value is the base cd timer
+				bulletcd1 = 0;
 			}
+			if (bulletcd1 == 0) // Default bullet is always active
+				BulletShoot(P.x, P.y, bulletangle, PBULLET_NORMAL, BULLET_PLAYER);
+
+			if (bulletcd2 > 1 / P.STATTOTAL.ATK_SPEED_TOTAL) { // Fixed value is the base cd timer
+				bulletcd2 = 0;
+			}
+			if ((Bulletlegal(2) == 1 || legal2 == 1) && bulletcd2 == 0)
+				BulletShoot(P.x, P.y, bulletangle, PBULLET_SPILT, BULLET_PLAYER);
+
+			if (bulletcd3 > 3 / P.STATTOTAL.ATK_SPEED_TOTAL) { // Fixed value is the base cd timer
+				bulletcd3 = 0;
+			}
+			if ((Bulletlegal(3) == 1 || legal3 == 1) && bulletcd3 == 0)
+				BulletShoot(P.x, P.y, bulletangle, PBULLET_ROCKET, BULLET_PLAYER);
+
+			if (bulletcd4 > 2 / P.STATTOTAL.ATK_SPEED_TOTAL) { // Fixed value is the base cd timer
+				bulletcd4 = 0;
+			}
+			if ((Bulletlegal(4) == 1 || legal4 == 1) && bulletcd4 == 0)
+				BulletShoot(P.x, P.y, bulletangle, PBULLET_HOMING, BULLET_PLAYER);
+
 		}
-		if (CP_Input_MouseDown(MOUSE_BUTTON_LEFT) == FALSE && bulletcd != 99) // Keeps bulletcd running even when not on leftclick
+		if (CP_Input_MouseDown(MOUSE_BUTTON_LEFT) == FALSE && bulletcd1 != 99) // Keeps bulletcd running even when not on leftclick
 		{
-			bulletcd += CP_System_GetDt();
-			if (bulletcd > 0.5)
-				bulletcd = 99;
+			bulletcd1 += CP_System_GetDt();
+			if (bulletcd1 > 0.5)
+				bulletcd1 = 99;
+		}
+		if (CP_Input_MouseDown(MOUSE_BUTTON_LEFT) == FALSE && bulletcd2 != 99) // Keeps bulletcd running even when not on leftclick
+		{
+			bulletcd2 += CP_System_GetDt();
+			if (bulletcd2 > 0.5)
+				bulletcd2 = 99;
+		}
+		if (CP_Input_MouseDown(MOUSE_BUTTON_LEFT) == FALSE && bulletcd3 != 99) // Keeps bulletcd running even when not on leftclick
+		{
+			bulletcd3 += CP_System_GetDt();
+			if (bulletcd3 > 0.5)
+				bulletcd3 = 99;
+		}
+		if (CP_Input_MouseDown(MOUSE_BUTTON_LEFT) == FALSE && bulletcd4 != 99) // Keeps bulletcd running even when not on leftclick
+		{
+			bulletcd4 += CP_System_GetDt();
+			if (bulletcd4 > 0.5)
+				bulletcd4 = 99;
 		}
 
 		
