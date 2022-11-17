@@ -78,7 +78,7 @@ Item* CreateItemEffect(CP_Vector coor, int exp, int expVal) {
 
 	Item* newItem = malloc(sizeof(Item));
 	*newItem = EmptyItem;
-
+	int statgen;
 	switch (EType) {
 	case EXP:
 		newItem->AffectedBaseStat = expVal;
@@ -89,11 +89,13 @@ Item* CreateItemEffect(CP_Vector coor, int exp, int expVal) {
 		break;
 	case StatBoost: //All Base Stats Upgrade
 		//char* PStats[] = {"HEALTH", "SPEED", "DAMAGE", "FIRE RATE", "BULLET SPEED"};
-		newItem->AffectedBaseStat = CP_Random_RangeInt(0, NoBaseStats);
+		statgen = CP_Random_RangeInt(0, NoBaseStats - 1);
+		newItem->AffectedBaseStat = statgen;
 		newItem->Duration = 2; //in secs
-		if (newItem->AffectedBaseStat == 0)
+		if (statgen == 0) {
 			newItem->Duration = -1;
-		newItem->Modifier = 30;
+		}
+		newItem->Modifier = 0.30;
 		newItem->Hitbox = 42;
 		break;
 	case MAGNET:
@@ -118,40 +120,32 @@ Item* CreateItemEffect(CP_Vector coor, int exp, int expVal) {
 
 
 void IAffectPlayer(Item* item, int method) {
-	int boost = item->Modifier * method;
+	float boost = item->Modifier * method;
 	switch (item->Type) {
 		case StatBoost://Affect Base Stats
 		switch (item->AffectedBaseStat) {
 			case 0://HP
-				P.CURRENT_HP += item->Modifier;
-				printf("Plus HP\n");
+				P.CURRENT_HP += item->Modifier * 100;
 				break;
 			case 1://Movement Speed
-				P.STAT.SPEED += boost;
-				printf("Plus Speed\n");
+				P.STATMULT.SPEED_MULT += boost;
 				break;
 			case 2://Damage
-				P.STAT.DAMAGE += boost;
-				printf("Plus DMG\n"); 
+				P.STATMULT.DAMAGE_MULT += boost * 2;
 				break;
 			case 3://Attack speed
-				P.STAT.ATK_SPEED += boost;
-				printf("Plus Atk Speed\n");
+				P.STATMULT.ATK_SPEED_MULT += boost;
 				break;
 			case 4://Bullet Speed
-				P.STAT.PROJECTILE_SPD += boost;
-				printf("Plus Proj speed\n");
+				P.STATMULT.PROJECTILE_SPD_MULT += boost;
 				break;
 			case 5:
-				P.STAT.MAX_HP += boost;
-				printf("Plus Max HP\n");
+				P.STATMULT.MAX_HP_MULT += boost;
 				break;
 		}
 		case EXP:
 			P.LEVEL.P_EXP += item->Modifier;
 			level_up(&P.LEVEL);
-			printf("Plus EXP\n");
-			//printf("Item x: %f | y: %f\n", item->x, item->y);
 			break;
 	}
 }
@@ -177,7 +171,6 @@ void ItemLoadImage(void) {
 void DrawItemImage(Item* item) {
 	if (item == NULL)
 		return;
-	//printf("Key: %p\n",item);
 	int original_Size = 32, scale, leftOS = 0, rightOS = 0, topOS = 0, btmOS = 0;
 	CP_Image* SImg = ItemSprites[item->Type];
 	int IHeight = CP_Image_GetHeight(SImg),IWidth;
@@ -242,27 +235,21 @@ void UpdateAppliedEffects(Item* item) {
 		goto UpdateEffects;
 	while (head != NULL) {
 		if (item->Type == head->key->Type && item->AffectedBaseStat == head->key->AffectedBaseStat) {
+			float durationleft = head->key->Duration - ( MobCycleTimer - head->key->Start);
+			head->key->Duration = item->Duration;
+			head->key->Start = MobCycleTimer;
 			found = 1;
-			//Found existing applied effect, break, time for next loop -> iter == 1
+			printf("Duration Left: %f\n", durationleft);
+			//printf("Add on N Start: %d | N Duration: %d\n", head->key->Start, head->key->Duration);
 			break;
 		}
 		head = head->next;
 	}
-	if (found == 1) {
-		head = AppliedEffects;
-		while (NULL != head) {
-			if (item->Type == head->key->Type && item->AffectedBaseStat == head->key->AffectedBaseStat) {
-				int durationleft = MobCycleTimer - head->key->Duration;
-				head->key->Duration = durationleft + item->Duration;
-				break;
-			}
-			head = head->next;
-		}
-	}
-	else {
+	if(found == 0){
 		//item not currently being applied
 		ItemLink* nLink = malloc(sizeof(ItemLink));
 		Item* nitem = malloc(sizeof(Item));
+		printf("Here\n");
 		//nitem = &(Item) { 0 };
 		nitem->Type = item->Type;
 		nitem->AffectedBaseStat = item->AffectedBaseStat;
@@ -270,22 +257,22 @@ void UpdateAppliedEffects(Item* item) {
 		nitem->Start = item->Start;
 		nLink->key = nitem;
 		nLink->next = AppliedEffects;
-		printf("Nlink: %p | Nitem %p\n", nLink, nitem);
 		AppliedEffects = nLink;
 	}
 
 UpdateEffects:
-	head = AppliedEffects;
 	while (head != NULL) {
-		if (MobCycleTimer - head->key->Start > head->key->Duration) {
+		float timeLeft = head->key->Duration - ( MobCycleTimer - head->key->Start);
+		if (timeLeft <= 0) {
 			ItemLink* next = head->next;
+			printf("Delete\n");
 			deleteItemLink(&AppliedEffects, head->key);
 			head = next;
 			continue;
 		}
+		//head->key->Start = MobCycleTimer;
 		head = head->next;
 	}
-	DrawAppliedEffects();
 }
 
 void DrawAppliedEffects() {
@@ -300,26 +287,36 @@ void DrawAppliedEffects() {
 	int iconsize = 64, nx = P.coor.x + (CP_System_GetWindowWidth()/ 2) - iconsize, ny = P.coor.y + (CP_System_GetWindowHeight() /2 ) - iconsize /2;
 	int IHeight, IWidth, SpriteIndex;
 	//CP_Settings_ImageMode(CP_POSITION_CENTER);
-	for (int i = 0; head != NULL; i++, head = head->next, nx -= iconsize) {
+	for (;head != NULL; head = head->next, nx -= iconsize) {
 		SImg = ItemSprites[head->key->Type];
 		IHeight = CP_Image_GetHeight(SImg);
 		switch (head->key->Type) {
 		case StatBoost:
-			IWidth = CP_Image_GetWidth(SImg) / NoBaseStats, SpriteIndex = (head->key->AffectedBaseStat % NoBaseStats  - 1) + 1;
+			IWidth = CP_Image_GetWidth(SImg) / NoBaseStats, SpriteIndex = head->key->AffectedBaseStat % NoBaseStats;
 			CP_Image_DrawSubImage(SImg, nx, ny, iconsize, iconsize,
 				IWidth * SpriteIndex,
 				0,
 				IWidth * SpriteIndex + IWidth,
 				IHeight,
 				255);
+
 			break;
 		default:
 			IWidth = CP_Image_GetWidth(SImg);
 			CP_Image_DrawSubImage(SImg, nx, ny, iconsize, iconsize,0,0,IWidth,IHeight,255);
 			break;
 		}
+		CP_Settings_StrokeWeight(0);
+		CP_Settings_RectMode(CP_POSITION_CENTER);
+		CP_Settings_Fill(CP_Color_Create(0,0,0,80));
+		float timeLeft = head->key->Duration - ( MobCycleTimer - head->key->Start);
+		float nheight = (timeLeft / (float) head->key->Duration) * iconsize;
+		CP_Graphics_DrawRect(nx, ny + (iconsize/2), iconsize, nheight);
+		char buffer[255];
+		CP_Settings_Fill(CP_Color_Create(0, 0, 0, 255));
+		sprintf_s(buffer, 255, "%1.0f", timeLeft);
+		CP_Font_DrawText(buffer, nx, ny - (iconsize * 2/ 3));
 	}
-
 }
 
 /*
@@ -406,6 +403,7 @@ ItemLink* ItemInteraction(ItemLink* head) {
 				deleteItemLink(&head, current->key);
 				current = next;
 				ItemTracker->DropCount[CType][0]--;
+				UpdateAppliedEffects(NULL);
 				continue;
 			}
 		}
@@ -415,7 +413,6 @@ ItemLink* ItemInteraction(ItemLink* head) {
 		if (current->key->collected = -1 && current->key->applying != 1) {
 			DrawItemImage(current->key);
 		}
-		UpdateAppliedEffects(NULL);
 		current = current->next;
 	}
 	return head;
@@ -451,7 +448,7 @@ void deleteItemLink(ItemLink**head, Item* item) {
 
 	if (curr != NULL && curr->key == item) {
 		*head = curr->next;
-		printf("Freeing: %p | %p\n", curr, curr->key);
+		//printf("Freeing: %p | %p\n", curr, curr->key);
 		free(curr->key);
 		free(curr);
 		return;
@@ -464,7 +461,7 @@ void deleteItemLink(ItemLink**head, Item* item) {
 		return;
 	prev->next = curr->next;
 
-	printf("Freeing: %p | %p\n", curr, curr->key);
+	//printf("Freeing: %p | %p\n", curr, curr->key);
 	free(curr->key);
 	free(curr);
 }
@@ -494,6 +491,7 @@ void FreeItemResource(void) {
 	free(ItemSprites);
 	freeLink(ItemTracker->ExpLL);
 	freeLink(ItemTracker->ItemLL);
+	freeLink(AppliedEffects);
 	free(ItemTracker);
 	printf("Freeing Item Structures\n");
 }

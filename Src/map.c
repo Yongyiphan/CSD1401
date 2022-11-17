@@ -158,7 +158,7 @@ void map_Update(void) {
 						//ItemTracker->exptree = insertItemNode(ItemTracker->exptree, CreateItemEffect(cMob->x, cMob->y, 1, cMob->Title));
 						//insertItemLink(&ItemTracker->ExpLL, CreateItemEffect(cMob->coor, EXP, cMob->Title));
 						float rng = CP_Random_RangeFloat(0, 1);
-						if (rng < 0.23) {
+						if (rng < 0.83) {
 							insertItemLink(&ItemTracker->ItemLL, CreateItemEffect(cMob->coor, -1, 0));
 						}
 						if (rng < 0.44) {
@@ -226,7 +226,8 @@ void map_Update(void) {
 				bulletcd = 99;
 		}
 		BulletDraw();
-	//	DrawAppliedEffects();
+		UpdateAppliedEffects(NULL);
+		DrawAppliedEffects();
 		CP_Settings_ResetMatrix();
 
 		// Time, returns and draws text

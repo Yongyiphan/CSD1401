@@ -83,7 +83,7 @@ Item Storage
 Mobs have a chance to drop items upon death
 */
 ItemLink* GetCurrentEffects(void);
-void UpdateAppliedEffects(Item* item, int type);
+void UpdateAppliedEffects(Item* item);
 void DrawAppliedEffects(void);
 
 void ItemLoadImage(void);
