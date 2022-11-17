@@ -105,6 +105,7 @@ void freeLink(ItemLink* head);
 
 void FreeItemResource(void);
 
+int Bulletlegal(int);
 
 
 #endif
