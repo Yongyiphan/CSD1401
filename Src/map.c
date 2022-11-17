@@ -17,6 +17,7 @@
 
 
 int WHeight, WWidth;
+float sfxVolume, bgmVolume;
 
 CP_Color dark_green;
 CP_Matrix transform;
@@ -39,6 +40,8 @@ void map_Init(void) {
 	WWidth = CP_System_GetWindowWidth();
 	//CP_System_Fullscreen();
 	isPaused = 0, isUpgrade = 0, isDead = 0;
+	sfxVolume = 0.7, bgmVolume = 0.7;
+
 	// initialize the timer to start from 0 
 	timer(1, isPaused);
 

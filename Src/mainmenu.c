@@ -5,6 +5,7 @@
 #include "map.h"
 #include "upgrades.h"
 #include "options.h"
+#include "audio_manager.h"
 
 #define WINDOWSIZEX 1300
 #define WINDOWSIZEY 900
@@ -15,7 +16,7 @@ CP_Sound BGM = NULL, shitSound = NULL;
 float width, height;
 float songLength = 500;
 int isPlaying = 0;
-
+float SFX_vol, BGM_vol;
 void Main_Menu_Init(void)
 {
 	
@@ -29,14 +30,9 @@ void Main_Menu_Init(void)
 	CP_Graphics_ClearBackground(dark_green);
 	width = CP_System_GetWindowWidth();
 	height = CP_System_GetWindowHeight();
-	//BGM = CP_Sound_Load("./Assets/thememusic.mp3");
-	//shitSound = CP_Sound_Load("./Assets/static.mp3");
-	CP_Sound_Play(BGM);
-
-	// if music is still playing, don't play again during initialization
-	/*if (!isPlaying) {
-		CP_Sound_PlayMusic(BGM);
-	}*/
+	Audio_Init();
+	// Initialize sound values to be 70% of max volume
+	SFX_vol = 0.7, BGM_vol = 0.7;
 }
 
 void Main_Menu_Update()

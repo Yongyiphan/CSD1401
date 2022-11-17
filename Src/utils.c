@@ -5,6 +5,7 @@
 #include "player.h"
 #include "game.h"
 #include "mainmenu.h"
+#include "audio_manager.h"
 
 #define _countof(array) (sizeof(array) / sizeof(array[0]))
 
@@ -20,6 +21,7 @@ int IsAreaClicked(float area_center_x, float area_center_y, float area_width, fl
 	// if x-coordinate of click is within left and right of the area, and 
 	// y-coordinate is within top and bottom of the area, then return 1. If not, return 0.
 	if (leftLimit < click_x && click_x < rightLimit && topLimit < click_y && click_y < bottomLimit) {
+		Audio_ButtonClick();
 		return 1;
 	}
 	return 0;
