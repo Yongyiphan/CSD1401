@@ -100,9 +100,9 @@ void CameraDemo_Update(Player *player, CP_Matrix *trans)
 	//Draw environment props that do not move
 	CP_Settings_Fill(CP_Color_Create(255, 0, 0, 255));
 	CP_Settings_TextAlignment(CP_TEXT_ALIGN_H_CENTER, CP_TEXT_ALIGN_V_MIDDLE);
-	CP_Font_DrawText("Hello", 255, 255);
-	CP_Font_DrawText("What you looking at?", 450, 200);
-	CP_Font_DrawText("No jokes about chuck norris", 2000, 20);
+	CP_Font_DrawText("W A S D to move", 450, 300);
+	CP_Font_DrawText("Hold Left Mouse Click to Shoot", 450, 200);
+	//CP_Font_DrawText("No jokes about chuck norris", 2000, 20);
 
 	//this draws the center circle in which the scale and rotation transformations
 	//take reference from

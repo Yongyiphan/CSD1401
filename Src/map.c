@@ -207,9 +207,9 @@ void map_Update(void) {
 			ItemTracker->CoinLL = ItemInteraction(ItemTracker->CoinLL);
 		}
 		//PrintItemCount();
-		if (MobCycleTimer % Wave_Timer == 0) {
+		if (MobCycleTimer % 2 == 0) {
 			float deduct = 1 + P.LEVEL.VAL / 4;
-			deduct = deduct > P.STATTOTAL.MAX_HP_TOTAL / 2 ? P.STATTOTAL.MAX_HP_TOTAL / 2 : deduct;
+			deduct = deduct > P.STATTOTAL.MAX_HP_TOTAL * 2 / 3  ? P.STATTOTAL.MAX_HP_TOTAL * 2 / 3 : deduct;
 			P.CURRENT_HP -= deduct;
 		}
 		static float bulletcd = 99; // Random big number so no cd on first shot
