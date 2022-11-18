@@ -96,7 +96,7 @@ void CameraDemo_Update(Player *player, CP_Matrix *trans)
 	*trans = transform;
 	CP_Settings_ApplyMatrix(transform);
 
-	CP_Graphics_ClearBackground(CP_Color_Create(100, 100, 100, 255));
+	//CP_Graphics_ClearBackground(CP_Color_Create(100, 100, 100, 255));
 	//Draw environment props that do not move
 	CP_Settings_Fill(CP_Color_Create(255, 0, 0, 255));
 	CP_Settings_TextAlignment(CP_TEXT_ALIGN_H_CENTER, CP_TEXT_ALIGN_V_MIDDLE);

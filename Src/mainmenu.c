@@ -6,6 +6,7 @@
 #include "upgrades.h"
 #include "options.h"
 #include "audio_manager.h"
+#include "credits.h"
 
 #define WINDOWSIZEX 1300
 #define WINDOWSIZEY 900
@@ -61,7 +62,7 @@ void Main_Menu_Update()
 	}
 	
 	//click play to go to map
-	if (CP_Input_MouseClicked())
+	if (CP_Input_MouseTriggered(MOUSE_BUTTON_LEFT))
 	{
 		if (IsAreaClicked(width / 2, (height / 2) - (height / 10) + (height / 10 * 0), (height / 5), ((height / 6) / 2), CP_Input_GetMouseX(), CP_Input_GetMouseY()))
 		{
@@ -78,6 +79,10 @@ void Main_Menu_Update()
 		if (IsAreaClicked(width / 2, (height / 2) - (height / 10) + (height / 10 * 2), (width / 5), ((height / 6) / 2), CP_Input_GetMouseX(), CP_Input_GetMouseY()))
 		{
 			CP_Engine_SetNextGameState(options_Init, options_Update, options_Exit);
+		}
+		if (IsAreaClicked(width / 2, (height / 2) - (height / 10) + (height / 10 * 3), (width / 5), ((height / 6) / 2), CP_Input_GetMouseX(), CP_Input_GetMouseY()))
+		{
+			CP_Engine_SetNextGameState(Credits_Init, Credits_Update, Credits_Exit);
 		}
 		//click exit to exit
 		if (IsAreaClicked(width / 2, (height / 2) - (height / 10) + (height / 10 * 4), (width / 5), ((height / 6) / 2), CP_Input_GetMouseX(), CP_Input_GetMouseY()))
