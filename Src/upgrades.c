@@ -89,7 +89,7 @@ void upgrades_Update(void)
 			{
 				upgrades[i].level += 1;
 				printf("%d ", upgrades[i].level);
-				upgrades[i].stat = upgrades[i].level * 10;
+				upgrades[i+5].stat = i == 0 ? upgrades[i+5].level * 10 :upgrades[i+5].level * 0.01;
 				printf("%f\n", upgrades[i].stat);
 			}
 		}
@@ -111,7 +111,9 @@ void upgrades_Update(void)
 			{
 				upgrades[i+5].level += 1;
 				printf("%d ", upgrades[i+5].level);
-				upgrades[i+5].stat = upgrades[i+5].level * 10;
+				
+				upgrades[i+5].stat = i == 0 ? upgrades[i+5].level * 10 :upgrades[i+5].level * 0.01;
+
 				printf("%f\n", upgrades[i+5].stat);
 			}
 		}

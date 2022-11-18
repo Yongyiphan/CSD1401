@@ -49,7 +49,7 @@ void BulletType(int type, float coordx, float coordy, float angle, int friendly)
 		bullet[bulletcounter].size = 10 * 1;
 		bullet[bulletcounter].speed = 30 * P.STATTOTAL.PROJECTILE_SPD_TOTAL;
 		bullet[bulletcounter].maxdistance = 300 * 1;
-		bullet[bulletcounter].damage = 10 * 1;
+		bullet[bulletcounter].damage = 5 + P.STATTOTAL.DAMAGE_TOTAL;
 		bullet[bulletcounter].exist = TRUE;
 	}
 
@@ -73,7 +73,7 @@ void BulletType(int type, float coordx, float coordy, float angle, int friendly)
 		bullet[bulletcounter].size = 15 * 1;
 		bullet[bulletcounter].speed = 5 * P.STATTOTAL.PROJECTILE_SPD_TOTAL;
 		bullet[bulletcounter].maxdistance = 300 * 1;
-		bullet[bulletcounter].damage = 20 * 1;
+		bullet[bulletcounter].damage = 10 + P.STATTOTAL.DAMAGE_TOTAL;
 		bullet[bulletcounter].timer = 1;
 		bullet[bulletcounter].exist = TRUE;
 	}
