@@ -81,6 +81,23 @@ void Player_Show_Stats(Player P) {
 	CP_Font_DrawText(buffer,)*/
 }
 
+
+void Player_Show_Coins(void) {
+	float printX = CP_System_GetWindowWidth() * 8.0 / 10;
+	float printY = CP_System_GetWindowHeight() * 1.0 / 10;
+
+	
+	CP_Image_Draw(ItemSprites[COIN], printX + 30, printY + 60, 50, 50, 255);
+	char buffer[16] = { 0 };
+	sprintf_s(buffer, _countof(buffer), "%d", P.STAT.Coin_Gained);
+	CP_Settings_TextAlignment(CP_TEXT_ALIGN_H_CENTER, CP_TEXT_ALIGN_V_TOP);
+	CP_Settings_TextSize(30.0f);
+	CP_Font_DrawText("COINS GAINED:", printX, printY);
+	CP_Settings_TextSize(60.0f);
+	CP_Font_DrawText(buffer, printX - 20, printY + 30);
+	CP_Settings_TextSize(30.0f);
+}
+
 /*
 Shows healthbar of the player. Creates 2 rectangles, one specifying current HP, and the other max HP.
 Current HP is always proportional to the length of max HP.
@@ -94,6 +111,7 @@ void show_healthbar(Player* p) {
 
 	CP_Settings_Fill(CP_Color_Create(255, 200, 200, 255));
 	CP_Settings_StrokeWeight(3.0f);
+	//CP_Settings_TextSize(20.0f);
 	CP_Graphics_DrawRectAdvanced(x_coord, y_coord, rectWidth, rectHeight, 0, 0);
 	CP_Settings_Fill(CP_Color_Create(255, 0, 0, 255));
 
@@ -213,7 +231,7 @@ void death_screen(float totalElapsedTime) {
 
 
 int level_up(LEVEL* level) {
-	if (level->P_EXP > level->EXP_REQ) {
+	if (level->P_EXP >= level->EXP_REQ) {
 		level->P_EXP = 0;
 		level->EXP_REQ *= 1.5;
 		level->VAL += 1;
@@ -259,7 +277,7 @@ void upgrade_screen(Player* P, int* isUpgrade, int* isPaused) {
 	CP_TEXT_ALIGN_HORIZONTAL centerHor = CP_TEXT_ALIGN_H_CENTER;
 	CP_TEXT_ALIGN_VERTICAL centerVert = CP_TEXT_ALIGN_V_MIDDLE;
 	CP_Settings_Fill(CP_Color_Create(0, 0, 0, 255));		// text is black
-	CP_Settings_TextSize(30.0f);
+	
 	CP_Settings_TextAlignment(centerHor, centerVert);
 
 	char* name[] = { "Pickup Radius", "Max HP", "Damage", "Speed", "Bullet Speed", "Attack Speed" };
@@ -267,17 +285,22 @@ void upgrade_screen(Player* P, int* isUpgrade, int* isPaused) {
 	// Draw out option boxes with padding applied
 	float background_topX = middle.x - background_width / 2;
 	float background_topY = middle.y - background_height / 2;
-	float currentX = background_topX, currentY = background_topY;
+	float currentX = background_topX, currentY = background_topY + 300;
+	CP_Settings_TextSize(55.0f);
+	CP_Font_DrawText("You have leveled up!!", middle.x, background_topY + 70);
+	CP_Font_DrawText("UPGRADES", middle.x, background_topY + 130);
+	
+	CP_Settings_TextSize(35.0f);
 	for (int i = 0; i < numBoxes_vert; i++) {
 		for (int y = 0; y < numBoxes_hor; y++) {
 			float boxX = currentX + padding + box_width / 2;
 			float boxY = currentY + padding + box_height / 2;
 			CP_Settings_Fill(CP_Color_Create(255, 100, 100, 255));
-			CP_Graphics_DrawRect(boxX, boxY, box_width, box_height);
+			CP_Graphics_DrawRectAdvanced(boxX, boxY, box_width, box_height, FALSE, 10);
 			CP_Settings_Fill(CP_Color_Create(0, 0, 0, 255));
-			CP_Font_DrawText(name[countStats % 6], boxX, boxY-20);
+			CP_Font_DrawText(name[countStats % 6], boxX, boxY-10);
 
-			if (CP_Input_MouseClicked()) {
+			if (CP_Input_MouseTriggered(MOUSE_BUTTON_LEFT)) {
 				if (IsAreaClicked(boxX, boxY, box_width, box_height, CP_Input_GetMouseX(), CP_Input_GetMouseY())) {
 					//stats[countStats % 6] += 1;
 					

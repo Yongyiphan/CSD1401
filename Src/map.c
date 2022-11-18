@@ -121,8 +121,10 @@ void map_Update(void) {
 		}
 
 #pragma endregion
+		
 		// Any objects below this function will be displaced by the camera movement
 		CameraDemo_Update(&P, &transform);
+		CP_Graphics_ClearBackground(dark_green);
 		GenerateWaves();
 		CP_Settings_NoFill();
 		CP_Graphics_DrawCircle(P.x, P.y, P.STATTOTAL.PICKUP_TOTAL);
@@ -331,12 +333,13 @@ void map_Update(void) {
 		upgrade_screen(&P, &isUpgrade, &isPaused);
 	}
 	Player_Show_Stats(P);
+	Player_Show_Coins();
 	show_healthbar(&P);
 	show_level(&P);
 
 	if (CP_Input_KeyTriggered(KEY_SPACE))
 		CP_Engine_Terminate();
-	CP_Graphics_ClearBackground(dark_green);
+	
 }
 
 void map_Exit(void) {

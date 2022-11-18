@@ -14,6 +14,7 @@
     <ClCompile Include="Src\utils.c" />
     <ClCompile Include="Src\Mob.c" />
     <ClCompile Include="Src\audio_manager.c" />
+    <ClCompile Include="Src\credits.c" />
   </ItemGroup>
   <ItemGroup>
     <ClInclude Include="Inc\bullet.h" />
@@ -28,10 +29,14 @@
     <ClInclude Include="Inc\utils.h" />
     <ClInclude Include="Inc\Mob.h" />
     <ClInclude Include="Inc\audio_manager.h" />
+    <ClInclude Include="Inc\credits.h" />
   </ItemGroup>
   <ItemGroup>
     <Image Include="Assests\DigiPen_Singapore_WEB_RED.png" />
     <Image Include="Assets\background.png" />
+    <Image Include="Assets\Credits\credits.png" />
+    <Image Include="Assets\Credits\ournames.png" />
+    <Image Include="Assets\Credits\smeg.png" />
   </ItemGroup>
   <ItemGroup>
     <Media Include="Assets\Sound\click.wav" />
@@ -44,8 +49,6 @@
     <Media Include="Assets\Sound\levelUp.wav" />
     <Media Include="Assets\Sound\ingameBGM.mp3" />
     <Media Include="Assets\Sound\mainmenuBGM.mp3" />
-    <Media Include="Assets\static.mp3" />
-    <Media Include="Assets\thememusic.mp3" />
   </ItemGroup>
   <ItemGroup>
     <Image Include="Assests\DigiPen_Singapore_WEB_RED.png" />

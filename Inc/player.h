@@ -78,6 +78,8 @@ void Player_Stats_Update(Player* player);
 
 void Player_Show_Stats(Player player);
 
+void Player_Show_Coins(void);
+
 void show_healthbar(Player* player);
 
 void show_level(Player* player);
