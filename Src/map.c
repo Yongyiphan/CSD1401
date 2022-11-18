@@ -11,8 +11,8 @@
 #include "Items.h"
 
 
-#define MAP_SIZEX 1880
-#define MAP_SIZEY 1180
+#define MAP_SIZEX 1300
+#define MAP_SIZEY 900
 
 
 

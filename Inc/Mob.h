@@ -68,7 +68,7 @@ extern int Mob_Img;
 #define MaxMobGrowthRate 20
 #define MaxUpperLimit 200
 #define WaveCostGrowthRate 10
-#define SpawnAreaOffset 500
+#define SpawnAreaOffset 1000
 #define StartMobQuantity 150
 #define MobStatScale 1.02
 
