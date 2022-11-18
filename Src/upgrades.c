@@ -89,8 +89,9 @@ void upgrades_Update(void)
 			{
 				upgrades[i].level += 1;
 				printf("%d ", upgrades[i].level);
-				upgrades[i+5].stat = i == 0 ? upgrades[i+5].level * 10 :upgrades[i+5].level * 0.01;
+				upgrades[i].stat = i == 0 ? upgrades[i].level * 10 :upgrades[i].level * 1;
 				printf("%f\n", upgrades[i].stat);
+				
 			}
 		}
 	}
@@ -115,6 +116,7 @@ void upgrades_Update(void)
 				upgrades[i+5].stat = i == 0 ? upgrades[i+5].level * 10 :upgrades[i+5].level * 0.01;
 
 				printf("%f\n", upgrades[i+5].stat);
+				save_all_upgrades_to_file();
 			}
 		}
 	}
@@ -137,6 +139,7 @@ void upgrades_Update(void)
 		if (IsAreaClicked((width - width / 12), height - height / 16, (width / 8), (height / 12), CP_Input_GetMouseX(), CP_Input_GetMouseY()))
 		{
 			reset_all_upgrades();
+			save_all_upgrades_to_file();
 		}
 	}
 
@@ -151,8 +154,9 @@ void upgrades_Update(void)
 	//exit to mainmenu
 	if (CP_Input_MouseClicked())
 	{
-		if (IsAreaClicked(width / 2, height - (height / 6), width / 8, height / 8, CP_Input_GetMouseX(),CP_Input_GetMouseY()))
+		if (IsAreaClicked(width / 2, height - (height / 6), width / 8, height / 8, CP_Input_GetMouseX(), CP_Input_GetMouseY()))
 			CP_Engine_SetNextGameState( Main_Menu_Init, Main_Menu_Update, Main_Menu_Exit);
+			save_all_upgrades_to_file();
 	}
 	if (CP_Input_KeyTriggered(KEY_ESCAPE)) 
 	{
