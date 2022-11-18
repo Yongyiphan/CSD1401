@@ -154,7 +154,7 @@ int BulletCollision(float targetx, float targety, float width, float height)
 
 		if (bullet[i].type == PBULLET_HOMING) BulletHomingTrack(targetx, targety, width, i);
 
-		CP_Graphics_DrawCircle(targetx, targety, width*0.9); // Draws hitbox zone of mob
+		//CP_Graphics_DrawCircle(targetx, targety, width*0.9); // Draws hitbox zone of mob
 		distance = CP_Math_Distance(bullet[i].x, bullet[i].y, targetx, targety);
 		if (distance < width*0.9)
 			return i;
