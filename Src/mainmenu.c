@@ -13,7 +13,7 @@
 CP_Image logo;
 CP_Image title;
 CP_Image zombie;
-CP_Color white, black, grey, dark_green; 
+CP_Color white, black, grey, dark_green, red; 
 CP_Sound BGM = NULL, shitSound = NULL;
 float width, height;
 float songLength = 500;
@@ -82,6 +82,12 @@ void Main_Menu_Update()
 		//click exit to exit
 		if (IsAreaClicked(width / 2, (height / 2) - (height / 10) + (height / 10 * 4), (width / 5), ((height / 6) / 2), CP_Input_GetMouseX(), CP_Input_GetMouseY()))
 		{
+			/*int exit = 1;
+			if (exit)
+			{
+				confirm_exit(exit);
+			}*/
+			save_all_upgrades_to_file();
 			CP_Engine_Terminate();
 			save_all_upgrades_to_file();
 		}
@@ -96,16 +102,17 @@ void Main_Menu_Update()
 	if (CP_Input_KeyTriggered(KEY_ESCAPE)) {
 		CP_Engine_Terminate();
 	}
-
-	if (CP_Input_KeyDown(KEY_SPACE))
-	{
-		Beep(400, 5);
-		Beep(1000, 100);
-		Beep(600, 30);
-		Beep(3000, 20);
 	}
 	
-}
+//void confirm_exit(int exit) 
+//{
+//	CP_Settings_Fill(grey);
+//	CP_Graphics_DrawRectAdvanced(width / 2, height / 2, width / 3, height / 3, 0, 20);
+//	if (CP_Input_KeyDown(KEY_ESCAPE))
+//	{
+//		exit = 0;
+//	}
+//}
 
 void Main_Menu_Exit()
 {

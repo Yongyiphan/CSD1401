@@ -31,7 +31,7 @@ void Player_Init(Player* P) {
 	*/
 
 	start_vector = CP_Vector_Zero();
-	P_stats = (Stats){ PLAYER_HP + upgrades[0].stat, PLAYER_SPEED + upgrades[1].stat, PLAYER_DAMAGE + upgrades[2].stat, ATK_SPD + upgrades[3].stat, PLAYER_DEFENSE + upgrades[4].stat , PLAYER_PICKUP + upgrades[5].stat, PLAYER_PROJ_SPD + upgrades[6].stat};
+	P_stats = (Stats){ PLAYER_HP + upgrades[0].stat, PLAYER_SPEED + upgrades[1].stat, PLAYER_DAMAGE + (upgrades[2].stat / 10), ATK_SPD + (upgrades[3].stat / 50), PLAYER_DEFENSE + upgrades[4].stat , PLAYER_PICKUP + upgrades[5].stat, PLAYER_PROJ_SPD + (upgrades[6].stat / 100)};
 	P_stats_mult = (StatsMult){ 1, 1, 1, 1, 1, 1, 1 };
 	P_stats_total = (StatsTotal){ PLAYER_HP, PLAYER_SPEED, PLAYER_DAMAGE, ATK_SPD, PLAYER_DEFENSE, PLAYER_PICKUP, PLAYER_PROJ_SPD};
 	level = (LEVEL){ 0, 0, 10 };
