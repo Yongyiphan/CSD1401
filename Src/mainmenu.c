@@ -28,6 +28,7 @@ void Main_Menu_Init(void)
 	black = CP_Color_Create(0, 0, 0, 255);
 	grey = CP_Color_Create(100, 100, 100, 255);
 	dark_green = CP_Color_Create(17, 39, 0, 255);
+	red = CP_Color_Create(200, 0, 0, 255);
 	CP_System_SetWindowSize(WINDOWSIZEX, WINDOWSIZEY);
 	//CP_System_Fullscreen();
 	//CP_Graphics_ClearBackground(dark_green);
@@ -89,7 +90,6 @@ void Main_Menu_Update()
 			}*/
 			save_all_upgrades_to_file();
 			CP_Engine_Terminate();
-			save_all_upgrades_to_file();
 		}
 	}
 
