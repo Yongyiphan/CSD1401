@@ -106,6 +106,15 @@ xcopy "$(SolutionDir)Assets\*" "$(OutDir)Assets\" /s /r /y /q
     <Image Include="Assets\Credits\credits.png" />
     <Image Include="Assets\Credits\ournames.png" />
     <Image Include="Assets\Credits\smeg.png" />
+    <Image Include="Assets\Instructions\atkSpd_text.png" />
+    <Image Include="Assets\Instructions\directionalKeys_text.png" />
+    <Image Include="Assets\Instructions\dmg_text.png" />
+    <Image Include="Assets\Instructions\great_exp.png" />
+    <Image Include="Assets\Instructions\hp_text.png" />
+    <Image Include="Assets\Instructions\magnet_text.png" />
+    <Image Include="Assets\Instructions\maxHP_text.png" />
+    <Image Include="Assets\Instructions\mvmtSpd_text.png" />
+    <Image Include="Assets\Instructions\normal_exp.png" />
     <Image Include="Assets\Title.png" />
     <Image Include="Assets\Zombie.png" />
   </ItemGroup>
@@ -115,6 +124,7 @@ xcopy "$(SolutionDir)Assets\*" "$(OutDir)Assets\" /s /r /y /q
     <ClCompile Include="Src\Camera.c" />
     <ClCompile Include="Src\credits.c" />
     <ClCompile Include="Src\game.c" />
+    <ClCompile Include="Src\instructions.c" />
     <ClCompile Include="Src\Items.c" />
     <ClCompile Include="Src\main.c" />
     <ClCompile Include="Src\mainmenu.c" />
@@ -131,6 +141,7 @@ xcopy "$(SolutionDir)Assets\*" "$(OutDir)Assets\" /s /r /y /q
     <ClInclude Include="Inc\Camera.h" />
     <ClInclude Include="Inc\credits.h" />
     <ClInclude Include="Inc\game.h" />
+    <ClInclude Include="Inc\instructions.h" />
     <ClInclude Include="Inc\mainmenu.h" />
     <ClInclude Include="Inc\Items.h" />
     <ClInclude Include="Inc\map.h" />
