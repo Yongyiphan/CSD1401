@@ -98,12 +98,12 @@ void Main_Menu_Update()
 	if (CP_Input_KeyDown(KEY_ENTER))
 	{
 		CP_Engine_SetNextGameState(map_Init, map_Update, map_Exit);
-	}
+		}
 	if (CP_Input_KeyTriggered(KEY_ESCAPE)) {
 		CP_Engine_Terminate();
-	}
-	}
-	
+	}	
+}
+
 //void confirm_exit(int exit) 
 //{
 //	CP_Settings_Fill(grey);
