@@ -126,8 +126,11 @@ void map_Update(void) {
 		CameraDemo_Update(&P, &transform);
 		CP_Graphics_ClearBackground(dark_green);
 		GenerateWaves();
+		CP_Settings_Save();
 		CP_Settings_NoFill();
+		CP_Settings_StrokeWeight(0.5f);
 		CP_Graphics_DrawCircle(P.x, P.y, P.STATTOTAL.PICKUP_TOTAL);
+		CP_Settings_Restore();
 		for (int w = 0; w < NO_WAVES; w++) {
 			if (WaveIDQueue[w] == -1) {
 				continue;

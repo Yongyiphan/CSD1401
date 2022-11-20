@@ -35,7 +35,7 @@ void CreateBaseStat(MobStats* cStat, int type)
 		case SmallMob:
 			cStat->HP = 5 * statscale * 2;
 			cStat->DEF = 10 + statscale;
-			cStat->Speed = 8 + statscale;
+			cStat->Speed = 5 + statscale;
 			cStat->Range = 0 + statscale;
 			cStat->Dmg = 1 + statscale;
 			cStat->size = 50;
@@ -43,7 +43,7 @@ void CreateBaseStat(MobStats* cStat, int type)
 		case MediumMob:
 			cStat->HP = 10 * statscale * 2;
 			cStat->DEF = 10;
-			cStat->Speed = 5 + statscale;
+			cStat->Speed = 1 + statscale;
 			cStat->Range = 0 + statscale;
 			cStat->Dmg = 2 + statscale;
 			cStat->size = 60 + statscale;
@@ -390,76 +390,33 @@ void MobTMobCollision(Mob* m) {
 			radius of contact of m && tm
 			dist will be left in squared form
 		*/
+		if (MobCycleTimer % 2 == 0 && m->boost == 0) {
+			m->dest = CP_Vector_Subtract(P.coor, m->coor);
+		}
 		float mRad = squareDist(m->w/2, m->h/2), tmRad;
 		float dMtoP = squareDist(P.x-m->coor.x, P.y-m->coor.y), dTMtoP, dMtoTM;
-		CP_Vector vMtoP = CP_Vector_Subtract(P.coor, m->coor);
-		CP_Vector NormBase = CP_Vector_Normalize(vMtoP);
+		CP_Vector NormBase = CP_Vector_Normalize(m->dest);
 		CP_Vector BasePF = CP_Vector_Scale(NormBase, m->CStats.Speed);
-#pragma region
-		goto BasicMovement;
-		if (CP_System_GetFrameRate() < 27.0f) {
-			goto BasicMovement;
-		}
-		//Some complicated ass iter using pointers XD
-		for (WaveTrack* i = WaveTracker; i < WaveTracker + NO_WAVES; i++) {
-			if (i->CurrentCount != 0) {
-				for (Mob** j = i->arr; j < i->arr + i->MobCount; j++) {
-					if (m == *j) {
-						continue;
-					}
-					tm = *j;
-					if (tm->Status == 1) {
-						/*
-						Collision:
-							->if M collide with another mob and is same vector direction pause
-						*/
-						tmRad = squareDist(tm->w / 2, tm->h / 2);
-						dMtoTM = squareDist(m->coor.x - tm->coor.x, m->coor.y - tm->coor.y);
-						dTMtoP = squareDist(P.x - tm->coor.x, P.y - tm->coor.y);
-						if (dMtoTM <= mRad + tmRad && dMtoP < dTMtoP) {
-							main = m;
-							bounce = tm;
-							/*
-							Require:
-								Vector bounce to main
-								Vector bounce to p
-							*/
-							CP_Vector vBounceToMain = CP_Vector_Set(m->coor.x - tm->coor.x, m->coor.y - tm->coor.y);
-							CP_Vector vBounceToP = CP_Vector_Set(P.x - tm->coor.x, P.y - tm->coor.y);
-							if (vBounceToMain.x == vBounceToP.x && vBounceToMain.y == vBounceToMain.y) {
-								goto BasicMovement;
-							}
-							float BouncePAngle = CP_Vector_Angle(vBounceToMain, vBounceToP);
-							if (_isnanf(BouncePAngle)) {
-								goto BasicMovement;
-							}
-							float nAngle = CP_Random_RangeFloat(0, BouncePAngle);
-							//Using vBounceToP as main directional vector -> find new angle from it -> transform it -> move bounce in reverse direction
-							CP_Matrix rot = CP_Matrix_Set(
-								cos(nAngle), -sin(nAngle), 0,
-								sin(nAngle), cos(nAngle), 0,
-								0, 0, 0
-							);
-							CP_Vector nDirection = CP_Vector_Normalize(CP_Vector_MatrixMultiply(rot, vBounceToP));
-							CP_Vector mainDirection = CP_Vector_Scale(CP_Vector_Normalize(CP_Vector_Set(P.x - m->coor.x, P.y - m->coor.y)), m->CStats.Speed);
-							//bounce->x -= nDirection.x;
-							//bounce->y -= nDirection.y;
-							bounce->coor = CP_Vector_Subtract(bounce->coor, nDirection);
-							if (m != main) {
-								main->coor = CP_Vector_Add(main->coor, mainDirection);
-							//	main->x += mainDirection.x;
-							//	main->y += mainDirection.y;
-								status = 1;
-							}
-							goto BasicMovement;
-						}
-					}
-				}
-			}
-		}
+		int duration, interval = 2;
+		switch (m->Title) {
+		case SmallMob:
 
-#pragma endregion
-	BasicMovement:
+			break;
+		case MediumMob:
+			duration = 20;
+			if (m->AnimationCycle % (interval * (int) CP_System_GetFrameRate()) == 0) {
+				m->boost = 1;
+				printf("Sped\n");
+			}
+			if (m->AnimationCycle % (interval * (int) CP_System_GetFrameRate() + duration) == 0) {
+				m->boost = 0;
+				printf("Spedn't\n");
+			}
+			if (m->boost == 1) {
+				BasePF = CP_Vector_Scale(BasePF, 5);
+			}
+			break;
+		}
 		if (0 == status) {
 			m->coor = CP_Vector_Add(m->coor, BasePF);
 		//	m->x += BasePF.x;
@@ -471,8 +428,8 @@ void MobTMobCollision(Mob* m) {
 void MobTPlayerCollision(Mob* m, Player* p) {
 	
 	if (CP_Vector_Length(CP_Vector_Subtract(m->coor, p->coor)) <= p->HITBOX) {
-		//m->CStats.HP -= p->STATTOTAL.DAMAGE_TOTAL / 4;
-		p->CURRENT_HP -= m->CStats.Dmg;
+		m->CStats.HP -= p->STATTOTAL.DAMAGE_TOTAL / 4;
+		//p->CURRENT_HP -= m->CStats.Dmg;
 	}
 	if (m->CStats.HP <= 0) {
 		m->Status = 0;
