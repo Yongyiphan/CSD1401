@@ -56,7 +56,7 @@ void Main_Menu_Update()
 		CP_Settings_Fill(black);
 		CP_Graphics_DrawRectAdvanced(width / 2, (height / 2) - (height / 10) + (height / 10 * i), (width / 5), ((height / 6) / 2), 0, 15);
 		//play text
-		CP_Settings_Fill(white);
+		CP_Settings_Fill(red);
 		CP_Settings_TextSize(40.0f);
 		CP_Font_DrawText(text[i], width / 2, (height / 2) - (height / 10) + ((height / 10) * i));
 	}
