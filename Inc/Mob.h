@@ -125,14 +125,12 @@ float squareDist(float one, float two);
 
 
 
-
-
-
-
-
-
-
-
-
-
 #endif
+
+
+
+
+
+
+
+
