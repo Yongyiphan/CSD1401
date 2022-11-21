@@ -15,6 +15,7 @@
     <ClCompile Include="Src\Mob.c" />
     <ClCompile Include="Src\audio_manager.c" />
     <ClCompile Include="Src\credits.c" />
+    <ClCompile Include="Src\instructions.c" />
   </ItemGroup>
   <ItemGroup>
     <ClInclude Include="Inc\bullet.h" />
@@ -30,6 +31,7 @@
     <ClInclude Include="Inc\Mob.h" />
     <ClInclude Include="Inc\audio_manager.h" />
     <ClInclude Include="Inc\credits.h" />
+    <ClInclude Include="Inc\instructions.h" />
   </ItemGroup>
   <ItemGroup>
     <Image Include="Assests\DigiPen_Singapore_WEB_RED.png" />
@@ -37,6 +39,15 @@
     <Image Include="Assets\Credits\credits.png" />
     <Image Include="Assets\Credits\ournames.png" />
     <Image Include="Assets\Credits\smeg.png" />
+    <Image Include="Assets\Instructions\atkSpd_text.png" />
+    <Image Include="Assets\Instructions\dmg_text.png" />
+    <Image Include="Assets\Instructions\hp_text.png" />
+    <Image Include="Assets\Instructions\maxHP_text.png" />
+    <Image Include="Assets\Instructions\mvmtSpd_text.png" />
+    <Image Include="Assets\Instructions\great_exp.png" />
+    <Image Include="Assets\Instructions\normal_exp.png" />
+    <Image Include="Assets\Instructions\magnet_text.png" />
+    <Image Include="Assets\Instructions\directionalKeys_text.png" />
   </ItemGroup>
   <ItemGroup>
     <Media Include="Assets\Sound\click.wav" />

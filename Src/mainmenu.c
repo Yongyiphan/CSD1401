@@ -7,6 +7,7 @@
 #include "options.h"
 #include "audio_manager.h"
 #include "credits.h"
+#include "instructions.h"
 
 #define WINDOWSIZEX 1300
 #define WINDOWSIZEY 900
@@ -101,6 +102,8 @@ void Main_Menu_Update()
 	if (CP_Input_KeyTriggered(KEY_ESCAPE)) {
 		CP_Engine_Terminate();
 	}
+	if (CP_Input_KeyTriggered(KEY_N))
+		CP_Engine_SetNextGameState(Instructions_Init, Instructions_Update, Instructions_Exit);
 
 	if (CP_Input_KeyDown(KEY_SPACE))
 	{

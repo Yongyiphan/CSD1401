@@ -83,14 +83,14 @@ void Player_Show_Stats(Player P) {
 
 
 void Player_Show_Coins(void) {
-	float printX = CP_System_GetWindowWidth() * 8.0 / 10;
+	float printX = CP_System_GetWindowWidth() * 7.0 / 10;
 	float printY = CP_System_GetWindowHeight() * 1.0 / 10;
 
 	
-	CP_Image_Draw(ItemSprites[COIN], printX + 30, printY + 60, 50, 50, 255);
+	CP_Image_Draw(ItemSprites[COIN], printX + 200, printY + 17, 50, 50, 255);
 	char buffer[16] = { 0 };
 	sprintf_s(buffer, _countof(buffer), "%d", P.STAT.Coin_Gained);
-	CP_Settings_TextAlignment(CP_TEXT_ALIGN_H_CENTER, CP_TEXT_ALIGN_V_TOP);
+	CP_Settings_TextAlignment(CP_TEXT_ALIGN_H_LEFT, CP_TEXT_ALIGN_V_TOP);
 	CP_Settings_TextSize(30.0f);
 	CP_Font_DrawText("COINS GAINED:", printX, printY);
 	CP_Settings_TextSize(60.0f);
