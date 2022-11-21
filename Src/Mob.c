@@ -104,15 +104,10 @@ void CreateMob(Mob*m, MobStats *Base, Player*player, int offSet)
 	nx = player->x + r * cos(rTheta);
 	ny = player->y + r * sin(rTheta);
 	m->coor = CP_Vector_Add(CP_Vector_Scale(CP_Vector_Set(cos(rTheta), sin(rTheta)), r), player->coor);
-
+	m->dest = player->coor;
 	m->BaseStats = *Base;
 	m->CStats = *Base;
-	//m->x = nx;
-	//m->y = ny;
 	m->Status = 1;
-	m->AnimationCycle = 0;
-	m->w = 0;
-	m->h = 0;
 }
 
 
@@ -162,6 +157,8 @@ void InitWavesArr(WaveTrack* tracker, int start) {
 }
 
 
+
+
 void GenerateMobs(WaveTrack* tracker, Player* p) {
 	int MobC = 0, cost = tracker->WaveCost, randM, randMCost;
 	//MobNode* root = tracker->tree, *current;
@@ -176,10 +173,11 @@ void GenerateMobs(WaveTrack* tracker, Player* p) {
 		if (MobC >= tracker->arrSize) {
 			int nQ = tracker->arrSize * 2;
 			Mob** tArr = realloc(tracker->arr,sizeof(Mob*) * nQ);
-			if (NULL != tArr) {
-				tracker->arr = tArr;
-				tracker->arrSize = nQ;
+			if (NULL == tArr) {
+				return NULL;
 			}
+			tracker->arr = tArr;
+			tracker->arrSize = nQ;
 			InitWavesArr(tracker, MobC);
 			printf("\tNew Arr Size = %d", nQ);
 		}
@@ -226,7 +224,7 @@ void GenerateWaves(void) {
 						WaveTracker[i].WaveCost = CWaveCost;
 					}
 					else {
-						WaveTracker[i].MaxMob = MaxMob;			//Update Max Mob limit
+						WaveTracker[i].MaxMob = MaxMob;								//Update Max Mob limit
 						WaveTracker[i].WaveCost = CWaveCost += WaveCostGrowthRate;	//Update Value which allows spawning of mobs
 					}
 					//Generate Waves at avaiable slot 
@@ -237,11 +235,9 @@ void GenerateWaves(void) {
 					break;
 				}
 			}
-			//PrintWaveStats();
-			//printf("\t\tTimer: %d", MobCycleTimer);
+			PrintWaveStats();
 		}
 	}
-//	printf("%f\n", CP_System_GetSeconds());
 }
 
 
@@ -281,7 +277,7 @@ void DrawMobImage(Mob* m, Player* p) {
 	int IHeight, IWidth, alpha = 255,original_Size, scale, leftOS = 0, rightOS = 0, topOS = 0, btmOS = 0;
 	int SizeDef = 5, StartImgI = m->Title * 2, flip = 0;
 	int FrameStep = 0, targetFPS = 6;
-	m->AnimationCycle += 1;
+	//m->AnimationCycle += 1;
 	int u0 = 0, v0 = 0, u1 = 0, v1 = 0;
 	/*
 	SM = 0, 0 * 2 = 0
@@ -390,37 +386,51 @@ void MobTMobCollision(Mob* m) {
 			radius of contact of m && tm
 			dist will be left in squared form
 		*/
-		if (MobCycleTimer % 2 == 0 && m->boost == 0) {
-			m->dest = CP_Vector_Subtract(P.coor, m->coor);
-		}
-		float mRad = squareDist(m->w/2, m->h/2), tmRad;
-		float dMtoP = squareDist(P.x-m->coor.x, P.y-m->coor.y), dTMtoP, dMtoTM;
-		CP_Vector NormBase = CP_Vector_Normalize(m->dest);
+		float mRad = squareDist(m->w / 2, m->h / 2), tmRad;
+		float dMtoP = squareDist(P.x - m->coor.x, P.y - m->coor.y), dTMtoP, dMtoTM;
+		CP_Vector NormBase = CP_Vector_Normalize(CP_Vector_Subtract(P.coor, m->coor));
 		CP_Vector BasePF = CP_Vector_Scale(NormBase, m->CStats.Speed);
-		int duration, interval = 2;
+		int duration, interval = 2, mag;
+		float maxDistanceDelta;
 		switch (m->Title) {
 		case SmallMob:
-
 			break;
 		case MediumMob:
-			duration = 20;
-			if (m->AnimationCycle % (interval * (int) CP_System_GetFrameRate()) == 0) {
-				m->boost = 1;
-				printf("Sped\n");
-			}
-			if (m->AnimationCycle % (interval * (int) CP_System_GetFrameRate() + duration) == 0) {
-				m->boost = 0;
-				printf("Spedn't\n");
-			}
-			if (m->boost == 1) {
-				BasePF = CP_Vector_Scale(BasePF, 5);
+			duration = 5;
+			if (dMtoP < squareDist(CP_System_GetWindowWidth() / 2, 0)) {
+				if (m->AnimationCycle % 20 == 0) {
+					m->boost = 1;
+					m->dest = P.coor;
+				}
+				if (m->boost == 1) {
+					maxDistanceDelta = 350 * CP_System_GetDt();
+					mag = CP_Vector_Length(m->dest, m->coor);
+					if (mag <= maxDistanceDelta || mag == 0.0f) {
+						m->boost = 0;
+						m->dest = P.coor;
+						return;
+					}
+					else {
+						//m->coor = CP_Vector_Add(m->coor, CP_Vector_Scale(CP_Vector_Scale(CP_Vector_Subtract(m->dest, m->coor), maxDistanceDelta), 1.0f / mag));
+						m->coor = CP_Vector_Add(m->coor, CP_Vector_Scale(CP_Vector_Normalize(CP_Vector_Subtract(m->dest, m->coor)), maxDistanceDelta));
+					}
+					status = 1;
+				}
 			}
 			break;
+//			 public static Vector3 MoveTowards(Vector3 current, Vector3 target, float maxDistanceDelta)
+			// {
+			//     Vector3 a = target - current;
+			//     float magnitude = a.magnitude;
+			//     if (magnitude <= maxDistanceDelta || magnitude == 0f)
+			//     {
+			//         return target;
+			//     }
+			//     return current + a / magnitude * maxDistanceDelta;
+			// }
 		}
 		if (0 == status) {
 			m->coor = CP_Vector_Add(m->coor, BasePF);
-		//	m->x += BasePF.x;
-		//	m->y += BasePF.y;
 		}
 	}
 }

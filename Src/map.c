@@ -91,30 +91,6 @@ void map_Update(void) {
 			isPaused = 1;
 			isUpgrade = 0;
 		}
-		// Increase speed of the player
-		//if (CP_Input_KeyTriggered(KEY_H)){
-		//	P.STATMULT.SPEED_MULT /= 1.1f;
-		//}
-		//if (CP_Input_KeyTriggered(KEY_M)){
-		//	P.STATMULT.PICKUP_MULT *= 1.1;
-		//}
-		// Open up the Upgrade Screen
-		/*if (CP_Input_KeyTriggered(KEY_U) && isUpgrade == 0) {
-			isUpgrade = 1;
-			isPaused = 1;
-		}*/
-		// Testing for leveling up
-		if (CP_Input_KeyDown(KEY_L)) {
-			P.LEVEL.P_EXP += 5;
-			level_up(&P.LEVEL);
-		}
-		// Manually control the HP of the player for testing
-		if (CP_Input_KeyDown(KEY_Q)) {
-			P.CURRENT_HP -= 4;
-		}
-		else if (CP_Input_KeyDown(KEY_E)) {
-			P.CURRENT_HP += 4;
-		}
 		if (P.CURRENT_HP <= 0) {
 			isDead = 1;
 			isPaused = 1;
@@ -136,38 +112,33 @@ void map_Update(void) {
 				continue;
 			}
 			cWave = &WaveTracker[w];
-			if (cWave->CurrentCount == 0 || (MobCycleTimer % 3 == 0 && cWave->CurrentCount == 1)) {
+			if (cWave->CurrentCount == 0) {
 				//if all mobs are dead
 				//return index to wave queue
 				WaveIDQueue[w] = -1;
 				//skip rest of algo
 				continue;
 			}
+			int deadCounter = 0, alive = 0;
 			for (int i = 0; i < cWave->MobCount; i++) {
 				cMob = cWave->arr[i];
 				//Only bother handle mobs that are alive
 				//Dead = 0, Alive = 1
 				if (cMob->Status == 1) {
 					//MobTPlayerCollision(cMob, &P);
+					cMob->AnimationCycle += 1;
 					MobTMobCollision(cMob);
 					MobTPlayerCollision(cMob, &P);
 					int bchecker;
 					//static int breset = BULLET_CAP + 1; // Ensures first run value will be always be different from bchecker
 					bchecker = BulletCollision(cMob->coor.x, cMob->coor.y, cMob->w, cMob->h);
 
-					//if (breset != bchecker) cMob->dmginstance = 0;
-					//breset = bchecker;
-
 					if (bullet[bchecker].type == PBULLET_ROCKET && bullet[bchecker].friendly == BULLET_PLAYER
 						&& bullet[bchecker].exist == FALSE) // Specific type for explosion zone
 					{
-						//if (cMob->dmginstance == 0)
-						//{
-							cMob->CStats.HP -= bullet[bchecker].damage;
-							if (cMob->CStats.HP <= 0)
-								cMob->Status = 0;
-						//	cMob->dmginstance = 1;
-						//}
+						cMob->CStats.HP -= bullet[bchecker].damage;
+						if (cMob->CStats.HP <= 0)
+							cMob->Status = 0;
 					}
 
 					if (bchecker >= 0 && bullet[bchecker].friendly == BULLET_PLAYER && bullet[bchecker].exist == TRUE)
@@ -181,7 +152,6 @@ void map_Update(void) {
 					if (cMob->Status == 0) {
 						cWave->CurrentCount -= 1;
 						MobCount[w] -= 1;
-						//ItemTracker->exptree = insertItemNode(ItemTracker->exptree, CreateItemEffect(cMob->x, cMob->y, 1, cMob->Title));
 						insertItemLink(&ItemTracker->ExpLL, CreateItemEffect(cMob->coor, EXP, cMob->Title));
 						float rng = CP_Random_RangeFloat(0, 1);
 						if (rng < 0.33) {
@@ -192,31 +162,29 @@ void map_Update(void) {
 						}
 						int sub = P.LEVEL.VAL > 0 ? P.LEVEL.VAL : 2;
 						P.CURRENT_HP += sub;
+						cMob = &(Mob) { 0 };
 						continue;
 					}
 					//cMob->h == 0 means haven drawn before. / assigned image to it yet
 					if (P.x - WWidth / 2 - cMob->w < cMob->coor.x && cMob->coor.x < P.x + WWidth / 2 + cMob->w && P.y - WHeight / 2 - cMob->h < cMob->coor.y && cMob->coor.y < P.y + WHeight / 2 + cMob->h || cMob->h == 0) {
 						DrawMobImage(cMob, &P);
 					}
+					alive++;
 				}
-
+				else {
+					cMob = &(Mob) { 0 };
+				}
+				cWave->CurrentCount = alive;
 			}
 		}
-		if (ItemTracker->ItemLL != NULL) {
-			ItemTracker->ItemLL = ItemInteraction(ItemTracker->ItemLL);
-		}
-		if (ItemTracker->ExpLL != NULL) {
-			ItemTracker->ExpLL = ItemInteraction(ItemTracker->ExpLL);
-		}
-		if (ItemTracker->CoinLL != NULL) {
-			ItemTracker->CoinLL = ItemInteraction(ItemTracker->CoinLL);
-		}
 		//PrintItemCount();
+		CheckItems();
 		if (MobCycleTimer % 2 == 0) {
 			float deduct = 1 + P.LEVEL.VAL / 4;
 			deduct = deduct > P.STATTOTAL.MAX_HP_TOTAL * 2 / 3  ? P.STATTOTAL.MAX_HP_TOTAL * 2 / 3 : deduct;
-			P.CURRENT_HP -= deduct;
+			//P.CURRENT_HP -= deduct;
 		}
+#pragma region
 		static float bulletcd = 99; // Random big number so no cd on first shot
 		static btype = 2;
 
@@ -319,9 +287,10 @@ void map_Update(void) {
 				bulletcd4 = 99;
 		}
 
-		
-			
 		BulletDraw();
+
+#pragma endregion
+
 		UpdateAppliedEffects(NULL);
 		DrawAppliedEffects();
 		CP_Settings_ResetMatrix();

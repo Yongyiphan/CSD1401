@@ -84,7 +84,7 @@ Item* CreateItemEffect(CP_Vector coor, int exp, int expVal) {
 	case EXP:
 		newItem->AffectedBaseStat = expVal;
 		newItem->Duration = -1;
-		newItem->Modifier = (float) MobCycleTimer / (P.LEVEL.VAL + 1) + P.LEVEL.VAL;
+		newItem->Modifier = ((float) MobCycleTimer / (P.LEVEL.VAL + 1) + P.LEVEL.VAL) * (expVal+1);
 		newItem->Hitbox = 25;
 
 		break;
@@ -117,8 +117,6 @@ Item* CreateItemEffect(CP_Vector coor, int exp, int expVal) {
 	}
 	newItem->Start = MobCycleTimer;
 	newItem->Type = EType;
-	//newItem->x = x;
-	//newItem->y = y;
 	newItem->coor = coor;
 	newItem->collected = 0;
 	newItem->knockback = 2;
@@ -154,8 +152,6 @@ void IAffectPlayer(Item* item, int method) {
 		}
 		case EXP:
 			P.LEVEL.P_EXP += item->Modifier;
-			//level_up(&P.LEVEL);
-			//printf("Item x: %f | y: %f\n", item->x, item->y);
 			break;
 
 		case BULLETType:
@@ -164,19 +160,16 @@ void IAffectPlayer(Item* item, int method) {
 				if (method == -1)
 					blegal2 = 0;
 				else blegal2 = 1;
-				printf("Bullet spilt check\n");
 				break;
 			case 3: // Bullet Rocket
 				if (method == -1)
 					blegal3 = 0;
 				else blegal3 = 1;
-				printf("Bullet rocket check\n");
 				break;
 			case 4: // Bullet Homing
 				if (method == -1)
 					blegal4 = 0;
 				else blegal4 = 1;
-				printf("Bullet homing check\n");
 				break;
 			}
 			break;
@@ -346,6 +339,18 @@ void DrawAppliedEffects() {
 		CP_Settings_Fill(CP_Color_Create(0, 0, 0, 255));
 		sprintf_s(buffer, 255, "%1.0f", timeLeft);
 		CP_Font_DrawText(buffer, nx, ny - (iconsize * 2/ 3));
+	}
+}
+
+void CheckItems(void) {
+	if (ItemTracker->ItemLL != NULL) {
+		ItemTracker->ItemLL = ItemInteraction(ItemTracker->ItemLL);
+	}
+	if (ItemTracker->ExpLL != NULL) {
+		ItemTracker->ExpLL = ItemInteraction(ItemTracker->ExpLL);
+	}
+	if (ItemTracker->CoinLL != NULL) {
+		ItemTracker->CoinLL = ItemInteraction(ItemTracker->CoinLL);
 	}
 }
 

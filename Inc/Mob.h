@@ -37,7 +37,7 @@ typedef struct Mob {
 	int w, h;
 	int dmginstance;
 	//Dead = 0 | Alive = 1
-	int boost;
+	int boost, jump;
 } Mob;
 
 static const struct Mob EmptyMob;

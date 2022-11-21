@@ -97,6 +97,7 @@ void IAffectPlayer(Item* i, int method);
 void PrintItemCount(void);
 
 
+void CheckItems(void);
 
 
 ItemLink* ItemInteraction(ItemLink* head);
