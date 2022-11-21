@@ -1,7 +1,8 @@
+#pragma once
 #include "cprocessing.h"
-#include "game.h"
-#include "map.h"
 #include "mainmenu.h"
+#include <stdio.h>
+
 
 int main(void)
 {

@@ -1,3 +1,4 @@
+#pragma once
 #include "map.h"
 #include "cprocessing.h"
 #include <stdlib.h>
@@ -6,164 +7,343 @@
 #include "player.h"
 #include "utils.h"
 #include "Mob.h"
+#include "bullet.h"
 #include "Items.h"
 
 
 #define MAP_SIZEX 1300
 #define MAP_SIZEY 900
-#define PLAYER_HP 100.0f
-#define PLAYER_SPEED 200.0f
-#define PLAYER_DAMAGE 1.0f
-#define ATK_SPEED 2.0f
-#define DEFENSE 10
-#define PLAYER_HITBOX 50
 
 
 
-Player P;
-CP_Vector start_vector;
-CP_Color grey, black, red, green, blue, white;
+int WHeight, WWidth;
+float sfxVolume, bgmVolume;
 
-//Mob Stuff
-#define NO_WAVES 6
-#define Spawn_Timer 1
-#define Wave_Timer 5
-#define SpawnAreaOffset 300
+CP_Color dark_green;
+CP_Matrix transform;
 
 Mob* cMob;
-int StartMobQuantity = 100, cWaveID = 0,currentWaveCost, MaxMob;
-int currentSec = 0;
-int WaveIDQueue[NO_WAVES];
-WaveTrack waveTrack[NO_WAVES], *cWave; // pause state for the game when paused.
+WaveTrack *cWave; // pause state for the game when paused.
 
 //Might be useful variable for Waves Tracking
-int totalWave = 0, MobCount[NO_WAVES];
-int isPaused;
+int totalWave = 0;
+float mousex, mousey;
+int isPaused, isUpgrade, isDead;
 
+//Images
+CP_Image background = NULL;
 
 void map_Init(void) {
-	
+	//CP_System_SetFrameRate(60);
 	CP_System_SetWindowSize(MAP_SIZEX, MAP_SIZEY);
+	WHeight = CP_System_GetWindowHeight();
+	WWidth = CP_System_GetWindowWidth();
 	//CP_System_Fullscreen();
-	isPaused = 0;
+	isPaused = 0, isUpgrade = 0, isDead = 0;
+	sfxVolume = 0.7, bgmVolume = 0.7;
 
-	grey = CP_Color_Create(111, 111, 111, 255);
-	white = CP_Color_Create(255, 255, 255, 255);
-	red = CP_Color_Create(255, 0, 0, 255);
-	green = CP_Color_Create(0, 255, 0, 255);
-	blue = CP_Color_Create(0, 0, 255, 255);
+	// initialize the timer to start from 0 
+	timer(1, isPaused);
 
-	start_vector = CP_Vector_Zero();
+	background = CP_Image_Load("./Assets/background.png");
+	dark_green = CP_Color_Create(50, 50, 0, 255);
+	CP_Graphics_ClearBackground(dark_green);
 	// Initialize the coordinates and stats of the player
-	P = (Player){ start_vector.x, start_vector.y, 90, PLAYER_HP, PLAYER_SPEED, PLAYER_DAMAGE, ATK_SPEED, DEFENSE, PLAYER_HITBOX}; //Initialise empty arrays of possible waves
-	currentWaveCost = 10;
-	MaxMob = 200;
-	for (int i = 0; i < NO_WAVES; i++) {
-		waveTrack[i] = (WaveTrack){
-			MaxMob,
-			0,
-			0,
-			0, 
-			malloc(sizeof(Mob*) * StartMobQuantity), 
-			StartMobQuantity, 
-			SpawnAreaOffset,
-			white
-		};
-		InitWavesArr(&waveTrack[i]);
-		WaveIDQueue[i] = -1;
-	}
+
+	
+	CreateWaveTracker();
+	CreateItemTracker();
+	MobLoadImage();
+	ItemLoadImage();
+	Player_Init(&P);
 	CameraDemo_Init();
+	Bulletinit();
 }
 
 void map_Update(void) {
-	int* checkPause = &isPaused;
-	show_healthbar(P);
+	
+	// Update player stats, inclusive of base stats and multipliers.
+	Player_Stats_Update(&P);
+#pragma region	
 	if (isPaused) {
-		option_screen(checkPause);
+		// Opens up the Upgrade Screen for players to pick their upgrades
+		if (isUpgrade) {
+			upgrade_screen(&P, &isUpgrade, &isPaused);
+			//printf("Player max hp: %f\n", P.MAX_HP);
+		}
+		// Opens up the Pause Screen
+		else if (P.CURRENT_HP > 0) {
+			option_screen(&isPaused);
+		}
+		// temporarily paused the death_screen function to allow the game to continue running
+		if (isDead) {
+			//float elapsedTime = timer(0);
+			death_screen(timer(0, isDead));
+		}
+	
+		// Resume the game
 		if (CP_Input_KeyTriggered(KEY_ESCAPE))
 			isPaused = 0;
 	}
+	// if game is not paused
 	else {
-		if (CP_Input_KeyTriggered(KEY_ESCAPE))
+		if (CP_Input_KeyTriggered(KEY_ESCAPE)) {
 			isPaused = 1;
-		if (CP_Input_KeyDown(KEY_H)) {
-			P.SPEED *= 1.1f;
+			isUpgrade = 0;
 		}
-		CameraDemo_Update(&P);
-		if ((int)CP_System_GetSeconds() != currentSec) {
-			currentSec = (int)CP_System_GetSeconds();
-			printf("\n\tCurrent Sec: %d | Current FPS:%f\n", currentSec, CP_System_GetFrameRate());
-			//Every SpawnTime interval spawn wave
-			if (currentSec % Wave_Timer == 0) {
-				//Growth Per Wave
-				MaxMob += 50;
-				//printf("Max Mobs Increased to %d\n", MaxMob);
-			}
-			if (currentSec % Spawn_Timer == 0) {
-				//Growth Per Wave
-				currentWaveCost += 20;
-				/*
-				Generate Waves
-				-) Update/ Reference == Require Pointers
-				===== Params ================
-					-> Player (Reference)
-					-> WaveTrack Arr (Update)
-					-> WaveID Queue (Update)
-					-> No of spawnable Waves
-					-> WaveCost Growth
-					-> MaxMob Growth
-				===== Optional =============== (May be deleted accordingly if unnecessary)
-					-> Total Wave Count (Update)
-					-> Mob Count (Update)
-				*/
-				GenerateWaves(&P, &waveTrack, &WaveIDQueue, NO_WAVES, currentWaveCost, MaxMob, &totalWave, &MobCount);
-				//Used to print current wave statistics, can be removed :)
-				PrintWaveStats(&totalWave,NO_WAVES, &WaveIDQueue, &MobCount);
-			}
+		// Increase speed of the player
+		//if (CP_Input_KeyTriggered(KEY_H)){
+		//	P.STATMULT.SPEED_MULT /= 1.1f;
+		//}
+		//if (CP_Input_KeyTriggered(KEY_M)){
+		//	P.STATMULT.PICKUP_MULT *= 1.1;
+		//}
+		// Open up the Upgrade Screen
+		/*if (CP_Input_KeyTriggered(KEY_U) && isUpgrade == 0) {
+			isUpgrade = 1;
+			isPaused = 1;
+		}*/
+		// Testing for leveling up
+		if (CP_Input_KeyDown(KEY_L)) {
+			P.LEVEL.P_EXP += 5;
+			level_up(&P.LEVEL);
+		}
+		// Manually control the HP of the player for testing
+		if (CP_Input_KeyDown(KEY_Q)) {
+			P.CURRENT_HP -= 4;
+		}
+		else if (CP_Input_KeyDown(KEY_E)) {
+			P.CURRENT_HP += 4;
+		}
+		if (P.CURRENT_HP <= 0) {
+			isDead = 1;
+			isPaused = 1;
 		}
 
-		int MobC = 0;
+#pragma endregion
+		// Any objects below this function will be displaced by the camera movement
+		CameraDemo_Update(&P, &transform);
+		GenerateWaves();
+		CP_Settings_NoFill();
+		CP_Graphics_DrawCircle(P.x, P.y, P.STATTOTAL.PICKUP_TOTAL);
 		for (int w = 0; w < NO_WAVES; w++) {
-			cWave = &waveTrack[w];
-			if (WaveIDQueue[w] != -1) {
-				if (cWave->CurrentCount == 0) {
-					//if all mobs are dead
-					//return index to wave queue
-					WaveIDQueue[w] = -1;
-					//skip rest of algo
-					continue;
-				}
-				//printf("Spawning wave: %d\n", w);
-				for (int i = 0; i < cWave->MobCount; i++) {
-					cMob = cWave->arr[i];
-					//Only bother handle mobs that are alive
-					//Dead = 0, Alive = 1
-					if (cMob->Status == 0) {
-						continue;
+			if (WaveIDQueue[w] == -1) {
+				continue;
+			}
+			cWave = &WaveTracker[w];
+			if (cWave->CurrentCount == 0 || (MobCycleTimer % 3 == 0 && cWave->CurrentCount == 1)) {
+				//if all mobs are dead
+				//return index to wave queue
+				WaveIDQueue[w] = -1;
+				//skip rest of algo
+				continue;
+			}
+			for (int i = 0; i < cWave->MobCount; i++) {
+				cMob = cWave->arr[i];
+				//Only bother handle mobs that are alive
+				//Dead = 0, Alive = 1
+				if (cMob->Status == 1) {
+					//MobTPlayerCollision(cMob, &P);
+					MobTMobCollision(cMob);
+					MobTPlayerCollision(cMob, &P);
+					int bchecker;
+					//static int breset = BULLET_CAP + 1; // Ensures first run value will be always be different from bchecker
+					bchecker = BulletCollision(cMob->coor.x, cMob->coor.y, cMob->w, cMob->h);
+
+					//if (breset != bchecker) cMob->dmginstance = 0;
+					//breset = bchecker;
+
+					if (bullet[bchecker].type == PBULLET_ROCKET && bullet[bchecker].friendly == BULLET_PLAYER
+						&& bullet[bchecker].exist == FALSE) // Specific type for explosion zone
+					{
+						//if (cMob->dmginstance == 0)
+						//{
+							cMob->CStats.HP -= bullet[bchecker].damage;
+							if (cMob->CStats.HP <= 0)
+								cMob->Status = 0;
+						//	cMob->dmginstance = 1;
+						//}
 					}
-					MobC += 1;
-					MobPathFinding(cMob, P.x, P.y);
-					MobCollision(cMob, &P);
+
+					if (bchecker >= 0 && bullet[bchecker].friendly == BULLET_PLAYER && bullet[bchecker].exist == TRUE)
+					{
+						cMob->CStats.HP -= bullet[bchecker].damage;
+						if (cMob->CStats.HP <= 0)
+							cMob->Status = 0;
+						bullet[bchecker].exist = FALSE;
+					}
+
 					if (cMob->Status == 0) {
 						cWave->CurrentCount -= 1;
 						MobCount[w] -= 1;
+						//ItemTracker->exptree = insertItemNode(ItemTracker->exptree, CreateItemEffect(cMob->x, cMob->y, 1, cMob->Title));
+						insertItemLink(&ItemTracker->ExpLL, CreateItemEffect(cMob->coor, EXP, cMob->Title));
+						float rng = CP_Random_RangeFloat(0, 1);
+						if (rng < 0.33) {
+							insertItemLink(&ItemTracker->ItemLL, CreateItemEffect(cMob->coor, -1, 0));
+						}
+						if (rng < 0.44) {
+							insertItemLink(&ItemTracker->CoinLL, CreateItemEffect(cMob->coor, COIN, 0));
+						}
+						int sub = P.LEVEL.VAL > 0 ? P.LEVEL.VAL : 2;
+						P.CURRENT_HP += sub;
 						continue;
 					}
-					DrawMob(cMob, cWave->waveColor.r, cWave->waveColor.g, cWave->waveColor.b);
+					//cMob->h == 0 means haven drawn before. / assigned image to it yet
+					if (P.x - WWidth / 2 - cMob->w < cMob->coor.x && cMob->coor.x < P.x + WWidth / 2 + cMob->w && P.y - WHeight / 2 - cMob->h < cMob->coor.y && cMob->coor.y < P.y + WHeight / 2 + cMob->h || cMob->h == 0) {
+						DrawMobImage(cMob, &P);
+					}
 				}
+
 			}
 		}
+		if (ItemTracker->ItemLL != NULL) {
+			ItemTracker->ItemLL = ItemInteraction(ItemTracker->ItemLL);
+		}
+		if (ItemTracker->ExpLL != NULL) {
+			ItemTracker->ExpLL = ItemInteraction(ItemTracker->ExpLL);
+		}
+		if (ItemTracker->CoinLL != NULL) {
+			ItemTracker->CoinLL = ItemInteraction(ItemTracker->CoinLL);
+		}
+		//PrintItemCount();
+		if (MobCycleTimer % 2 == 0) {
+			float deduct = 1 + P.LEVEL.VAL / 4;
+			deduct = deduct > P.STATTOTAL.MAX_HP_TOTAL * 2 / 3  ? P.STATTOTAL.MAX_HP_TOTAL * 2 / 3 : deduct;
+			P.CURRENT_HP -= deduct;
+		}
+		static float bulletcd = 99; // Random big number so no cd on first shot
+		static btype = 2;
+
+		//printf("MobCount: %d |\tFPS: %f \n", MobC, CP_System_GetFrameRate());
+
+		// Bullet CD Related stuff below
+		float bulletangle = 0;
+		static float bulletcd1 = 99, bulletcd2 = 99, bulletcd3 = 99, bulletcd4 = 99; // Random big number so no cd on first shot
+		static int legal2 = 0, legal3 = 0, legal4 = 0; // Manual overwrite for bullet types, for testing use
+		if (CP_Input_KeyTriggered(KEY_1)) // For testing, keypad 1 to toggle on / off
+		{
+			if (legal2 == 0)
+				legal2 = 1;
+			else
+				legal2 = 0;
+		}
+		if (CP_Input_KeyTriggered(KEY_2)) // For testing, keypad 2 to toggle on / off
+		{
+			if (legal3 == 0)
+				legal3 = 1;
+			else
+				legal3 = 0;
+		}
+		if (CP_Input_KeyTriggered(KEY_3)) // For testing, keypad 3 to toggle on / off
+		{
+			if (legal4 == 0)
+				legal4 = 1;
+			else
+				legal4 = 0;
+		}
+		if (CP_Input_KeyTriggered(KEY_4)) // Toggle all types on / off
+		{
+			if (legal2 == 0 || legal3 == 0 || legal4 == 0)
+				legal2 = legal3 = legal4 = 1;
+			else
+				legal2 = legal3 = legal4 = 0;
+		}
+
+		if (CP_Input_MouseDown(MOUSE_BUTTON_LEFT))
+		{
+			// Get details for bullets
+			bulletcd1 += CP_System_GetDt();
+			bulletcd2 += CP_System_GetDt();
+			bulletcd3 += CP_System_GetDt();
+			bulletcd4 += CP_System_GetDt();
+			mousex = CP_Input_GetMouseWorldX();
+			mousey = CP_Input_GetMouseWorldY();
+			bulletangle = point_point_angle(P.x, P.y, mousex, mousey);
+
+			// Check valid cd + shoot for each bullet type
+			if (bulletcd1 > 1 / P.STATTOTAL.ATK_SPEED_TOTAL) { // Fixed value is the base cd timer
+				bulletcd1 = 0;
+			}
+			if (bulletcd1 == 0) {
+				// Default bullet is always active
+				BulletShoot(P.x, P.y, bulletangle, PBULLET_NORMAL, BULLET_PLAYER);
+			}
+
+			if (bulletcd2 > 1 / P.STATTOTAL.ATK_SPEED_TOTAL) { // Fixed value is the base cd timer
+				bulletcd2 = 0;
+			}
+			if ((Bulletlegal(2) == 1 || legal2 == 1) && bulletcd2 == 0)
+				BulletShoot(P.x, P.y, bulletangle, PBULLET_SPILT, BULLET_PLAYER);
+
+			if (bulletcd3 > 3 / P.STATTOTAL.ATK_SPEED_TOTAL) { // Fixed value is the base cd timer
+				bulletcd3 = 0;
+			}
+			if ((Bulletlegal(3) == 1 || legal3 == 1) && bulletcd3 == 0)
+				BulletShoot(P.x, P.y, bulletangle, PBULLET_ROCKET, BULLET_PLAYER);
+
+			if (bulletcd4 > 2 / P.STATTOTAL.ATK_SPEED_TOTAL) { // Fixed value is the base cd timer
+				bulletcd4 = 0;
+			}
+			if ((Bulletlegal(4) == 1 || legal4 == 1) && bulletcd4 == 0)
+				BulletShoot(P.x, P.y, bulletangle, PBULLET_HOMING, BULLET_PLAYER);
+
+		}
+		if (CP_Input_MouseDown(MOUSE_BUTTON_LEFT) == FALSE && bulletcd1 != 99) // Keeps bulletcd running even when not on leftclick
+		{
+			bulletcd1 += CP_System_GetDt();
+			if (bulletcd1 > 0.5)
+				bulletcd1 = 99;
+		}
+		if (CP_Input_MouseDown(MOUSE_BUTTON_LEFT) == FALSE && bulletcd2 != 99) // Keeps bulletcd running even when not on leftclick
+		{
+			bulletcd2 += CP_System_GetDt();
+			if (bulletcd2 > 0.5)
+				bulletcd2 = 99;
+		}
+		if (CP_Input_MouseDown(MOUSE_BUTTON_LEFT) == FALSE && bulletcd3 != 99) // Keeps bulletcd running even when not on leftclick
+		{
+			bulletcd3 += CP_System_GetDt();
+			if (bulletcd3 > 0.5)
+				bulletcd3 = 99;
+		}
+		if (CP_Input_MouseDown(MOUSE_BUTTON_LEFT) == FALSE && bulletcd4 != 99) // Keeps bulletcd running even when not on leftclick
+		{
+			bulletcd4 += CP_System_GetDt();
+			if (bulletcd4 > 0.5)
+				bulletcd4 = 99;
+		}
+
+		
+			
+		BulletDraw();
+		UpdateAppliedEffects(NULL);
+		DrawAppliedEffects();
+		CP_Settings_ResetMatrix();
+		// Time, returns and draws text
+		timer(0, isPaused);
 	}
-	
+
+	// Shows the upgrade screen whenever the player levels up.
+	if (level_up(&P.LEVEL)) {
+		isPaused = 1;
+		isUpgrade = 1;
+		upgrade_screen(&P, &isUpgrade, &isPaused);
+	}
+	Player_Show_Stats(P);
+	show_healthbar(&P);
+	show_level(&P);
 
 	if (CP_Input_KeyTriggered(KEY_SPACE))
 		CP_Engine_Terminate();
-
-	
+	CP_Graphics_ClearBackground(dark_green);
 }
 
 void map_Exit(void) {
-	for (int i = 0; i < NO_WAVES; i++) {
-		free(waveTrack[i].arr);
-	}
+	FreeMobResource();
+	
+	FreeItemResource();
+	printf("Coin Gained: %d", P.STAT.Coin_Gained);
+	
+	//free(ItemTracker);
 }

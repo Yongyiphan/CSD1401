@@ -1,4 +1,4 @@
-
+#pragma once
 
 void game_Init(void);
 void game_Update(void);
