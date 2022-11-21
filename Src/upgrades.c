@@ -36,9 +36,9 @@ void upgrades_Init(void)
 		upgrades[i].name = upgradename[i];
 	}
 }
-char* convert_int_to_string(int value)
+char* convert_int_to_string(char buffer[], int value)
 {
-	char buffer[16];
+	//char buffer[16];
 	sprintf_s(buffer, _countof(buffer), "%d", value);
 	return buffer;
 }
@@ -60,6 +60,8 @@ void upgrades_Update(void)
 	for (int i = 0; i < 5; i++)
 	{
 		CP_Graphics_DrawRectAdvanced((width / 6) * (i+1), height / 3, width / 8, height / 8, 0, 15);
+
+
 	}
 	//draw text on boxes
 	char* text[] = { "HEALTH", "SPEED", "DAMAGE", "ATTACK SPEED",  "DEFENSE" };
@@ -67,9 +69,10 @@ void upgrades_Update(void)
 	CP_Settings_Fill(white);
 	CP_Settings_TextSize(30);
 	for (int i = 0; i < 5; i++)
-	{
+	{	
+		char buffer[16];
 		CP_Font_DrawText(text[i], (width / 6) * (i + 1), height / 3 - height / 24, width / 8);
-		CP_Font_DrawText(convert_int_to_string(upgrades[i].level), (width / 6)* (i + 1), height / 3, width / 8, height / 8, 0, 15);
+		CP_Font_DrawText(convert_int_to_string(buffer, upgrades[i].level), (width / 6)* (i + 1), height / 3, width / 8, height / 8, 0, 15);
 		//printf("string\n");
 	}
 
@@ -89,8 +92,9 @@ void upgrades_Update(void)
 			{
 				upgrades[i].level += 1;
 				printf("%d ", upgrades[i].level);
-				upgrades[i+5].stat = i == 0 ? upgrades[i+5].level * 10 :upgrades[i+5].level * 0.01;
+				upgrades[i].stat = i == 0 ? upgrades[i].level * 10 :upgrades[i].level * 1;
 				printf("%f\n", upgrades[i].stat);
+				save_all_upgrades_to_file();
 			}
 		}
 	}
@@ -100,7 +104,7 @@ void upgrades_Update(void)
 	{
 		CP_Graphics_DrawRectAdvanced((width / 6) * (i + 1), height / 3 + height / 4, width / 8, height / 8, 0, 15);
 	}
-
+	//increase rect for row 2
 	CP_Settings_Fill(grey);
 	for (int i = 0; i < 2; i++)
 	{
@@ -115,6 +119,7 @@ void upgrades_Update(void)
 				upgrades[i+5].stat = i == 0 ? upgrades[i+5].level * 10 :upgrades[i+5].level * 0.01;
 
 				printf("%f\n", upgrades[i+5].stat);
+				save_all_upgrades_to_file();
 			}
 		}
 	}
@@ -123,7 +128,9 @@ void upgrades_Update(void)
 	CP_Settings_Fill(white);
 	for (int i = 0; i < 2; i++)
 	{
-		CP_Font_DrawText(text2[i],(width / 6)* (i + 1), height / 3 + height / 4 - height / 24, width / 8, height / 8, 0, 15);
+		char buffer[16];
+		CP_Font_DrawText(text2[i], (width / 6)* (i + 1), height / 3 + height / 4 - height / 24, width / 8, height / 8, 0, 15);
+		CP_Font_DrawText(convert_int_to_string(buffer, upgrades[i+5].level), (width / 6) * (i + 1), height / 3 + height / 4, width / 8, height / 8, 0, 15);
 	}
 
 	//reset button
@@ -137,6 +144,7 @@ void upgrades_Update(void)
 		if (IsAreaClicked((width - width / 12), height - height / 16, (width / 8), (height / 12), CP_Input_GetMouseX(), CP_Input_GetMouseY()))
 		{
 			reset_all_upgrades();
+			save_all_upgrades_to_file();
 		}
 	}
 
@@ -151,8 +159,11 @@ void upgrades_Update(void)
 	//exit to mainmenu
 	if (CP_Input_MouseClicked())
 	{
-		if (IsAreaClicked(width / 2, height - (height / 6), width / 8, height / 8, CP_Input_GetMouseX(),CP_Input_GetMouseY()))
-			CP_Engine_SetNextGameState( Main_Menu_Init, Main_Menu_Update, Main_Menu_Exit);
+		if (IsAreaClicked(width / 2, height - (height / 6), width / 8, height / 8, CP_Input_GetMouseX(), CP_Input_GetMouseY()))
+		{
+			CP_Engine_SetNextGameState(Main_Menu_Init, Main_Menu_Update, Main_Menu_Exit);
+			save_all_upgrades_to_file();
+		}
 	}
 	if (CP_Input_KeyTriggered(KEY_ESCAPE)) 
 	{
@@ -165,13 +176,13 @@ void upgrades_Update(void)
 void upgrades_read_from_file(void)
 {
 	FILE* upgradesfile = openfile("./assets/upgradesdata.txt", "r");
-	//{
+	{
 		if (upgradesfile)
 		{
 			fscanf_s(upgradesfile, "%d %f %d %f %d %f %d %f %d %f %d %f %d %f", &upgrades[0].level, &upgrades[0].stat, &upgrades[1].level, &upgrades[1].stat, &upgrades[2].level, &upgrades[2].stat, &upgrades[3].level, &upgrades[3].stat, &upgrades[4].level, &upgrades[4].stat, &upgrades[5].level, &upgrades[5].stat, &upgrades[6].level, &upgrades[6].stat);
 			printf("%d %f %d %f %d %f %d %f %d %f %d %f %d %f", upgrades[0].level, upgrades[0].stat, upgrades[1].level, upgrades[1].stat, upgrades[2].level, upgrades[2].stat, upgrades[3].level, upgrades[3].stat, upgrades[4].level, upgrades[4].stat, upgrades[5].level, upgrades[5].stat, upgrades[6].level, upgrades[6].stat);
 		}
-	//}
+	}
 	closefile(upgradesfile);
 }
 //save data to upgradesdata.txt

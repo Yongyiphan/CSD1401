@@ -34,7 +34,7 @@ void Player_Init(Player* P) {
 	P_stats = (Stats){ PLAYER_HP + upgrades[0].stat, PLAYER_SPEED + upgrades[1].stat, PLAYER_DAMAGE + upgrades[2].stat, ATK_SPD + upgrades[3].stat, PLAYER_DEFENSE + upgrades[4].stat , PLAYER_PICKUP + upgrades[5].stat, PLAYER_PROJ_SPD + upgrades[6].stat};
 	P_stats_mult = (StatsMult){ 1, 1, 1, 1, 1, 1, 1 };
 	P_stats_total = (StatsTotal){ PLAYER_HP, PLAYER_SPEED, PLAYER_DAMAGE, ATK_SPD, PLAYER_DEFENSE, PLAYER_PICKUP, PLAYER_PROJ_SPD};
-	level = (LEVEL){ 0, 0, 10 };
+	level = (LEVEL){ 0, 0, 50 };
 
 	*P = (Player){ start_vector.x, start_vector.y, PLAYER_HP + upgrades[0].stat, P_stats, P_stats_mult, P_stats_total, PLAYER_HITBOX, level};
 	P->coor = CP_Vector_Set(P->x, P->y);
@@ -229,11 +229,13 @@ void death_screen(float totalElapsedTime) {
 	}
 }
 
-
+#define Level_Req_Jump 10
+#define Level_Jump_Perc 1.5f
+#define Level_Up_Perc 1.2f
 int level_up(LEVEL* level) {
 	if (level->P_EXP >= level->EXP_REQ) {
 		level->P_EXP = 0;
-		level->EXP_REQ *= 1.5;
+		level->EXP_REQ = level->VAL % Level_Req_Jump == 0 ? level->EXP_REQ * Level_Jump_Perc : level->EXP_REQ * Level_Up_Perc;
 		level->VAL += 1;
 
 		return 1;

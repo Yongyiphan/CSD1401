@@ -73,7 +73,7 @@ Item* CreateItemEffect(CP_Vector coor, int exp, int expVal) {
 	if (ItemCountSum() > 50) {
 		if (ItemTracker->DropCount[MAGNET][0] < ItemTracker->DropCount[MAGNET][1]) {
 			EType = MAGNET;
-			printf("Creating a magnet\n");
+			//printf("Creating a magnet\n");
 		}
 	}
 
@@ -84,7 +84,7 @@ Item* CreateItemEffect(CP_Vector coor, int exp, int expVal) {
 	case EXP:
 		newItem->AffectedBaseStat = expVal;
 		newItem->Duration = -1;
-		newItem->Modifier = (float)pow(5, expVal + 1);
+		newItem->Modifier = (float) MobCycleTimer / (P.LEVEL.VAL + 1) + P.LEVEL.VAL;
 		newItem->Hitbox = 25;
 
 		break;
@@ -101,7 +101,7 @@ Item* CreateItemEffect(CP_Vector coor, int exp, int expVal) {
 		break;
 	case MAGNET:
 		newItem->Duration = 2;
-		newItem->Hitbox = 32;
+		newItem->Hitbox = 45;
 		break;
 	case COIN:
 		newItem->Duration = -1;
@@ -111,7 +111,7 @@ Item* CreateItemEffect(CP_Vector coor, int exp, int expVal) {
 		newItem->Duration = 5;
 		newItem->Hitbox = 25;
 		newItem->AffectedBaseStat = B_RNG;
-		printf("BulletType! %d", B_RNG);
+	//	printf("BulletType! %d", B_RNG);
 		break;
 
 	}
@@ -121,7 +121,7 @@ Item* CreateItemEffect(CP_Vector coor, int exp, int expVal) {
 	//newItem->y = y;
 	newItem->coor = coor;
 	newItem->collected = 0;
-	newItem->knockback = 5;
+	newItem->knockback = 2;
 	return newItem;
 };
 
@@ -367,7 +367,7 @@ ItemLink* ItemInteraction(ItemLink* head) {
 			//printf("IM MAGNET.\n");
 			IsMagnet = 1;
 			P.STATTOTAL.PICKUP_TOTAL = 3000;
-			CP_Graphics_DrawCircle(P.x, P.y, P.STATTOTAL.PICKUP_TOTAL);
+			//CP_Graphics_DrawCircle(P.x, P.y, P.STATTOTAL.PICKUP_TOTAL);
 		}
 		CP_Vector target = CP_Vector_Subtract(CP_Vector_Set(P.x, P.y), current->key->coor);
 		float dist = CP_Vector_Length(target);
@@ -377,6 +377,10 @@ ItemLink* ItemInteraction(ItemLink* head) {
 			float speed = dist * CP_System_GetDt() * 2;
 			//speed = speed > slowest ? speed : slowest;
 			CP_Vector Movement = CP_Vector_Scale(CP_Vector_Normalize(target), speed * (P.STATTOTAL.SPEED_TOTAL / 100));
+			if (current->key->knockback > 0) {
+				current->key->coor = CP_Vector_Subtract(current->key->coor, CP_Vector_Scale(Movement, 2));
+				current->key->knockback--;
+			}
 			if (dist < P.STAT.PICKUP && dist > P.HITBOX) {
 				Movement = CP_Vector_Scale(Movement, 1.5);
 			}
