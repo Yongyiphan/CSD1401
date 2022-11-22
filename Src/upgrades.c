@@ -6,7 +6,7 @@
 #include "player.h"
 #include <stdio.h>
 #include <stdlib.h>
-
+#include "items.h"
 
 #define WINDOWSIZEX 1300
 #define WINDOWSIZEY 900
@@ -21,16 +21,21 @@ float width, height;
 upgrade upgrades[NUM_UPGRADES];
 void upgrades_Init(void)
 {
+	//draw coin icon
 	coin = CP_Image_Load("./Assets/Items/coin.png");
+	//colors
 	white = CP_Color_Create(255, 255, 255, 255);
 	black = CP_Color_Create(0, 0, 0, 255);
 	grey = CP_Color_Create(100, 100, 100, 255);
 	dark_green = CP_Color_Create(17, 39, 0, 255);
 	red = CP_Color_Create(200, 0, 0, 255);
+	//window size
 	//CP_System_SetWindowSize(WINDOWSIZEX, WINDOWSIZEY);
 	CP_Graphics_ClearBackground(dark_green);
 	width = CP_System_GetWindowWidth();
 	height = CP_System_GetWindowHeight();
+
+	//name upgrades
 	char* upgradename[7] = { "HEALTH", "SPEED", "DAMAGE", "FIRE RATE", "DEFENSE", "PICK UP", "BULLET SPEED" };
 	upgrades_read_from_file();
 	//set upgrades to default
@@ -55,7 +60,7 @@ void upgrades_Update(void)
 	CP_Settings_TextSize(200);
 	CP_Settings_Fill(red);
 	CP_Font_DrawText("UPGRADES", width / 2, height / 8);
-	CP_Image_Draw(coin, width - width / 12, height / 12, width / 16, height / 16, 255);
+	CP_Image_Draw(coin, width - width / 10, height / 12, width / 20, height / 16, 255);
 	
 
 	CP_Settings_Fill(black);
