@@ -43,7 +43,7 @@ void CreateBaseStat(MobStats* cStat, int type)
 		case MediumMob:
 			cStat->HP = 10 * statscale * 2;
 			cStat->DEF = 10;
-			cStat->Speed = 1 + statscale;
+			cStat->Speed = 2 + statscale;
 			cStat->Range = 0 + statscale;
 			cStat->Dmg = 2 + statscale;
 			cStat->size = 60 + statscale;
@@ -390,31 +390,30 @@ void MobTMobCollision(Mob* m) {
 		float dMtoP = squareDist(P.x - m->coor.x, P.y - m->coor.y), dTMtoP, dMtoTM;
 		CP_Vector NormBase = CP_Vector_Normalize(CP_Vector_Subtract(P.coor, m->coor));
 		CP_Vector BasePF = CP_Vector_Scale(NormBase, m->CStats.Speed);
-		int duration, interval = 2, mag;
-		float maxDistanceDelta;
+		int duration, interval = 2;
+		float maxDistanceDelta, mag;
 		switch (m->Title) {
 		case SmallMob:
 			break;
 		case MediumMob:
 			duration = 5;
 			if (dMtoP < squareDist(CP_System_GetWindowWidth() / 2, 0)) {
-				if (m->AnimationCycle % 20 == 0) {
+				if (m->AnimationCycle % 80 == 0) {
 					m->boost = 1;
 					m->dest = P.coor;
 				}
 				if (m->boost == 1) {
-					maxDistanceDelta = 350 * CP_System_GetDt();
-					mag = CP_Vector_Length(m->dest, m->coor);
-					if (mag <= maxDistanceDelta || mag == 0.0f) {
+					maxDistanceDelta = 450 * CP_System_GetDt();
+					mag = CP_Vector_Distance(m->dest, m->coor);
+					if (mag <= maxDistanceDelta|| mag == 0.0f) {
 						m->boost = 0;
 						m->dest = P.coor;
-						return;
 					}
 					else {
-						//m->coor = CP_Vector_Add(m->coor, CP_Vector_Scale(CP_Vector_Scale(CP_Vector_Subtract(m->dest, m->coor), maxDistanceDelta), 1.0f / mag));
+						status = 1;
 						m->coor = CP_Vector_Add(m->coor, CP_Vector_Scale(CP_Vector_Normalize(CP_Vector_Subtract(m->dest, m->coor)), maxDistanceDelta));
+						return;
 					}
-					status = 1;
 				}
 			}
 			break;

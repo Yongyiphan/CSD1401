@@ -72,6 +72,7 @@ extern int Mob_Img;
 #define SpawnAreaOffset 1000
 #define StartMobQuantity 150
 #define MobStatScale 1.02
+#define BIGNONO 180
 
 extern int WaveIDQueue[NO_WAVES], MobCount[NO_WAVES], CWave, CWaveCost, CMaxMob;
 extern WaveTrack WaveTracker[NO_WAVES];
