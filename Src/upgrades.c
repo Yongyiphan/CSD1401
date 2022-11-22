@@ -13,6 +13,7 @@
 
 
 CP_Color white, black, grey, dark_green, red;
+CP_Image coin;
 float width, height;
 
 //upgrade health, speed, damage, fire_rate, defense, pick_up, bullet_speed;
@@ -20,6 +21,7 @@ float width, height;
 upgrade upgrades[NUM_UPGRADES];
 void upgrades_Init(void)
 {
+	coin = CP_Image_Load("./Assets/Items/coin.png");
 	white = CP_Color_Create(255, 255, 255, 255);
 	black = CP_Color_Create(0, 0, 0, 255);
 	grey = CP_Color_Create(100, 100, 100, 255);
@@ -53,7 +55,7 @@ void upgrades_Update(void)
 	CP_Settings_TextSize(200);
 	CP_Settings_Fill(red);
 	CP_Font_DrawText("UPGRADES", width / 2, height / 8);
-
+	CP_Image_Draw(coin, width - width / 12, height / 12, width / 16, height / 16, 255);
 	
 
 	CP_Settings_Fill(black);
