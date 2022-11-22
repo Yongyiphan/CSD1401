@@ -18,11 +18,10 @@
 			type	-> types of values to update with.
 @returns	Updated base stats with new values
 */
-int MobCosts[MobTypes] = { 1,2,3, 4, 5};
+int MobCosts[MobTypes] = { 1,2};
 float statscale;
 void CreateBaseStat(MobStats* cStat, int type)
 {
-	
     switch (type) {
 		//Mob Format:
 		//int HP;
@@ -34,40 +33,19 @@ void CreateBaseStat(MobStats* cStat, int type)
 		//int size;
 		case SmallMob:
 			cStat->HP = 5 * statscale * 2;
-			cStat->DEF = 10 + statscale;
 			cStat->Speed = 5 + statscale;
-			cStat->Range = 0 + statscale;
 			cStat->Dmg = 1 + statscale;
 			cStat->size = 50;
 			break;
 		case MediumMob:
-			cStat->HP = 10 * statscale * 2;
-			cStat->DEF = 10;
-			cStat->Speed = 2 + statscale;
-			cStat->Range = 0 + statscale;
+			cStat->HP = 15 * statscale * 2;
+			cStat->Speed = 2;
 			cStat->Dmg = 2 + statscale;
-			cStat->size = 60 + statscale;
-			break;
-		case BigMob:
-			cStat->HP = 5;
-			cStat->DEF = 10;
-			cStat->Speed = 5;
-			cStat->Range = 0;
-			cStat->Dmg = 1;
-			cStat->size = 25;
-			break;
-		case BigBoss:
-			cStat->HP = 5;
-			cStat->DEF = 10;
-			cStat->Speed = 5;
-			cStat->Range = 0;
-			cStat->Dmg = 1;
-			cStat->size = 50;
+			cStat->size = 60 * statscale > 200 ? 200 : 60 * statscale;
 			break;
 		default:
 			//Something Might be wrong;
 			cStat->HP = 5;
-			cStat->DEF = 10;
 			cStat->Speed = 5;
 			cStat->Range = 0;
 			cStat->Dmg = 1;
@@ -202,15 +180,23 @@ void GenerateMobs(WaveTrack* tracker, Player* p) {
 	tracker->MobCount = MobC;
 	tracker->CurrentCount = MobC;
 }
-
+#include <utils.h>
 void GenerateWaves(void) {
-	if (MobCycleTimer != (int)CP_System_GetSeconds()) {
-		MobCycleTimer = (int)CP_System_GetSeconds() - MobCycleTimer > 1 ? (int)CP_System_GetSeconds() : MobCycleTimer + 1;
-		printf("Mob Cycle Timer: %d | Stat Scale: %f\n",MobCycleTimer, statscale);
-		//printf("Current FPS: %f\n", CP_System_GetFrameRate());
+		static int TimesUP = 0;
+		if (MobCycleTimer >= BIGNONO) {
+			if (MobCycleTimer % BIGNONO == 0 && TimesUP == 0) {
+				statscale *= 5;
+				TimesUP = 1;
+			}
+			if (MobCycleTimer % BIGNONO == 1 && TimesUP == 1) {
+				TimesUP = 0;
+			}
+			
+		}
+	//	printf("Mob timer: %d | Scale: %f\n", MobCycleTimer, statscale);
+		static int DifficultyBL = 0;
 		if (MobCycleTimer % Wave_Timer == 0) {
-			statscale *= MobStatScale;
-			MaxMob += MaxMobGrowthRate;
+			DifficultyBL++;
 		}
 		if (MobCycleTimer % Spawn_Timer == 0) {
 			for (int i = 0; i < NO_WAVES; i++)
@@ -219,6 +205,11 @@ void GenerateWaves(void) {
 				//Whereby each "-1" == to available slot to generate waves
 				if (WaveIDQueue[i] == -1) {
 					++CWave; //Increment WaveCount
+					if (CWave % NO_WAVES == 0 && DifficultyBL > 0) {
+						DifficultyBL--;
+						statscale *= MobStatScale;
+						MaxMob += MaxMobGrowthRate;
+					}
 					if (MaxMob >= (MaxUpperLimit / NO_WAVES)) {
 						WaveTracker[i].MaxMob = (MaxUpperLimit / NO_WAVES);
 						WaveTracker[i].WaveCost = CWaveCost;
@@ -227,6 +218,7 @@ void GenerateWaves(void) {
 						WaveTracker[i].MaxMob = MaxMob;								//Update Max Mob limit
 						WaveTracker[i].WaveCost = CWaveCost += WaveCostGrowthRate;	//Update Value which allows spawning of mobs
 					}
+					printf("Wave: %d => Cost: %d | C2: %d\n", CWave, WaveTracker[i].WaveCost, CWaveCost);
 					//Generate Waves at avaiable slot 
 					GenerateMobs(&WaveTracker[i], &P);
 					//Edit increment to spawn more mob each waves
@@ -235,9 +227,8 @@ void GenerateWaves(void) {
 					break;
 				}
 			}
-			PrintWaveStats();
 		}
-	}
+	//}
 }
 
 
@@ -417,16 +408,6 @@ void MobTMobCollision(Mob* m) {
 				}
 			}
 			break;
-//			 public static Vector3 MoveTowards(Vector3 current, Vector3 target, float maxDistanceDelta)
-			// {
-			//     Vector3 a = target - current;
-			//     float magnitude = a.magnitude;
-			//     if (magnitude <= maxDistanceDelta || magnitude == 0f)
-			//     {
-			//         return target;
-			//     }
-			//     return current + a / magnitude * maxDistanceDelta;
-			// }
 		}
 		if (0 == status) {
 			m->coor = CP_Vector_Add(m->coor, BasePF);
@@ -437,8 +418,8 @@ void MobTMobCollision(Mob* m) {
 void MobTPlayerCollision(Mob* m, Player* p) {
 	
 	if (CP_Vector_Length(CP_Vector_Subtract(m->coor, p->coor)) <= p->HITBOX) {
-		m->CStats.HP -= p->STATTOTAL.DAMAGE_TOTAL / 4;
-		//p->CURRENT_HP -= m->CStats.Dmg;
+		//m->CStats.HP -= p->STATTOTAL.DAMAGE_TOTAL / 4;
+		p->CURRENT_HP -= m->CStats.Dmg;
 	}
 	if (m->CStats.HP <= 0) {
 		m->Status = 0;

@@ -150,8 +150,6 @@ void map_Update(void) {
 					}
 
 					if (cMob->Status == 0) {
-						cWave->CurrentCount -= 1;
-						MobCount[w] -= 1;
 						insertItemLink(&ItemTracker->ExpLL, CreateItemEffect(cMob->coor, EXP, cMob->Title));
 						float rng = CP_Random_RangeFloat(0, 1);
 						if (rng < 0.33) {
@@ -161,7 +159,7 @@ void map_Update(void) {
 							insertItemLink(&ItemTracker->CoinLL, CreateItemEffect(cMob->coor, COIN, 0));
 						}
 						int sub = P.LEVEL.VAL > 0 ? P.LEVEL.VAL : 2;
-						P.CURRENT_HP += sub;
+						P.CURRENT_HP += sub * 2;
 						cMob = &(Mob) { 0 };
 						continue;
 					}
@@ -177,12 +175,13 @@ void map_Update(void) {
 				cWave->CurrentCount = alive;
 			}
 		}
+		//PrintWaveStats();
 		//PrintItemCount();
 		CheckItems();
 		if (MobCycleTimer % 2 == 0) {
 			float deduct = 1 + P.LEVEL.VAL / 4;
-			deduct = deduct > P.STATTOTAL.MAX_HP_TOTAL * 2 / 3  ? P.STATTOTAL.MAX_HP_TOTAL * 2 / 3 : deduct;
-			//P.CURRENT_HP -= deduct;
+			deduct = deduct > P.STATTOTAL.MAX_HP_TOTAL / 2 ? P.STATTOTAL.MAX_HP_TOTAL / 2 : deduct;
+			P.CURRENT_HP -= deduct;
 		}
 #pragma region
 		static float bulletcd = 99; // Random big number so no cd on first shot

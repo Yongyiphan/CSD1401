@@ -6,6 +6,7 @@
 #include "game.h"
 #include "mainmenu.h"
 #include "audio_manager.h"
+#include "Mob.h"
 
 #define _countof(array) (sizeof(array) / sizeof(array[0]))
 
@@ -81,14 +82,13 @@ void option_screen(int* isPaused) {
 	}
 }
 	
-
 float timer(int reset, int isDead) {
 	float x = CP_System_GetWindowWidth() / 2;
 	float y = CP_System_GetWindowHeight() * 0.8 / 10;
 	
 	float currentElapsedTime = CP_System_GetDt();
 	static float totalElapsedTime = 0;
-	
+	MobCycleTimer = totalElapsedTime;
 	// Draw text of respective boxes at respective coordinates.
 	CP_Settings_TextSize(40.0f);
 	CP_Settings_TextAlignment(CP_TEXT_ALIGN_H_LEFT, CP_TEXT_ALIGN_V_MIDDLE);

@@ -63,15 +63,15 @@ extern int Mob_Img;
 // --------------------------- //
 
 //Mob Stuff
-#define NO_WAVES 4
-#define Spawn_Timer 1
+#define NO_WAVES 5
+#define Spawn_Timer 5
 #define Wave_Timer 30
-#define MaxMobGrowthRate 100
-#define MaxUpperLimit 500
-#define WaveCostGrowthRate 10
+#define MaxMobGrowthRate 30
+#define MaxUpperLimit 1000
+#define WaveCostGrowthRate 2
 #define SpawnAreaOffset 1000
 #define StartMobQuantity 150
-#define MobStatScale 1.02
+#define MobStatScale 1.04
 #define BIGNONO 180
 
 extern int WaveIDQueue[NO_WAVES], MobCount[NO_WAVES], CWave, CWaveCost, CMaxMob;
