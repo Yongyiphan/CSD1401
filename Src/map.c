@@ -28,7 +28,8 @@ WaveTrack *cWave; // pause state for the game when paused.
 //Might be useful variable for Waves Tracking
 int totalWave = 0;
 float mousex, mousey;
-int isPaused, isUpgrade, isDead;
+int isPaused, isUpgrade, isDead, hasWon, init;
+float time;
 
 //Images
 CP_Image background = NULL;
@@ -39,11 +40,12 @@ void map_Init(void) {
 	WHeight = CP_System_GetWindowHeight();
 	WWidth = CP_System_GetWindowWidth();
 	//CP_System_Fullscreen();
-	isPaused = 0, isUpgrade = 0, isDead = 0;
+	isPaused = 0, isUpgrade = 0, isDead = 0, hasWon = 0;
 	sfxVolume = 0.7, bgmVolume = 0.7;
 
 	// initialize the timer to start from 0 
-	timer(1, isPaused);
+	init = 1;
+	time = timer(isPaused, init);
 
 	background = CP_Image_Load("./Assets/background.png");
 	dark_green = CP_Color_Create(50, 50, 0, 255);
@@ -61,15 +63,20 @@ void map_Init(void) {
 }
 
 void map_Update(void) {
-	
+	init = 0;
+	time = timer(isPaused, init);
 	// Update player stats, inclusive of base stats and multipliers.
 	Player_Stats_Update(&P);
+
+// IsPaused conditions
 #pragma region	
 	if (isPaused) {
 		// Opens up the Upgrade Screen for players to pick their upgrades
 		if (isUpgrade) {
 			upgrade_screen(&P, &isUpgrade, &isPaused);
-			//printf("Player max hp: %f\n", P.MAX_HP);
+		}
+		else if (hasWon == 1) {
+			Player_Win_Condition(&isPaused, &hasWon);
 		}
 		// Opens up the Pause Screen
 		else if (P.CURRENT_HP > 0) {
@@ -78,7 +85,7 @@ void map_Update(void) {
 		// temporarily paused the death_screen function to allow the game to continue running
 		if (isDead) {
 			//float elapsedTime = timer(0);
-			death_screen(timer(0, isDead));
+			death_screen(timer(isDead, init));
 		}
 	
 		// Resume the game
@@ -91,33 +98,14 @@ void map_Update(void) {
 			isPaused = 1;
 			isUpgrade = 0;
 		}
-		// Increase speed of the player
-		//if (CP_Input_KeyTriggered(KEY_H)){
-		//	P.STATMULT.SPEED_MULT /= 1.1f;
-		//}
-		//if (CP_Input_KeyTriggered(KEY_M)){
-		//	P.STATMULT.PICKUP_MULT *= 1.1;
-		//}
-		// Open up the Upgrade Screen
-		/*if (CP_Input_KeyTriggered(KEY_U) && isUpgrade == 0) {
-			isUpgrade = 1;
-			isPaused = 1;
-		}*/
-		// Testing for leveling up
-		if (CP_Input_KeyDown(KEY_L)) {
-			P.LEVEL.P_EXP += 5;
-			level_up(&P.LEVEL);
-		}
-		// Manually control the HP of the player for testing
-		if (CP_Input_KeyDown(KEY_Q)) {
-			P.CURRENT_HP -= 4;
-		}
-		else if (CP_Input_KeyDown(KEY_E)) {
-			P.CURRENT_HP += 4;
-		}
 		if (P.CURRENT_HP <= 0) {
 			isDead = 1;
 			isPaused = 1;
+		}
+		// If the game has proceeded over specified time
+		if (timer(isPaused, init) >= 5.0 && hasWon == 0) {
+			isPaused = 1;
+			hasWon = 1;
 		}
 
 #pragma endregion
@@ -221,7 +209,7 @@ void map_Update(void) {
 		static btype = 2;
 
 		//printf("MobCount: %d |\tFPS: %f \n", MobC, CP_System_GetFrameRate());
-
+#pragma region
 		// Bullet CD Related stuff below
 		float bulletangle = 0;
 		static float bulletcd1 = 99, bulletcd2 = 99, bulletcd3 = 99, bulletcd4 = 99; // Random big number so no cd on first shot
@@ -322,11 +310,12 @@ void map_Update(void) {
 		
 			
 		BulletDraw();
+#pragma endregion
 		UpdateAppliedEffects(NULL);
 		DrawAppliedEffects();
 		CP_Settings_ResetMatrix();
 		// Time, returns and draws text
-		timer(0, isPaused);
+		Draw_Time(time);
 	}
 
 	// Shows the upgrade screen whenever the player levels up.
