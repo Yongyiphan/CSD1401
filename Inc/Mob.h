@@ -31,12 +31,13 @@ typedef struct Mob {
 	MobStats BaseStats;
 	MobStats CStats;
 	//float x, y;
-	CP_Vector coor;
+	CP_Vector coor, dest;
 	int Status; 
 	int AnimationCycle;
 	int w, h;
 	int dmginstance;
 	//Dead = 0 | Alive = 1
+	int boost, jump;
 } Mob;
 
 static const struct Mob EmptyMob;
@@ -62,15 +63,16 @@ extern int Mob_Img;
 // --------------------------- //
 
 //Mob Stuff
-#define NO_WAVES 4
-#define Spawn_Timer 1
-#define Wave_Timer 10
-#define MaxMobGrowthRate 20
-#define MaxUpperLimit 200
-#define WaveCostGrowthRate 10
+#define NO_WAVES 5
+#define Spawn_Timer 5
+#define Wave_Timer 30
+#define MaxMobGrowthRate 30
+#define MaxUpperLimit 1000
+#define WaveCostGrowthRate 2
 #define SpawnAreaOffset 1000
 #define StartMobQuantity 150
-#define MobStatScale 1.02
+#define MobStatScale 1.04
+#define BIGNONO 180
 
 extern int WaveIDQueue[NO_WAVES], MobCount[NO_WAVES], CWave, CWaveCost, CMaxMob;
 extern WaveTrack WaveTracker[NO_WAVES];
@@ -125,14 +127,12 @@ float squareDist(float one, float two);
 
 
 
-
-
-
-
-
-
-
-
-
-
 #endif
+
+
+
+
+
+
+
+

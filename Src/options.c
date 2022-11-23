@@ -49,6 +49,7 @@ void options_Update(void)
 		CP_Settings_Fill(white);
 		CP_Font_DrawText(text[i], (width / 4), (center.y) - (height / 10) + (height / 10 * i));
 		CP_Settings_Fill(grey);
+		CP_Settings_StrokeWeight(5.0f);
 		// rectangle width: rectWidth;
 		CP_Graphics_DrawRectAdvanced(center.x, (center.y) - (height / 10) + (height / 10 * i), rectWidth, rectHeight, 0, 0);
 	}

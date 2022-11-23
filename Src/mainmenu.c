@@ -6,6 +6,8 @@
 #include "upgrades.h"
 #include "options.h"
 #include "audio_manager.h"
+#include "credits.h"
+#include "instructions.h"
 
 #define WINDOWSIZEX 1300
 #define WINDOWSIZEY 900
@@ -19,8 +21,6 @@ float width, height;
 float songLength = 500;
 int isPlaying = 0;
 float SFX_vol, BGM_vol;
-
-
 void Main_Menu_Init(void)
 {
 	title = CP_Image_Load("./Assets/Title.png");
@@ -117,7 +117,7 @@ void Main_Menu_Update()
 	if (CP_Input_KeyDown(KEY_ENTER))
 	{
 		CP_Engine_SetNextGameState(map_Init, map_Update, map_Exit);
-		}
+	}
 	if (CP_Input_KeyTriggered(KEY_ESCAPE)) {
 		CP_Engine_Terminate();
 	}	
