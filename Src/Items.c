@@ -7,6 +7,7 @@
 #include "player.h"
 #include "Map.h"
 #include <assert.h>
+#include "audio_manager.h"
 /*
 @brief		Function that initialise array with empty items
 @params		tracker	-> Contains stats for tracking Items
@@ -132,7 +133,9 @@ void IAffectPlayer(Item* item, int method) {
 	float boost = item->Modifier * method;
 	switch (item->Type) {
 		case StatBoost://Affect Base Stats
+		//Audio_Pickup_Item();
 		switch (item->AffectedBaseStat) {
+			
 			case 0://HP
 				P.CURRENT_HP += (item->Modifier * 1000);
 				break;
@@ -147,6 +150,7 @@ void IAffectPlayer(Item* item, int method) {
 				break;
 				P.STATMULT.PROJECTILE_SPD_MULT += boost;
 			case 4://Bullet Speed
+
 				break;
 			case 5:
 				P.STATMULT.MAX_HP_MULT += boost;
@@ -154,8 +158,8 @@ void IAffectPlayer(Item* item, int method) {
 		}
 		case EXP:
 			P.LEVEL.P_EXP += item->Modifier;
-			//level_up(&P.LEVEL);
-			//printf("Item x: %f | y: %f\n", item->x, item->y);
+			//Audio_Pickup_EXP();
+			
 			break;
 
 		case BULLETType:

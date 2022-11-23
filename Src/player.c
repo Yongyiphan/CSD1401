@@ -9,6 +9,7 @@
 #include "Items.h"
 #include "mainmenu.h"
 #include "upgrades.h"
+#include "audio_manager.h"
 
 
 // Player hitbox is a circle
@@ -269,6 +270,7 @@ void death_screen(float totalElapsedTime) {
 		if (IsAreaClicked(middle.x, middle.y, width, height, CP_Input_GetMouseX(), CP_Input_GetMouseY())) {
 			FreeMobResource();
 			FreeItemResource();
+			
 			map_Init();
 		}
 		if (IsAreaClicked(middle.x, middle.y + height + padding, width, height, CP_Input_GetMouseX(), CP_Input_GetMouseY())) {
@@ -286,6 +288,7 @@ int level_up(LEVEL* level) {
 		level->EXP_REQ = level->VAL % Level_Req_Jump == 0 ? level->EXP_REQ * Level_Jump_Perc : level->EXP_REQ * Level_Up_Perc;
 		level->VAL += 1;
 
+		//Audio_LevelUp();
 		return 1;
 	}
 	return 0;

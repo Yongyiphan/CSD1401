@@ -9,6 +9,7 @@
 #include "Mob.h"
 #include "bullet.h"
 #include "Items.h"
+#include "audio_manager.h"
 
 
 #define MAP_SIZEX 1300
@@ -51,8 +52,9 @@ void map_Init(void) {
 	dark_green = CP_Color_Create(50, 50, 0, 255);
 	CP_Graphics_ClearBackground(dark_green);
 	// Initialize the coordinates and stats of the player
+	Audio_Init();
+	Audio_Play_Music(In_Game);
 
-	
 	CreateWaveTracker();
 	CreateItemTracker();
 	MobLoadImage();
@@ -261,25 +263,35 @@ void map_Update(void) {
 			if (bulletcd1 == 0) {
 				// Default bullet is always active
 				BulletShoot(P.x, P.y, bulletangle, PBULLET_NORMAL, BULLET_PLAYER);
+				//Audio_Bullet();
 			}
 
 			if (bulletcd2 > 1 / P.STATTOTAL.ATK_SPEED_TOTAL) { // Fixed value is the base cd timer
 				bulletcd2 = 0;
 			}
-			if ((Bulletlegal(2) == 1 || legal2 == 1) && bulletcd2 == 0)
+			if ((Bulletlegal(2) == 1 || legal2 == 1) && bulletcd2 == 0) {
 				BulletShoot(P.x, P.y, bulletangle, PBULLET_SPILT, BULLET_PLAYER);
+				//Audio_Bullet();
+			}
+				
 
 			if (bulletcd3 > 3 / P.STATTOTAL.ATK_SPEED_TOTAL) { // Fixed value is the base cd timer
 				bulletcd3 = 0;
 			}
-			if ((Bulletlegal(3) == 1 || legal3 == 1) && bulletcd3 == 0)
+			if ((Bulletlegal(3) == 1 || legal3 == 1) && bulletcd3 == 0) {
 				BulletShoot(P.x, P.y, bulletangle, PBULLET_ROCKET, BULLET_PLAYER);
+				//Audio_Bullet();
+			}
+				
 
 			if (bulletcd4 > 2 / P.STATTOTAL.ATK_SPEED_TOTAL) { // Fixed value is the base cd timer
 				bulletcd4 = 0;
 			}
-			if ((Bulletlegal(4) == 1 || legal4 == 1) && bulletcd4 == 0)
+			if ((Bulletlegal(4) == 1 || legal4 == 1) && bulletcd4 == 0) {
 				BulletShoot(P.x, P.y, bulletangle, PBULLET_HOMING, BULLET_PLAYER);
+				//Audio_Bullet();
+			}
+				
 
 		}
 		if (CP_Input_MouseDown(MOUSE_BUTTON_LEFT) == FALSE && bulletcd1 != 99) // Keeps bulletcd running even when not on leftclick
@@ -339,6 +351,7 @@ void map_Exit(void) {
 	
 	FreeItemResource();
 	printf("Coin Gained: %d", P.STAT.Coin_Gained);
+	Audio_Exit();
 	
 	//free(ItemTracker);
 }

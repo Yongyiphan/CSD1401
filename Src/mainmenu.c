@@ -36,8 +36,10 @@ void Main_Menu_Init(void)
 	width = CP_System_GetWindowWidth();
 	height = CP_System_GetWindowHeight();
 	Audio_Init();
+	
 	// Initialize sound values to be 70% of max volume
 	SFX_vol = 0.7, BGM_vol = 0.7;
+	Audio_Play_Music(Main_Menu);
 }
 
 void Main_Menu_Update()
@@ -65,8 +67,9 @@ void Main_Menu_Update()
 	//click play to go to map
 	if (CP_Input_MouseTriggered(MOUSE_BUTTON_LEFT))
 	{
-		if (IsAreaClicked(width / 2, (height / 2) - (height / 10) + (height / 10 * 0), (height / 5), ((height / 6) / 2), CP_Input_GetMouseX(), CP_Input_GetMouseY()))
-		{
+		if (IsAreaClicked(width / 2, (height / 2) - (height / 10) + (height / 10 * 0), (height / 5), ((height / 6) / 2), CP_Input_GetMouseX(), CP_Input_GetMouseY())) {
+		
+			
 			CP_Engine_SetNextGameState(map_Init, map_Update, map_Exit);
 			//CP_Sound_Free(&BGM);
 
@@ -117,5 +120,5 @@ void Main_Menu_Update()
 
 void Main_Menu_Exit()
 {
-
+	Audio_Exit();
 }
