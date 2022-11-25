@@ -21,8 +21,5 @@ void Audio_Play_Music(int sound);
 
 //void Audio_Stop_MainMenu_BGM(void);
 
-//void Audio_InGame_BGM(void);
-
-//void Audio_Stop_InGame_BGM(void);
 
 void Audio_Exit(void);

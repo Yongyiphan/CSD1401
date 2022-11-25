@@ -21,8 +21,8 @@ void Audio_Init(void) {
 	pickup_item_sound = CP_Sound_Load("./Assets/Sound/powerUp.wav");
 	bullet_sound = CP_Sound_Load("./Assets/Sound/laserShoot.wav");
 	level_up_sound = CP_Sound_Load("./Assets/Sound/levelUp.wav");
-	main_bgm_music = CP_Sound_Load("./Assets/Sound/mainmenuBGM.mp3");
-	ingame_bgm_music = CP_Sound_Load("./Assets/Sound/ingameBGM.mp3");
+	main_bgm_music = CP_Sound_Load("./Assets/Sound/mainmenu_music.mp3");
+	ingame_bgm_music = CP_Sound_Load("./Assets/Sound/bgm_music.mp3");
 }
 
 void Audio_Play_Music(int sound) {
@@ -41,46 +41,30 @@ void Audio_Play_Music(int sound) {
 }
 
 void Audio_ButtonClick(void) {
-	CP_Sound_PlayAdvanced(button_click, SFX_vol, 1.0f, FALSE, SFX);
+	if (button_click)
+		CP_Sound_PlayAdvanced(button_click, SFX_vol, 1.0f, FALSE, SFX);
 }
 
 void Audio_Pickup_EXP(void) {
-	CP_Sound_PlayAdvanced(pickup_exp_sound, SFX_vol, 1.0f, FALSE, SFX);
+	if (pickup_exp_sound)
+		CP_Sound_PlayAdvanced(pickup_exp_sound, SFX_vol, 1.0f, FALSE, SFX);
 }
 
 void Audio_Pickup_Item(void) {
-	CP_Sound_PlayAdvanced(button_click, SFX_vol, 1.0f, FALSE, SFX);
+	if (pickup_item_sound)
+		CP_Sound_PlayAdvanced(button_click, SFX_vol, 1.0f, FALSE, SFX);
 }
 
 void Audio_Bullet(void) {
-	CP_Sound_PlayAdvanced(bullet_sound, SFX_vol, 1.0f, FALSE, SFX);
+	if (bullet_sound)
+		CP_Sound_PlayAdvanced(bullet_sound, SFX_vol, 1.0f, FALSE, SFX);
 }
 
 void Audio_LevelUp(void){
-	CP_Sound_PlayAdvanced(level_up_sound, SFX_vol, 1.0f, FALSE, SFX);
+	if (level_up_sound)
+		CP_Sound_PlayAdvanced(level_up_sound, SFX_vol, 1.0f, FALSE, SFX);
 }
 
-void Audio_MainMenu_BGM(void) {
-	static int isPlayed = 0;
-
-	if (isPlayed == 0) {
-		CP_Sound_PlayAdvanced(main_bgm_music, BGM_vol, 1.0f, TRUE, MUSIC);
-		isPlayed = 1;
-	}
-	
-}
-
-void Audio_Stop_MainMenu_BGM(void) {
-	CP_Sound_StopGroup(MUSIC);
-}
-
-void Audio_Stop_InGame_BGM(void) {
-	CP_Sound_StopGroup(MUSIC);
-}
-
-void Audio_InGame_BGM(void) {
-	CP_Sound_PlayAdvanced(ingame_bgm_music, BGM_vol, 1.0f, TRUE, MUSIC);
-}
 
 
 void Audio_Exit(void) {

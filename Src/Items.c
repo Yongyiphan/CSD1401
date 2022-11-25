@@ -133,7 +133,7 @@ void IAffectPlayer(Item* item, int method) {
 	float boost = item->Modifier * method;
 	switch (item->Type) {
 		case StatBoost://Affect Base Stats
-		//Audio_Pickup_Item();
+		Audio_Pickup_Item();
 		switch (item->AffectedBaseStat) {
 			
 			case 0://HP

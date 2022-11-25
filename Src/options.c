@@ -3,6 +3,7 @@
 #include "utils.h"
 #include "mainmenu.h"
 #include "options.h"
+#include "audio_manager.h"
 
 #define WINDOWSIZEX 1300
 #define WINDOWSIZEY 900
@@ -28,7 +29,8 @@ void options_Init(void)
 	rectWidth = width / 3;
 	rectHeight = height / 16;
 	center = CP_Vector_Set(width / 2, height / 2);
-	SFX_length = BGM_length = rectWidth * (SFX_vol);
+	SFX_length = rectWidth * (SFX_vol);
+	BGM_length = rectWidth * BGM_vol;
 }
 
 void options_Update(void)
@@ -70,6 +72,7 @@ void options_Update(void)
 		{
 			BGM_length = CP_Input_GetMouseX() - (rectWidth);
 			BGM_vol = BGM_length / rectWidth;
+			CP_Sound_SetGroupVolume(MUSIC, BGM_vol);
 			//*bgmLen = BGM_length / rectWidth;
 		}
 	}

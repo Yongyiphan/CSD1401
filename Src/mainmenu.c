@@ -38,12 +38,13 @@ void Main_Menu_Init(void)
 	Audio_Init();
 	
 	// Initialize sound values to be 70% of max volume
-	SFX_vol = 0.7, BGM_vol = 0.7;
+	SFX_vol = 0.7, BGM_vol = 0.5;
 	Audio_Play_Music(Main_Menu);
 }
 
 void Main_Menu_Update()
 {
+	
 	CP_Image_Draw(title, width / 2, height / 5, width / 3, height / 4, 255);
 	CP_Image_Draw(zombie, width / 2 + width / 3, height / 2, width / 4, height / 3, 255);
 	CP_Image_Draw(zombie, width / 2 - width / 3, height / 2, width / 4, height / 3, 255);
