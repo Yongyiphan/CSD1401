@@ -12,7 +12,8 @@ CP_Sound level_up_sound;
 CP_Sound main_bgm_music;
 CP_Sound ingame_bgm_music;
 
-enum Sound_group { MUSIC, SFX };
+
+
 
 void Audio_Init(void) {
 	button_click = CP_Sound_Load("./Assets/Sound/click.wav");
@@ -20,38 +21,52 @@ void Audio_Init(void) {
 	pickup_item_sound = CP_Sound_Load("./Assets/Sound/powerUp.wav");
 	bullet_sound = CP_Sound_Load("./Assets/Sound/laserShoot.wav");
 	level_up_sound = CP_Sound_Load("./Assets/Sound/levelUp.wav");
-	main_bgm_music = CP_Sound_Load("./Assets/Sound/mainmenuBGM.wav");
-	ingame_bgm_music = CP_Sound_Load("./Assets/Sound/ingameBGM.wav");
+	main_bgm_music = CP_Sound_Load("./Assets/Sound/mainmenu_music.mp3");
+	ingame_bgm_music = CP_Sound_Load("./Assets/Sound/bgm_music.mp3");
+}
+
+void Audio_Play_Music(int sound) {
+	CP_Sound_StopGroup(MUSIC);
+	switch (sound) 
+	{
+	case Main_Menu:
+		if (main_bgm_music)
+			CP_Sound_PlayAdvanced(main_bgm_music, BGM_vol, 1.0f, TRUE, MUSIC);
+		break;
+	case In_Game:
+		if (ingame_bgm_music)
+			CP_Sound_PlayAdvanced(ingame_bgm_music, BGM_vol, 1.0f, TRUE, MUSIC);
+		break;
+	}
 }
 
 void Audio_ButtonClick(void) {
-	CP_Sound_PlayAdvanced(button_click, SFX_vol, 1.0f, FALSE, MUSIC);
+	if (button_click)
+		CP_Sound_PlayAdvanced(button_click, SFX_vol, 1.0f, FALSE, SFX);
 }
 
 void Audio_Pickup_EXP(void) {
-
-	CP_Sound_PlayAdvanced(pickup_exp_sound, SFX_vol, 1.0f, TRUE, MUSIC);
+	if (pickup_exp_sound)
+		CP_Sound_PlayAdvanced(pickup_exp_sound, SFX_vol, 1.0f, FALSE, SFX);
 }
 
 void Audio_Pickup_Item(void) {
-	CP_Sound_PlayAdvanced(button_click, SFX_vol, 1.0f, TRUE, MUSIC);
+	if (pickup_item_sound)
+		CP_Sound_PlayAdvanced(button_click, SFX_vol, 1.0f, FALSE, SFX);
 }
 
 void Audio_Bullet(void) {
-	CP_Sound_PlayAdvanced(bullet_sound, SFX_vol, 1.0f, TRUE, MUSIC);
+	if (bullet_sound)
+		CP_Sound_PlayAdvanced(bullet_sound, SFX_vol, 1.0f, FALSE, SFX);
 }
 
 void Audio_LevelUp(void){
-	CP_Sound_PlayAdvanced(level_up_sound, SFX_vol, 1.0f, TRUE, MUSIC);
+	if (level_up_sound)
+		CP_Sound_PlayAdvanced(level_up_sound, SFX_vol, 1.0f, FALSE, SFX);
 }
 
-void Audio_MainMenu_BGM(void) {
-	CP_Sound_PlayAdvanced(main_bgm_music, BGM_vol, 1.0f, TRUE, MUSIC);
-}
 
-void Audio_InGame_BGM(void) {
-	CP_Sound_PlayAdvanced(ingame_bgm_music, BGM_vol, 1.0f, TRUE, MUSIC);
-}
+
 void Audio_Exit(void) {
 	CP_Sound_Free(button_click);
 	CP_Sound_Free(pickup_exp_sound);

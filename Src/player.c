@@ -9,6 +9,7 @@
 #include "Items.h"
 #include "mainmenu.h"
 #include "upgrades.h"
+#include "audio_manager.h"
 
 
 // Player hitbox is a circle
@@ -96,6 +97,56 @@ void Player_Show_Coins(void) {
 	CP_Settings_TextSize(60.0f);
 	CP_Font_DrawText(buffer, printX - 20, printY + 30);
 	CP_Settings_TextSize(30.0f);
+}
+
+void Player_Win_Condition(int *isPaused, int *hasWon) {
+	float screen_width = (float)CP_System_GetWindowWidth();
+	float screen_height = (float)CP_System_GetWindowHeight();
+	CP_Vector middle = CP_Vector_Set(screen_width / 2, screen_height / 2);
+
+	if (*hasWon != 1) {
+		return;
+	}
+	float width = 300, height = 60, padding = 30;
+	CP_Settings_TextSize(30.0f);
+	CP_Settings_TextAlignment(CP_TEXT_ALIGN_H_CENTER, CP_TEXT_ALIGN_V_MIDDLE);
+
+	CP_Settings_RectMode(CP_POSITION_CENTER);
+	CP_Settings_NoStroke();
+
+	// Options background
+	CP_Settings_Fill(CP_Color_Create(80, 80, 100, 120));
+	CP_Graphics_DrawRectAdvanced(middle.x, middle.y, screen_width * 4.0 / 10, screen_height * 8.0 / 10, 0, 20);
+
+	// Draw out option boxes
+	CP_Settings_Fill(CP_Color_Create(255, 100, 100, 255));
+	CP_Graphics_DrawRect(middle.x, middle.y, width, height);
+	
+
+	CP_Settings_Fill(CP_Color_Create(0, 0, 0, 255));
+	// The buttons to resume game
+	char* textArr[] = { "Congratulations!", "You have completed the game!", "However, the real fun only starts now..." };
+
+	float textPadding = 80;
+	for (int i = 0, j = 3; i < _countof(textArr); i++, j--) {
+		if (i == 0) {
+			CP_Settings_TextSize(50.0f);
+			CP_Font_DrawText(textArr[i], middle.x, middle.y - textPadding * j);
+			CP_Settings_TextSize(30.0f);
+			continue;
+		}
+		CP_Font_DrawText(textArr[i], middle.x, middle.y - textPadding * j);
+	}
+	
+	CP_Font_DrawText("Resume", middle.x, middle.y);
+	
+	if (CP_Input_MouseTriggered(MOUSE_BUTTON_LEFT)) {
+		if (IsAreaClicked(middle.x, middle.y, width, height, CP_Input_GetMouseX(), CP_Input_GetMouseY())) {
+			*isPaused = 0;
+			*hasWon = 2;	// any number other than 1 and 0
+		}
+	}
+	CP_Settings_Stroke(CP_Color_Create(0, 0, 0, 255));
 }
 
 /*
@@ -190,14 +241,12 @@ void death_screen(float totalElapsedTime) {
 	CP_Graphics_DrawRect(middle.x, middle.y, width, height);
 	CP_Graphics_DrawRect(middle.x, middle.y + height + padding, width, height);
 
-	// Align text to the center vertically and horizontally
-	CP_TEXT_ALIGN_HORIZONTAL centerHor = CP_TEXT_ALIGN_H_CENTER;
-	CP_TEXT_ALIGN_VERTICAL centerVert = CP_TEXT_ALIGN_V_MIDDLE;
+	
 	CP_Settings_Fill(CP_Color_Create(0, 0, 0, 255));		// text is black
-
+	// Align text to the center vertically and horizontally
 	// Draw text of respective boxes at respective coordinates.
 	CP_Settings_TextSize(40.0f);
-	CP_Settings_TextAlignment(centerHor, centerVert);
+	CP_Settings_TextAlignment(CP_TEXT_ALIGN_H_CENTER, CP_TEXT_ALIGN_V_MIDDLE);	
 
 	char buffer[30] = { 0 };
 	// Print out the words shown
@@ -221,6 +270,7 @@ void death_screen(float totalElapsedTime) {
 		if (IsAreaClicked(middle.x, middle.y, width, height, CP_Input_GetMouseX(), CP_Input_GetMouseY())) {
 			FreeMobResource();
 			FreeItemResource();
+			
 			map_Init();
 		}
 		if (IsAreaClicked(middle.x, middle.y + height + padding, width, height, CP_Input_GetMouseX(), CP_Input_GetMouseY())) {
@@ -238,6 +288,7 @@ int level_up(LEVEL* level) {
 		level->EXP_REQ = level->VAL % Level_Req_Jump == 0 ? level->EXP_REQ * Level_Jump_Perc : level->EXP_REQ * Level_Up_Perc;
 		level->VAL += 1;
 
+		//Audio_LevelUp();
 		return 1;
 	}
 	return 0;
@@ -255,7 +306,7 @@ void upgrade_screen(Player* P, int* isUpgrade, int* isPaused) {
 	float upgrades_height = screen_height * 4.0 / 10;
 
 	float padding = 40;
-	int numBoxes_hor = 3, numBoxes_vert = 2;
+	int numBoxes_hor = 3, numBoxes_vert = 2, isClicked = FALSE;
 	// Apply the text boxes' width and height according to the number of boxes, padding,
 	// and background width and height.
 	const float box_width = ((background_width - (numBoxes_hor + 1) * padding)) / (float) numBoxes_hor;
@@ -324,8 +375,10 @@ void upgrade_screen(Player* P, int* isUpgrade, int* isPaused) {
 					else if (strcmp(name[countStats % 6], "Attack Speed") == 0)
 						P->STATMULT.ATK_SPEED_MULT += 0.05;
 
+					isClicked = TRUE;
 					*isPaused = 0;
 					*isUpgrade = 0;
+					
 				}
 			}
 				
@@ -336,10 +389,10 @@ void upgrade_screen(Player* P, int* isUpgrade, int* isPaused) {
 		currentX = background_topX, currentY = background_topY;
 		currentY += box_height + padding;
 	}
-	if (CP_Input_KeyTriggered(KEY_U)) {
+	/*if (isClicked && Timer_CountDown()) {
 		*isPaused = 0;
 		*isUpgrade = 0;
-	}
+	}*/
 
 	// Remove rectangle align-center and add stroke back in
 	CP_Settings_RectMode(CP_POSITION_CORNER);

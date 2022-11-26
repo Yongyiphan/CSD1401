@@ -80,6 +80,8 @@ void Player_Show_Stats(Player player);
 
 void Player_Show_Coins(void);
 
+void Player_Win_Condition(int* isPaused, int* hasWon);
+
 void show_healthbar(Player* player);
 
 void show_level(Player* player);

@@ -19,8 +19,12 @@ float point_point_angle(float, float, float, float);
 
 int IsAreaClicked(float area_center_x, float area_center_y, float area_width, float area_height, float click_x, float click_y);
 
-float timer(int reset, int isPaused);
+// Reinitialize the timer with init
+float timer(int isPaused, int init);
 
+int Timer_CountDown(void);
+
+void Draw_Time(float totalElapsedTime);
 
 #endif
 

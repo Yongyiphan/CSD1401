@@ -22,7 +22,7 @@ int IsAreaClicked(float area_center_x, float area_center_y, float area_width, fl
 	// if x-coordinate of click is within left and right of the area, and 
 	// y-coordinate is within top and bottom of the area, then return 1. If not, return 0.
 	if (leftLimit < click_x && click_x < rightLimit && topLimit < click_y && click_y < bottomLimit) {
-		//Audio_ButtonClick();
+		Audio_ButtonClick();
 		return 1;
 	}
 	return 0;
@@ -67,11 +67,7 @@ void option_screen(int* isPaused) {
 	CP_Settings_Stroke(CP_Color_Create(0, 0, 0, 255));
 
 
-	if (CP_Input_MouseClicked()) {
-		/*if (IsAreaClicked(middle.x, middle.y - height - padding, width, height, CP_Input_GetMouseX(), CP_Input_GetMouseY())) {
-			upgrade_screen(P, isMenu);
-		}*/
-
+	if (CP_Input_MouseTriggered(MOUSE_BUTTON_LEFT)) {
 		if (IsAreaClicked(middle.x, middle.y, width, height, CP_Input_GetMouseX(), CP_Input_GetMouseY())) {
 			*isPaused = 0;
 		}
@@ -81,32 +77,58 @@ void option_screen(int* isPaused) {
 		}
 	}
 }
-	
-float timer(int reset, int isDead) {
-	float x = CP_System_GetWindowWidth() / 2;
-	float y = CP_System_GetWindowHeight() * 0.8 / 10;
+
+
+float timer(int isPaused, int init) {
 	
 	float currentElapsedTime = CP_System_GetDt();
 	static float totalElapsedTime = 0;
-	MobCycleTimer = totalElapsedTime;
+	
+	if (init) {
+		totalElapsedTime = 0;
+	}
+	if (!isPaused) {
+		totalElapsedTime += currentElapsedTime;
+		//CP_Font_DrawTextBox("Upgrades", middle.x, middle.y - height - padding, width);
+	}
+	return totalElapsedTime;
+}
+
+// Prints out a countdown timer in the middle of the screen
+// If timer has reached 0, return TRUE. Else, return FALSE.
+int Timer_CountDown(void) {
+	CP_Vector middle = CP_Vector_Set(CP_System_GetWindowWidth() / 2.0, CP_System_GetWindowHeight() / 2.0);
+	float currentElapsedTime = CP_System_GetDt();
+	static float countDownTime = 3;
+
+	CP_Settings_TextAlignment(CP_TEXT_ALIGN_H_LEFT, CP_TEXT_ALIGN_V_MIDDLE);
+	countDownTime -= currentElapsedTime;
+	char buffer[16] = { 0 };
+	sprintf_s(buffer, _countof(buffer), "%.f", countDownTime);
+	CP_Font_DrawText(buffer, middle.x, middle.y);
+
+	if (countDownTime <= 0) {
+		countDownTime = 3;
+		return TRUE;
+	}
+	return FALSE;
+}
+
+void Draw_Time(float totalElapsedTime) {
+	float x = CP_System_GetWindowWidth() / 2;
+	float y = CP_System_GetWindowHeight() * 0.8 / 10;
+
 	// Draw text of respective boxes at respective coordinates.
 	CP_Settings_TextSize(40.0f);
 	CP_Settings_TextAlignment(CP_TEXT_ALIGN_H_LEFT, CP_TEXT_ALIGN_V_MIDDLE);
 	CP_Settings_Fill(CP_Color_Create(255, 255, 255, 255));
 
-	if (reset) {
-		totalElapsedTime = 0;
-	}
-	if (!isDead) {
-		totalElapsedTime += currentElapsedTime;
-		//CP_Font_DrawTextBox("Upgrades", middle.x, middle.y - height - padding, width);
-		char buffer[16] = { 0 };
-		sprintf_s(buffer, _countof(buffer), "%.2f", totalElapsedTime);
-		CP_Font_DrawText("Time: ", x - 50, y);
-		CP_Font_DrawText(buffer, x + 50, y);
-	}
-	return totalElapsedTime;
+	char buffer[16] = { 0 };
+	sprintf_s(buffer, _countof(buffer), "%.2f", totalElapsedTime);
+	CP_Font_DrawText("Time: ", x - 50, y);
+	CP_Font_DrawText(buffer, x + 50, y);
 }
+
 float point_point_angle(float x1, float y1, float x2, float y2)
 {
 	float tempx=0, tempy=0, temp=0;
