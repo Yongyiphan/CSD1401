@@ -86,7 +86,7 @@ Item* CreateItemEffect(CP_Vector coor, int exp, int expVal) {
 	case EXP:
 		newItem->AffectedBaseStat = expVal;
 		newItem->Duration = -1;
-		newItem->Modifier = ((float) MobCycleTimer / (P.LEVEL.VAL + 1) + P.LEVEL.VAL) * (expVal+1);
+		newItem->Modifier = 5 * (expVal + 1) + (float)MobCycleTimer;
 		newItem->Hitbox = 25;
 
 		break;

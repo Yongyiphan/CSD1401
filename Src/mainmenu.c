@@ -88,11 +88,8 @@ void Main_Menu_Update()
 		if (CP_Input_MouseTriggered(MOUSE_BUTTON_LEFT))
 		{
 			if (IsAreaClicked(width / 2, (height / 2) - (height / 10) + (height / 10 * 0), (height / 5), ((height / 6) / 2), CP_Input_GetMouseX(), CP_Input_GetMouseY())) {
-
-
 				CP_Engine_SetNextGameState(map_Init, map_Update, map_Exit);
 				//CP_Sound_Free(&BGM);
-
 			}
 			//click upgrades to go to upgrades screen
 			if (IsAreaClicked(width / 2, (height / 2) - (height / 10) + (height / 10 * 1), (width / 5), ((height / 6) / 2), CP_Input_GetMouseX(), CP_Input_GetMouseY()))
@@ -124,20 +121,11 @@ void Main_Menu_Update()
 	{
 		CP_Engine_SetNextGameState(map_Init, map_Update, map_Exit);
 	}
-	if (CP_Input_KeyTriggered(KEY_ESCAPE)) {
-		CP_Engine_Terminate();
-	}
+	//if (CP_Input_KeyTriggered(KEY_ESCAPE)) {
+	//	CP_Engine_Terminate();
+	//}
 }
 
-//void confirm_exit(int exit) 
-//{
-//	CP_Settings_Fill(grey);
-//	CP_Graphics_DrawRectAdvanced(width / 2, height / 2, width / 3, height / 3, 0, 20);
-//	if (CP_Input_KeyDown(KEY_ESCAPE))
-//	{
-//		exit = 0;
-//	}
-//}
 
 void Main_Menu_Exit()
 {

@@ -202,8 +202,6 @@ void map_Update(void) {
 				cWave->CurrentCount = alive;
 			}
 		}
-		//PrintWaveStats();
-		//PrintItemCount();
 		CheckItems();
 		if (MobCycleTimer % 2 == 0) {
 			float deduct = 1 + P.LEVEL.VAL / 4;
@@ -211,8 +209,6 @@ void map_Update(void) {
 			P.CURRENT_HP -= deduct;
 		}
 #pragma region
-		//printf("MobCount: %d |\tFPS: %f \n", MobC, CP_System_GetFrameRate());
-
 		// Bullet CD stuff below
 		float bulletangle = 0;
 		// Large value so all bullet can shoot from the start with no cd
@@ -288,9 +284,6 @@ void map_Update(void) {
 	show_healthbar(&P);
 	show_level(&P);
 
-	if (CP_Input_KeyTriggered(KEY_SPACE))
-		CP_Engine_Terminate();
-	
 }
 
 void map_Exit(void) {
