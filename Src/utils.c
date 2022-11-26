@@ -91,6 +91,7 @@ float timer(int isPaused, int init) {
 		totalElapsedTime += currentElapsedTime;
 		//CP_Font_DrawTextBox("Upgrades", middle.x, middle.y - height - padding, width);
 	}
+	MobCycleTimer = (int)totalElapsedTime;
 	return totalElapsedTime;
 }
 

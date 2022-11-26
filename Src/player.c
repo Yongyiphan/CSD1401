@@ -200,20 +200,24 @@ void show_level(Player* P) {
 	CP_Graphics_DrawRectAdvanced(x_coord, y_coord, rectWidth, rectHeight, 0, 0);
 
 	CP_Settings_Fill(CP_Color_Create(100, 200, 100, 255));
-	CP_Graphics_DrawRectAdvanced(x_coord, y_coord, (P->LEVEL.P_EXP / (float) P->LEVEL.EXP_REQ) * rectWidth, rectHeight, 0, 0);
+	float lvlperc = (P->LEVEL.P_EXP / (float)P->LEVEL.EXP_REQ);
+	CP_Graphics_DrawRectAdvanced(x_coord, y_coord, lvlperc * rectWidth, rectHeight, 0, 0);
 	CP_Settings_RectMode(CP_POSITION_CENTER);
 
 	CP_Settings_TextAlignment(CP_TEXT_ALIGN_H_CENTER, CP_TEXT_ALIGN_V_TOP);
 	CP_Settings_Fill(CP_Color_Create(0, 0, 0, 255));
 	char buffer[3][16] = { {0}, {0}, {0} };
 	sprintf_s(buffer[0], _countof(buffer[0]), "%d", P->LEVEL.VAL);
-	sprintf_s(buffer[1], _countof(buffer[1]), "%d", P->LEVEL.P_EXP);
-	sprintf_s(buffer[2], _countof(buffer[2]), "%d", P->LEVEL.EXP_REQ);
+//	sprintf_s(buffer[1], _countof(buffer[1]), "%d", P->LEVEL.P_EXP);
+//	sprintf_s(buffer[2], _countof(buffer[2]), "%d", P->LEVEL.EXP_REQ);
 	CP_Font_DrawText("Lv:", (x_coord * 2 + rectWidth) / 2 - 110, y_coord);
 	CP_Font_DrawText(buffer[0], (x_coord * 2 + rectWidth) / 2 - 85, y_coord);
-	CP_Font_DrawText(buffer[1], (x_coord * 2 + rectWidth) / 2 - 40, y_coord);
-	CP_Font_DrawText("/", (x_coord * 2 + rectWidth) / 2, y_coord);
-	CP_Font_DrawText(buffer[2], (x_coord * 2 + rectWidth) / 2 + 40, y_coord);
+//	CP_Font_DrawText(buffer[1], (x_coord * 2 + rectWidth) / 2 - 40, y_coord);
+//	CP_Font_DrawText("/", (x_coord * 2 + rectWidth) / 2, y_coord);
+//	CP_Font_DrawText(buffer[2], (x_coord * 2 + rectWidth) / 2 + 40, y_coord);
+	sprintf_s(buffer[1], _countof(buffer[1]), "%.2f", lvlperc * 100);
+	CP_Font_DrawText(buffer[1], (x_coord * 2 + rectWidth) / 2, y_coord);
+	CP_Font_DrawText("%", (x_coord * 2 + rectWidth) / 2 + 45, y_coord);
 }
 
 // Shows a death screen, and gives the player the option whether to restart the game

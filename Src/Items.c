@@ -132,8 +132,8 @@ Item* CreateItemEffect(CP_Vector coor, int exp, int expVal) {
 	newItem->Start = MobCycleTimer;
 	newItem->Type = EType;
 	newItem->coor = coor;
-	newItem->collected = 0;
-	newItem->knockback = 2;
+	newItem->collected = 1;
+	newItem->knockback = 3;
 	return newItem;
 };
 
@@ -143,53 +143,52 @@ Item* CreateItemEffect(CP_Vector coor, int exp, int expVal) {
 void IAffectPlayer(Item* item, int method) {
 	float boost = item->Modifier * method;
 	switch (item->Type) {
-		case StatBoost://Affect Base Stats
+	case StatBoost://Affect Base Stats
 		Audio_Pickup_Item();
 		switch (item->AffectedBaseStat) {
-			
-			case 0://HP
-				P.CURRENT_HP += (item->Modifier * 1000);
-				break;
-			case 1://Movement Speed
-				P.STATMULT.SPEED_MULT += boost;
-				break;
-			case 2://Damage
-				P.STATMULT.DAMAGE_MULT += boost * 2;
-				break;
-			case 3://Attack speed
-				P.STATMULT.ATK_SPEED_MULT += boost;
-				break;
-				P.STATMULT.PROJECTILE_SPD_MULT += boost;
-			case 4://Bullet Speed
-
-				break;
-			case 5:
-				P.STATMULT.MAX_HP_MULT += boost;
-				break;
+		case 0://HP
+			P.CURRENT_HP += (item->Modifier * 1000);
+			break;
+		case 1://Movement Speed
+			P.STATMULT.SPEED_MULT += boost;
+			break;
+		case 2://Damage
+			P.STATMULT.DAMAGE_MULT += boost * 2;
+			break;
+		case 3://Attack speed
+			P.STATMULT.ATK_SPEED_MULT += boost;
+			break;
+		case 4://Bullet Speed
+			P.STATMULT.PROJECTILE_SPD_MULT += boost;
+			break;
+		case 5:
+			P.STATMULT.MAX_HP_MULT += boost;
+			break;
 		}
-		case EXP:
-			P.LEVEL.P_EXP += item->Modifier;
-			break;
+		break;
+	case EXP:
+		P.LEVEL.P_EXP += item->Modifier;
+		break;
 
-		case BULLETType:
+	case BULLETType:
 		switch (item->AffectedBaseStat) {
-			case 2: // Bullet Spilt
-				if (method == -1)
-					blegal2 -= 1;
-				else blegal2 += 1;
-				break;
-			case 3: // Bullet Rocket
-				if (method == -1)
-					blegal3 -= 1;
-				else blegal3 += 1;
-				break;
-			case 4: // Bullet Homing
-				if (method == -1)
-					blegal4 -= 1;
-				else blegal4 += 1;
-				break;
-			}
+		case 2: // Bullet Spilt
+			if (method == -1)
+				blegal2 -= 1;
+			else blegal2 += 1;
 			break;
+		case 3: // Bullet Rocket
+			if (method == -1)
+				blegal3 -= 1;
+			else blegal3 += 1;
+			break;
+		case 4: // Bullet Homing
+			if (method == -1)
+				blegal4 -= 1;
+			else blegal4 += 1;
+			break;
+		}
+		break;
 	}
 }
 
@@ -277,10 +276,11 @@ void UpdateAppliedEffects(Item* item) {
 	head = AppliedEffects;
 	if (item == NULL)
 		goto UpdateEffects;
+	int count = 0;
 	while (head != NULL) {
+		count++;
 		if (item->Type == head->key->Type && item->AffectedBaseStat == head->key->AffectedBaseStat) {
 			float durationleft = head->key->Duration - ( MobCycleTimer - head->key->Start);
-			head->key->Duration = item->Duration;
 			head->key->Start = MobCycleTimer;
 			found = 1;
 			//Found existing applied effect, break, time for next loop -> iter == 1
@@ -367,22 +367,24 @@ void DrawAppliedEffects() {
 
 void CheckItems(void) {
 	if (ItemTracker->ItemLL != NULL) {
-		ItemTracker->ItemLL = ItemInteraction(ItemTracker->ItemLL);
+		ItemInteraction(&ItemTracker->ItemLL);
 	}
 	if (ItemTracker->ExpLL != NULL) {
-		ItemTracker->ExpLL = ItemInteraction(ItemTracker->ExpLL);
+		ItemInteraction(&ItemTracker->ExpLL);
 	}
 	if (ItemTracker->CoinLL != NULL) {
-		ItemTracker->CoinLL = ItemInteraction(ItemTracker->CoinLL);
+		ItemInteraction(&ItemTracker->CoinLL);
 	}
+	UpdateAppliedEffects(NULL);
+	DrawAppliedEffects();
 }
 
 int IsMagnet = 0, ToCollect = 0;
-ItemLink* ItemInteraction(ItemLink* head) {
+void ItemInteraction(ItemLink** head) {
 	if (head == NULL)
 		return;
 	
-	ItemLink* current = head, *next = NULL;
+	ItemLink* current = *head, *next = NULL;
 	//assert(_CrtCheckMemory());
 	while (current != NULL) {
 		int CType = current->key->Type;
@@ -392,17 +394,22 @@ ItemLink* ItemInteraction(ItemLink* head) {
 		}
 		CP_Vector target = CP_Vector_Subtract(CP_Vector_Set(P.x, P.y), current->key->coor);
 		float dist = CP_Vector_Length(target);
-		if (dist < P.STATTOTAL.PICKUP_TOTAL)
+		if (dist < P.STATTOTAL.PICKUP_TOTAL) {
 			current->key->collected = -1;
+		}
 		if (current->key->collected == -1) {
 			float speed = dist * CP_System_GetDt() * 2;
 			CP_Vector Movement = CP_Vector_Scale(CP_Vector_Normalize(target), speed * (P.STATTOTAL.SPEED_TOTAL / 100));
 			if (current->key->knockback > 0) {
 				current->key->coor = CP_Vector_Subtract(current->key->coor, CP_Vector_Scale(Movement, 2));
 				current->key->knockback--;
+				printf("Knockback: %d\n", current->key->knockback);
 			}
-			if (dist < P.STAT.PICKUP && dist > P.HITBOX) {
-				Movement = CP_Vector_Scale(Movement, 1.5);
+			else {
+				if (dist < P.STAT.PICKUP && dist > P.HITBOX) {
+					Movement = CP_Vector_Scale(Movement, 1.5);
+				}
+
 			}
 			current->key->coor = CP_Vector_Add(current->key->coor, Movement);
 		}
@@ -417,7 +424,7 @@ ItemLink* ItemInteraction(ItemLink* head) {
 			if(CType == EXP) {
 				IAffectPlayer(current->key, 1);
 				next = current->next;
-				deleteItemLink(&head, current->key);
+				deleteItemLink(head, current->key);
 				current = next;
 				ItemTracker->DropCount[EXP][0]--;
 				continue;
@@ -427,7 +434,7 @@ ItemLink* ItemInteraction(ItemLink* head) {
 				if (current->key->Duration == -1) {
 					IAffectPlayer(current->key, 1);
 					next = current->next;
-					deleteItemLink(&head, current->key);
+					deleteItemLink(head, current->key);
 					current = next;
 					ItemTracker->DropCount[CType][0]--;
 					if (CType == COIN)
@@ -435,7 +442,6 @@ ItemLink* ItemInteraction(ItemLink* head) {
 					continue;
 				}
 				if (current->key->applying == 0) {
-
 					IAffectPlayer(current->key, 1);
 					current->key->Start = MobCycleTimer;
 					current->key->applying = 1;
@@ -444,8 +450,8 @@ ItemLink* ItemInteraction(ItemLink* head) {
 			}
 		}
 	
-		int timeDiff = MobCycleTimer - current->key->Start;
 		if (CType != EXP) {
+			int timeDiff = MobCycleTimer - current->key->Start;
 			if (timeDiff > current->key->Duration && current->key->applying == 1) {
 				//time to delete item's stat boost
 				if (CType == MAGNET) {
@@ -453,7 +459,7 @@ ItemLink* ItemInteraction(ItemLink* head) {
 				}
 				IAffectPlayer(current->key, -1);
 				next = current->next;
-				deleteItemLink(&head, current->key);
+				deleteItemLink(head, current->key);
 				current = next;
 				ItemTracker->DropCount[CType][0]--;
 				UpdateAppliedEffects(NULL);
@@ -463,7 +469,8 @@ ItemLink* ItemInteraction(ItemLink* head) {
 
 
 		//only draw items that are newly initialised or not collected
-		if (current->key->collected = -1 && current->key->applying != 1) {
+		//if (current->key->collected == 1 && current->key->applying != 1) {
+		if (current->key->applying != 1) {
 			DrawItemImage(current->key);
 		}
 		current = current->next;

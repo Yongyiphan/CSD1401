@@ -13,8 +13,6 @@ CP_Sound main_bgm_music;
 CP_Sound ingame_bgm_music;
 
 
-
-
 void Audio_Init(void) {
 	button_click = CP_Sound_Load("./Assets/Sound/click.wav");
 	pickup_exp_sound = CP_Sound_Load("./Assets/Sound/pickupCoin.wav");
@@ -71,9 +69,16 @@ void Audio_Exit(void) {
 	CP_Sound_Free(button_click);
 	CP_Sound_Free(pickup_exp_sound);
 	CP_Sound_Free(pickup_item_sound);
+
 	CP_Sound_Free(bullet_sound);
 	CP_Sound_Free(level_up_sound);
-	CP_Sound_Free(pickup_exp_sound);
+	
 	CP_Sound_Free(main_bgm_music);
 	CP_Sound_Free(ingame_bgm_music);
+
+	button_click = NULL;
+	pickup_exp_sound = pickup_item_sound = NULL;
+	bullet_sound = level_up_sound = NULL;
+	main_bgm_music = ingame_bgm_music = NULL;
+
 }

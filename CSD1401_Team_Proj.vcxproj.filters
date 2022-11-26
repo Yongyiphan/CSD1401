@@ -3,7 +3,6 @@
   <ItemGroup>
     <ClCompile Include="Src\bullet.c" />
     <ClCompile Include="Src\Camera.c" />
-    <ClCompile Include="Src\game.c" />
     <ClCompile Include="Src\Items.c" />
     <ClCompile Include="Src\main.c" />
     <ClCompile Include="Src\mainmenu.c" />
@@ -20,7 +19,6 @@
   <ItemGroup>
     <ClInclude Include="Inc\bullet.h" />
     <ClInclude Include="Inc\Camera.h" />
-    <ClInclude Include="Inc\game.h" />
     <ClInclude Include="Inc\mainmenu.h" />
     <ClInclude Include="Inc\Items.h" />
     <ClInclude Include="Inc\map.h" />

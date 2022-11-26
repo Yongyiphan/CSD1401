@@ -22,6 +22,7 @@ float songLength = 500;
 int isPlaying = 0;
 int MMAudio = 0;
 float SFX_vol, BGM_vol;
+int splashscreen_time = 2;
 void Main_Menu_Init(void)
 {
 	title = CP_Image_Load("./Assets/Title.png");
@@ -37,27 +38,26 @@ void Main_Menu_Init(void)
 	//CP_Graphics_ClearBackground(dark_green);
 	width = CP_System_GetWindowWidth();
 	height = CP_System_GetWindowHeight();
-	Audio_Init();
 	
-	// Initialize sound values to be 70% of max volume
-	SFX_vol = 0.7, BGM_vol = 0.5;
+	Audio_Init();
+	SFX_vol = 0.7, BGM_vol = 0.2;
 	MMAudio = 0;
-//	Audio_Play_Music(Main_Menu);
 }
+
+
 void Main_Menu_Update()
 {
 	CP_Graphics_ClearBackground(black);
 	float currentElapsedTime = CP_System_GetDt();
 	static float totalElapsedTime = 0;
 	totalElapsedTime += currentElapsedTime;
-	int transparency = 256 - abs((int)(totalElapsedTime / 5 * 256) % 512 - 256);
-	if (totalElapsedTime < 5)
+	int transparency = 256 - abs((int)(totalElapsedTime / splashscreen_time * 256) % 512 - 256);
+	if (totalElapsedTime < splashscreen_time)
 	{
 		CP_Image_Draw(logo, CP_System_GetWindowWidth() / 2, CP_System_GetWindowHeight() / 2, CP_System_GetWindowWidth(), CP_System_GetWindowHeight(), transparency);
 		printf("%f\n", totalElapsedTime);
 	}
-
-	if (totalElapsedTime >= 5)
+	if (totalElapsedTime >= splashscreen_time)
 	{
 		if (MMAudio == 0) {
 			Audio_Play_Music(Main_Menu);

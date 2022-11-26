@@ -123,7 +123,6 @@ xcopy "$(SolutionDir)Assets\*" "$(OutDir)Assets\" /s /r /y /q
     <ClCompile Include="Src\bullet.c" />
     <ClCompile Include="Src\Camera.c" />
     <ClCompile Include="Src\credits.c" />
-    <ClCompile Include="Src\game.c" />
     <ClCompile Include="Src\instructions.c" />
     <ClCompile Include="Src\Items.c" />
     <ClCompile Include="Src\main.c" />
@@ -140,7 +139,6 @@ xcopy "$(SolutionDir)Assets\*" "$(OutDir)Assets\" /s /r /y /q
     <ClInclude Include="Inc\bullet.h" />
     <ClInclude Include="Inc\Camera.h" />
     <ClInclude Include="Inc\credits.h" />
-    <ClInclude Include="Inc\game.h" />
     <ClInclude Include="Inc\instructions.h" />
     <ClInclude Include="Inc\mainmenu.h" />
     <ClInclude Include="Inc\Items.h" />

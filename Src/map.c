@@ -25,7 +25,6 @@
 
 
 int WHeight, WWidth;
-float sfxVolume, bgmVolume;
 
 CP_Color dark_green;
 CP_Matrix transform;
@@ -46,7 +45,6 @@ void map_Init(void) {
 	WWidth = CP_System_GetWindowWidth();
 	//CP_System_Fullscreen();
 	isPaused = 0, isUpgrade = 0, isDead = 0, hasWon = 0;
-	sfxVolume = 0.7, bgmVolume = 0.7;
 
 	// initialize the timer to start from 0 
 	init = 1;
@@ -157,7 +155,6 @@ void map_Update(void) {
 					int bchecker;
 					// Check if current mob is colliding with a bullet, bchecker will be the collided bullet
 					bchecker = BulletCollision(cMob->coor.x, cMob->coor.y, cMob->w, cMob->h);
-
 					// Check collision of mob against the explosion radius of explosive bullet
 					if (bullet[bchecker].type == PBULLET_ROCKET && bullet[bchecker].friendly == BULLET_PLAYER
 						&& bullet[bchecker].exist == FALSE) // Specific type for explosion zone
@@ -183,7 +180,7 @@ void map_Update(void) {
 					if (cMob->Status == 0) {
 						insertItemLink(&ItemTracker->ExpLL, CreateItemEffect(cMob->coor, EXP, cMob->Title));
 						float rng = CP_Random_RangeFloat(0, 1);
-						if (rng < 0.33) {
+						if (rng < 0.63) {
 							insertItemLink(&ItemTracker->ItemLL, CreateItemEffect(cMob->coor, -1, 0));
 						}
 						if (rng < 0.44) {
@@ -206,7 +203,6 @@ void map_Update(void) {
 				cWave->CurrentCount = alive;
 			}
 		}
-		CheckItems();
 		if (MobCycleTimer % 2 == 0) {
 			float deduct = 1 + P.LEVEL.VAL / 4;
 			deduct = deduct > P.STATTOTAL.MAX_HP_TOTAL / 2 ? P.STATTOTAL.MAX_HP_TOTAL / 2 : deduct;
@@ -233,45 +229,44 @@ void map_Update(void) {
 			for (int i = 0; i < 2; i++)
 			{
 				// CD of 1s base value but affected by atk_speed
-				if (bulletcd[i] > 1 / P.STATTOTAL.ATK_SPEED_TOTAL)
+				if (bulletcd[i] > 1 / P.STATTOTAL.ATK_SPEED_TOTAL) {
 					bulletcd[i] = 0;
+				}
 			}
 
 			// Check cd valid for explosive bullet
 			// CD of 3s base value but affected by atk_speed
-			if (bulletcd[2] > 3 / P.STATTOTAL.ATK_SPEED_TOTAL)
+			if (bulletcd[2] > 3 / P.STATTOTAL.ATK_SPEED_TOTAL) {
 				bulletcd[2] = 0;
-
+			}
 			// Check cd valid for homing bullet
 			// CD of 2s base value but affected by atk_speed
-			if (bulletcd[3] > 2 / P.STATTOTAL.ATK_SPEED_TOTAL)
+			if (bulletcd[3] > 2 / P.STATTOTAL.ATK_SPEED_TOTAL) {
 				bulletcd[3] = 0;
-
+			}
 			// Default bullet is always active, no additional check required
 			if (bulletcd[0] == 0) {
 				BulletShoot(P.x, P.y, bulletangle, PBULLET_NORMAL, BULLET_PLAYER);
 			}
-			
 			// Shoot other bullet types when valid
 			for (int i = 1; i < 4; i++)
 			{
 				// Bulletlegal checks for when bullet item buff is active
-				if ((Bulletlegal(i + 1) == 1) && bulletcd[i] == 0)
-					BulletShoot(P.x, P.y, bulletangle, i+1, BULLET_PLAYER);
+				if ((Bulletlegal(i + 1) == 1) && bulletcd[i] == 0) {
+					BulletShoot(P.x, P.y, bulletangle, i + 1, BULLET_PLAYER);
+				}
 			}
-			
+
 		}
 
 		// Keeps bulletcd running even when not on leftclick
-		if (CP_Input_MouseDown(MOUSE_BUTTON_LEFT) == FALSE)
-		{
+		if (CP_Input_MouseDown(MOUSE_BUTTON_LEFT) == FALSE){
 			UpdateCDTimer(bulletcd, 4);
 		}
 
 #pragma endregion
 
-		UpdateAppliedEffects(NULL);
-		DrawAppliedEffects();
+		CheckItems();
 		CP_Settings_ResetMatrix();
 		// Time, returns and draws text
 		Draw_Time(time);

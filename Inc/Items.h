@@ -34,9 +34,10 @@ typedef struct ItemStat {
 	//double x;
 	//double y;
 	CP_Vector coor;
-	//-1 = Collected, 1 = Not collected, 2 = applying;
-	//0 = initialised value
-	int collected, applying;
+	//-1 = Collected, 0 = initialised, 1 = Not collected
+	int collected;
+	//1 = applying;
+	int applying;
 	int knockback;
 	int Dis[2];
 }Item;
@@ -98,7 +99,8 @@ void IAffectPlayer(Item* i, int method);
 void CheckItems(void);
 
 
-ItemLink* ItemInteraction(ItemLink* head);
+//ItemLink* ItemInteraction(ItemLink* head);
+void ItemInteraction(ItemLink** head);
 ItemLink* newLink(Item* item);
 void insertItemLink(ItemLink** head, Item *item);
 void deleteItemLink(ItemLink** head, Item *item);

@@ -48,7 +48,7 @@ void BulletType(int type, float coordx, float coordy, float angle, int friendly)
 		BulletCoor(coordx, coordy, angle);
 		if (friendly == BULLET_MOB) bullet[bulletcounter].friendly = BULLET_MOB; else bullet[bulletcounter].friendly = BULLET_PLAYER;
 		bullet[bulletcounter].type = PBULLET_NORMAL;
-		bullet[bulletcounter].size = 10;
+		bullet[bulletcounter].size = 20;
 		bullet[bulletcounter].speed = 30 * P.STATTOTAL.PROJECTILE_SPD_TOTAL;
 		bullet[bulletcounter].maxdistance = 300;
 		bullet[bulletcounter].damage = 5 + P.STATTOTAL.DAMAGE_TOTAL;
@@ -73,7 +73,7 @@ void BulletType(int type, float coordx, float coordy, float angle, int friendly)
 		BulletCoor(coordx, coordy, angle);
 		if (friendly == BULLET_MOB) bullet[bulletcounter].friendly = BULLET_MOB; else bullet[bulletcounter].friendly = BULLET_PLAYER;
 		bullet[bulletcounter].type = PBULLET_ROCKET;
-		bullet[bulletcounter].size = 15;
+		bullet[bulletcounter].size = 25;
 		bullet[bulletcounter].speed = 5 * P.STATTOTAL.PROJECTILE_SPD_TOTAL;
 		bullet[bulletcounter].maxdistance = 300;
 		bullet[bulletcounter].damage = 10 + P.STATTOTAL.DAMAGE_TOTAL;
