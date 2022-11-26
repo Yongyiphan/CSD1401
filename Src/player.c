@@ -272,9 +272,7 @@ void death_screen(float totalElapsedTime) {
 
 	if (CP_Input_MouseClicked()) {
 		if (IsAreaClicked(middle.x, middle.y, width, height, CP_Input_GetMouseX(), CP_Input_GetMouseY())) {
-			FreeMobResource();
-			FreeItemResource();
-			
+			map_Exit();
 			map_Init();
 		}
 		if (IsAreaClicked(middle.x, middle.y + height + padding, width, height, CP_Input_GetMouseX(), CP_Input_GetMouseY())) {

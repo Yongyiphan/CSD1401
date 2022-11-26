@@ -9,6 +9,7 @@
 #include "Mob.h"
 #include "bullet.h"
 #include "Items.h"
+#include "upgrades.h"
 #include "audio_manager.h"
 
 /*---------------------------------------------------
@@ -89,7 +90,6 @@ void map_Update(void) {
 		}
 		// temporarily paused the death_screen function to allow the game to continue running
 		if (isDead) {
-			//float elapsedTime = timer(0);
 			death_screen(timer(isDead, init));
 		}
 	
@@ -287,11 +287,11 @@ void map_Update(void) {
 
 void map_Exit(void) {
 	FreeMobResource();
-	
 	FreeItemResource();
-
 	BulletImgFree();
-	printf("Coin Gained: %d", P.STAT.Coin_Gained);
+	printf("Coin Gained: %d\n", P.STAT.Coin_Gained);
+	money.amount += P.STAT.Coin_Gained;
+	save_all_upgrades_to_file();
 	Audio_Exit();
 	
 	//free(ItemTracker);

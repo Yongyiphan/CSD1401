@@ -19,6 +19,7 @@ float width, height;
 //upgrade health, speed, damage, fire_rate, defense, pick_up, bullet_speed;
 
 upgrade upgrades[NUM_UPGRADES];
+coins money;
 void upgrades_Init(void)
 {
 	//draw coin icon
@@ -42,6 +43,7 @@ void upgrades_Init(void)
 	for (int i = 0; i < NUM_UPGRADES; i++)
 	{
 		upgrades[i].name = upgradename[i];
+		upgrades[i].cost = 2000;
 	}
 }
 char* convert_int_to_string(char buffer[], int value)
@@ -60,27 +62,33 @@ void upgrades_Update(void)
 	CP_Settings_TextSize(200);
 	CP_Settings_Fill(red);
 	CP_Font_DrawText("UPGRADES", width / 2, height / 8);
+	//currency logo and amount
 	CP_Image_Draw(coin, width - width / 10, height / 12, width / 20, height / 16, 255);
 	
+	CP_Settings_Fill(white);
+	CP_Settings_TextSize(50);
+	char buffer[16];
+	CP_Font_DrawText(convert_int_to_string(buffer, money.amount), width - width / 10, height / 7, width / 20);
 
 	CP_Settings_Fill(black);
 	//boxes for upgrades row 1
 	for (int i = 0; i < 5; i++)
 	{
 		CP_Graphics_DrawRectAdvanced((width / 6) * (i+1), height / 3, width / 8, height / 8, 0, 15);
-
-
 	}
 	//draw text on boxes
 	char* text[] = { "HEALTH", "SPEED", "DAMAGE", "ATTACK SPEED",  "DEFENSE" };
 	//char* text = GetBaseStats(-1); //from player.c
-	CP_Settings_Fill(white);
+	
 	CP_Settings_TextSize(30);
 	for (int i = 0; i < 5; i++)
 	{	
 		char buffer[16];
+		CP_Settings_Fill(white);
 		CP_Font_DrawText(text[i], (width / 6) * (i + 1), height / 3 - height / 24, width / 8);
-		CP_Font_DrawText(convert_int_to_string(buffer, upgrades[i].level), (width / 6)* (i + 1), height / 3, width / 8, height / 8, 0, 15);
+		CP_Font_DrawText(convert_int_to_string(buffer, upgrades[i].level), (width / 6)* (i + 1), height / 3);
+		
+		CP_Font_DrawText("$2000", (width / 6) * (i + 1), height / 3 + height / 24);
 		//printf("string\n");
 	}
 
@@ -99,11 +107,15 @@ void upgrades_Update(void)
 		{
 			if (IsAreaClicked((width / 6) * (i + 1), height / 3 + height / 10, width / 12, height / 12, CP_Input_GetMouseX(), CP_Input_GetMouseY()))
 			{
-				upgrades[i].level += 1;
-				printf("%d ", upgrades[i].level);
-				upgrades[i].stat = upgrades[i].level * 10;
-				printf("%f\n", upgrades[i].stat);
-				save_all_upgrades_to_file();
+				if (money.amount >= upgrades[i].cost)
+				{
+					money.amount -= upgrades[i].cost;
+					upgrades[i].level += 1;
+					printf("%d ", upgrades[i].level);
+					upgrades[i].stat = upgrades[i].level * 10;
+					printf("%f\n", upgrades[i].stat);
+					save_all_upgrades_to_file();
+				}
 			}
 		}
 		CP_Settings_Fill(white);
@@ -126,13 +138,17 @@ void upgrades_Update(void)
 		{
 			if (IsAreaClicked((width / 6) * (i + 1), height / 3 + height / 4 + height / 10, width / 12, height / 12, CP_Input_GetMouseX(), CP_Input_GetMouseY()))
 			{
-				upgrades[i+5].level += 1;
-				printf("%d ", upgrades[i+5].level);
-				
-				upgrades[i + 5].stat = upgrades[i + 5].level * 10;
+				if (money.amount >= upgrades[i + 5].cost)
+				{
+					money.amount -= upgrades[i + 5].cost;
+					upgrades[i + 5].level += 1;
+					printf("%d ", upgrades[i + 5].level);
 
-				printf("%f\n", upgrades[i+5].stat);
-				save_all_upgrades_to_file();
+					upgrades[i + 5].stat = upgrades[i + 5].level * 10;
+
+					printf("%f\n", upgrades[i + 5].stat);
+					save_all_upgrades_to_file();
+				}
 			}
 		}
 		CP_Settings_Fill(white);
@@ -141,13 +157,15 @@ void upgrades_Update(void)
 	}
 
 	char* text2[] = { "PICK UP", "PROJECTILE SPEED" };
-	CP_Settings_TextSize(30);
-	CP_Settings_Fill(white);
+	
 	for (int i = 0; i < 2; i++)
 	{
+		CP_Settings_TextSize(30);
+		CP_Settings_Fill(white);
 		char buffer[16];
 		CP_Font_DrawText(text2[i], (width / 6)* (i + 1), height / 3 + height / 4 - height / 24, width / 8, height / 8);
 		CP_Font_DrawText(convert_int_to_string(buffer, upgrades[i+5].level), (width / 6) * (i + 1), height / 3 + height / 4, width / 8, height / 8);
+		CP_Font_DrawText("$2000", (width / 6) * (i + 1), height / 3 + height / 4 + height / 24);
 	}
 
 	//reset button
@@ -197,8 +215,8 @@ void upgrades_read_from_file(void)
 	{
 		if (upgradesfile)
 		{
-			fscanf_s(upgradesfile, "%d %f %d %f %d %f %d %f %d %f %d %f %d %f", &upgrades[0].level, &upgrades[0].stat, &upgrades[1].level, &upgrades[1].stat, &upgrades[2].level, &upgrades[2].stat, &upgrades[3].level, &upgrades[3].stat, &upgrades[4].level, &upgrades[4].stat, &upgrades[5].level, &upgrades[5].stat, &upgrades[6].level, &upgrades[6].stat);
-			printf("%d %f %d %f %d %f %d %f %d %f %d %f %d %f", upgrades[0].level, upgrades[0].stat, upgrades[1].level, upgrades[1].stat, upgrades[2].level, upgrades[2].stat, upgrades[3].level, upgrades[3].stat, upgrades[4].level, upgrades[4].stat, upgrades[5].level, upgrades[5].stat, upgrades[6].level, upgrades[6].stat);
+			fscanf_s(upgradesfile, "%d %f %d %f %d %f %d %f %d %f %d %f %d %f %d", &upgrades[0].level, &upgrades[0].stat, &upgrades[1].level, &upgrades[1].stat, &upgrades[2].level, &upgrades[2].stat, &upgrades[3].level, &upgrades[3].stat, &upgrades[4].level, &upgrades[4].stat, &upgrades[5].level, &upgrades[5].stat, &upgrades[6].level, &upgrades[6].stat, &money.amount);
+			printf("%d %f %d %f %d %f %d %f %d %f %d %f %d %f %d", upgrades[0].level, upgrades[0].stat, upgrades[1].level, upgrades[1].stat, upgrades[2].level, upgrades[2].stat, upgrades[3].level, upgrades[3].stat, upgrades[4].level, upgrades[4].stat, upgrades[5].level, upgrades[5].stat, upgrades[6].level, upgrades[6].stat, money.amount);
 		}
 	}
 	closefile(upgradesfile);
@@ -213,6 +231,7 @@ void save_all_upgrades_to_file(void)
 		{
 			fprintf(upgradesfile, "%d %f ", upgrades[i].level, upgrades[i].stat);
 		}
+		fprintf(upgradesfile, "%d", money.amount);
 	}
 	closefile(upgradesfile);
 }
@@ -222,8 +241,9 @@ void reset_all_upgrades(void)
 {
 	for(int i = 0; i < NUM_UPGRADES; i++)
 	{
+		money.amount += upgrades[i].cost * upgrades[i].level;
 		upgrades[i].level = 0;
-		upgrades[i].cost = 0;
+		//upgrades[i].cost = 0;
 		upgrades[i].stat = 0;
 	}
 }

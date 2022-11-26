@@ -222,20 +222,22 @@ void GenerateWaves(void) {
 			Size	-> Size of array
 @returns	Filled up array of pointers to CP_Image Objs
 */
-CP_Image** MobSprites;
+CP_Image** MobSprites = NULL;
 int Mob_Img;
 void MobLoadImage(void) {
-	char *FilePaths[] = {
+	char* FilePaths[] = {
 		"./Assets/Mobs/SmallM.png",
 		"./Assets/Mobs/SmallM_Flipped.png",
 		"./Assets/Mobs/RangeM.png",
 		"./Assets/Mobs/RangeM_Flipped.png"
 	};
 	Mob_Img = (sizeof(FilePaths) / sizeof(FilePaths[0]));
-	MobSprites = malloc(sizeof(CP_Image*) * Mob_Img);
-	for (int i = 0; i < Mob_Img; i++) {
-		MobSprites[i] = malloc(sizeof(CP_Image));
-		MobSprites[i] = CP_Image_Load(FilePaths[i]);
+	if (MobSprites == NULL) {
+		MobSprites = malloc(sizeof(CP_Image*) * Mob_Img);
+		for (int i = 0; i < Mob_Img; i++) {
+			MobSprites[i] = malloc(sizeof(CP_Image));
+			MobSprites[i] = CP_Image_Load(FilePaths[i]);
+		}
 	}
 }
 void DrawMobImage(Mob* m, Player* p) {
@@ -404,5 +406,6 @@ void FreeMobResource(void) {
 		free(MobSprites[i]);
 	}
 	free(MobSprites);
+	MobSprites = NULL;
 
 }

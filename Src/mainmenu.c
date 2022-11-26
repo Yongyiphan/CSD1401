@@ -54,7 +54,7 @@ void Main_Menu_Update()
 	int transparency = 256 - abs((int)(totalElapsedTime / splashscreen_time * 256) % 512 - 256);
 	if (totalElapsedTime < splashscreen_time)
 	{
-		CP_Image_Draw(logo, CP_System_GetWindowWidth() / 2, CP_System_GetWindowHeight() / 2, CP_System_GetWindowWidth(), CP_System_GetWindowHeight(), transparency);
+		CP_Image_Draw(logo, CP_System_GetWindowWidth() / 2, CP_System_GetWindowHeight() / 2, CP_System_GetWindowWidth(), CP_System_GetWindowHeight()/2, transparency);
 		printf("%f\n", totalElapsedTime);
 	}
 	if (totalElapsedTime >= splashscreen_time)
@@ -71,9 +71,9 @@ void Main_Menu_Update()
 		//CP_Graphics_ClearBackground(grey);
 		CP_Settings_RectMode(CP_POSITION_CENTER);
 
-		char* text[] = { "PLAY", "UPGRADES", "OPTIONS", "CREDITS", "EXIT" };
+		char* text[] = {"PLAY", "UPGRADES", "HOW TO PLAY", "OPTIONS", "CREDITS", "EXIT"};
 		CP_Settings_TextAlignment(CP_TEXT_ALIGN_H_CENTER, CP_TEXT_ALIGN_V_MIDDLE);
-		for (int i = 0; i < 5; i++) {
+		for (int i = 0; i < 6; i++) {
 			//play rectangle
 
 			CP_Settings_Fill(black);
@@ -96,13 +96,15 @@ void Main_Menu_Update()
 			{
 				CP_Engine_SetNextGameState(upgrades_Init, upgrades_Update, upgrades_Exit);
 			}
+			//click how to play to go to instructions screen
+			
 			//click options to go to options screen
-			if (IsAreaClicked(width / 2, (height / 2) - (height / 10) + (height / 10 * 2), (width / 5), ((height / 6) / 2), CP_Input_GetMouseX(), CP_Input_GetMouseY()))
+			if (IsAreaClicked(width / 2, (height / 2) - (height / 10) + (height / 10 * 3), (width / 5), ((height / 6) / 2), CP_Input_GetMouseX(), CP_Input_GetMouseY()))
 			{
 				CP_Engine_SetNextGameState(options_Init, options_Update, options_Exit);
 			}
 			//click exit to exit
-			if (IsAreaClicked(width / 2, (height / 2) - (height / 10) + (height / 10 * 4), (width / 5), ((height / 6) / 2), CP_Input_GetMouseX(), CP_Input_GetMouseY()))
+			if (IsAreaClicked(width / 2, (height / 2) - (height / 10) + (height / 10 * 5), (width / 5), ((height / 6) / 2), CP_Input_GetMouseX(), CP_Input_GetMouseY()))
 			{
 				/*int exit = 1;
 				if (exit)

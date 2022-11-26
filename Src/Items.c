@@ -41,19 +41,22 @@
 #endif
 
 static int blegal2 = 0, blegal3 = 0, blegal4 = 0;
-ItemTrack* ItemTracker;
+ItemTrack* ItemTracker = NULL;
 ItemLink* AppliedEffects = NULL;
 void CreateItemTracker() {
-    ItemTracker = malloc(sizeof(ItemTrack));
-	*ItemTracker = (ItemTrack){ 0 };
-	for (int i = 0; i < No_Items; i++) {
-		ItemTracker->DropCount[i][0] = 0;
-		ItemTracker->DropCount[i][1] = 0;
+	if (ItemTracker == NULL) {
+		ItemTracker = malloc(sizeof(ItemTrack));
+		*ItemTracker = (ItemTrack){ 0 };
+		for (int i = 0; i < No_Items; i++) {
+			ItemTracker->DropCount[i][0] = 0;
+			ItemTracker->DropCount[i][1] = 0;
+		}
+		//Specific Drop Limitations
+		ItemTracker->DropCount[MAGNET][1] = 1;
+		AppliedEffects = NULL;
+		blegal2 = blegal3 = blegal4 = 0;
+
 	}
-	//Specific Drop Limitations
-	ItemTracker->DropCount[MAGNET][1] = 1;
-	AppliedEffects = NULL;
-	blegal2 = blegal3 = blegal4 = 0;
 }
 int ItemCountSum(void) {
 	int s = 0;
@@ -193,7 +196,7 @@ void IAffectPlayer(Item* item, int method) {
 }
 
 
-CP_Image** ItemSprites;
+CP_Image** ItemSprites = NULL;
 int Img_C;
 void ItemLoadImage(void) {
 	char* FilePaths[] = {
@@ -204,10 +207,12 @@ void ItemLoadImage(void) {
 		"./Assets/Items/coin.png",
 	};
 	Img_C = (sizeof(FilePaths) / sizeof(FilePaths[0]));
-	ItemSprites = malloc(sizeof(CP_Image*) * Img_C);
-	for (int i = 0; i < Img_C; i++) {
-		ItemSprites[i] = malloc(sizeof(CP_Image));
-		ItemSprites[i] = CP_Image_Load(FilePaths[i]);
+	if (ItemSprites == NULL) {
+		ItemSprites = malloc(sizeof(CP_Image*) * Img_C);
+		for (int i = 0; i < Img_C; i++) {
+			ItemSprites[i] = malloc(sizeof(CP_Image));
+			ItemSprites[i] = CP_Image_Load(FilePaths[i]);
+		}
 	}
 }
 void DrawItemImage(Item* item) {
@@ -551,10 +556,13 @@ void FreeItemResource(void) {
 		free(ItemSprites[i]);
 	}
 	free(ItemSprites);
+	ItemSprites = NULL;
+
 	freeLink(ItemTracker->ExpLL);
 	freeLink(ItemTracker->ItemLL);
 	freeLink(AppliedEffects);
 	free(ItemTracker);
+	ItemTracker = NULL;
 	printf("Freeing Item Structures\n");
 }
 
