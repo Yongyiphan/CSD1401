@@ -246,6 +246,7 @@ void map_Update(void) {
 			// Default bullet is always active, no additional check required
 			if (bulletcd[0] == 0) {
 				BulletShoot(P.x, P.y, bulletangle, PBULLET_NORMAL, BULLET_PLAYER);
+				Audio_Bullet();
 			}
 			// Shoot other bullet types when valid
 			for (int i = 1; i < 4; i++)
@@ -253,6 +254,7 @@ void map_Update(void) {
 				// Bulletlegal checks for when bullet item buff is active
 				if ((Bulletlegal(i + 1) == 1) && bulletcd[i] == 0) {
 					BulletShoot(P.x, P.y, bulletangle, i + 1, BULLET_PLAYER);
+					Audio_Bullet();
 				}
 			}
 
