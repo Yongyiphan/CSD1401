@@ -1,17 +1,30 @@
 #pragma once
 #include "cprocessing.h"
 #include <stdlib.h>
+#include <stdio.h>
 #include <math.h>
+#include <assert.h>
 #include "Items.h"
 #include "Mob.h"
 #include "player.h"
 #include "Map.h"
-#include <assert.h>
-/*
-@brief		Function that initialise array with empty items
-@params		tracker	-> Contains stats for tracking Items
-@returns	Item arr with blank items
-*/
+
+
+/* --------------------------------------
+* File Level Documentation
+* @author	Edgar Yong
+* @email	y.yiphanedgar.digipen.edu
+* @contributor Sen Chuan
+* @file		Items.c
+* @brief	This file contains all functions required for item generation
+			-> Store items in linked list, and draw items' sprites
+			-> Generate different effects for items with RNG
+			-> Item and player iteraction
+			-> Free All resources created through malloc
+* Copyright 2022 Digipen, All Rights Reserved.
+*//*-------------------------------------*/
+
+
 
 #ifdef _DEBUG
 #  define _CRTDBG_MAP_ALLOC
@@ -46,7 +59,6 @@ ItemTracker->DropCount[] = {EXP,..., Magnet etc)
 	-> 0 = Count
 	-> 1 = Limit (-1 = ignore limit)
 */
-
 void PrintItemCount(void) {
 	printf("EXP Drop count: %d | Limit: %d\n", ItemTracker->DropCount[EXP][0], ItemTracker->DropCount[EXP][1]);
 	printf("Stat Drop count: %d | Limit: %d\n", ItemTracker->DropCount[StatBoost][0], ItemTracker->DropCount[StatBoost][1]);
@@ -54,7 +66,6 @@ void PrintItemCount(void) {
 }
 
 
-#include <stdio.h>
 #pragma region
 Item* CreateItemEffect(CP_Vector coor, int exp, int expVal) {
 	//Get Random chance generator
@@ -69,11 +80,9 @@ Item* CreateItemEffect(CP_Vector coor, int exp, int expVal) {
 	else {
 		EType = exp;
 	}
-
 	if (ItemCountSum() > 50) {
 		if (ItemTracker->DropCount[MAGNET][0] < ItemTracker->DropCount[MAGNET][1]) {
 			EType = MAGNET;
-			//printf("Creating a magnet\n");
 		}
 	}
 
@@ -89,7 +98,6 @@ Item* CreateItemEffect(CP_Vector coor, int exp, int expVal) {
 
 		break;
 	case StatBoost: //All Base Stats Upgrade
-		//char* PStats[] = {"HEALTH", "SPEED", "DAMAGE", "FIRE RATE", "BULLET SPEED"};
 		statgen = CP_Random_RangeInt(0, NoBaseStats - 1);
 		newItem->AffectedBaseStat = statgen;
 		newItem->Duration = 2; //in secs
@@ -111,9 +119,7 @@ Item* CreateItemEffect(CP_Vector coor, int exp, int expVal) {
 		newItem->Duration = 5;
 		newItem->Hitbox = 25;
 		newItem->AffectedBaseStat = B_RNG;
-	//	printf("BulletType! %d", B_RNG);
 		break;
-
 	}
 	newItem->Start = MobCycleTimer;
 	newItem->Type = EType;
@@ -187,7 +193,6 @@ void ItemLoadImage(void) {
 		"./Assets/Items/Magnet.png",
 		"./Assets/Items/coin.png",
 	};
-
 	Img_C = (sizeof(FilePaths) / sizeof(FilePaths[0]));
 	ItemSprites = malloc(sizeof(CP_Image*) * Img_C);
 	for (int i = 0; i < Img_C; i++) {
@@ -204,6 +209,7 @@ void DrawItemImage(Item* item) {
 	int ph = IHeight * item->Hitbox / IHeight, pw = ph;
 	int Displacement[3] = { -1, 0, 1 }, dx, dy;
 	if (item->Dis[0] == 0 && item->Dis[1] == 0 && item->Type != EXP) {
+		//draw item at random location around exp
 		do {
 			dx = Displacement[CP_Random_RangeInt(0, 2)];
 			dy = Displacement[CP_Random_RangeInt(0, 2)];
@@ -239,20 +245,11 @@ void DrawItemImage(Item* item) {
 		break;
 	default:
 		IWidth = CP_Image_GetWidth(SImg);
-		CP_Image_DrawSubImage(SImg, item->coor.x, item->coor.y, pw, ph,
-			0,
-			0,
-			IWidth,
-			IHeight,
-			255);
+		CP_Image_DrawSubImage(SImg, item->coor.x, item->coor.y, pw, ph,0,0,IWidth,IHeight,255);
 		break;
 	}
 }
 
-
-ItemLink* GetCurrentEffects(void) {
-	return AppliedEffects;
-}
 
 void UpdateAppliedEffects(Item* item) {
 	int found = 0;
@@ -275,7 +272,6 @@ void UpdateAppliedEffects(Item* item) {
 		//item not currently being applied
 		ItemLink* nLink = malloc(sizeof(ItemLink));
 		Item* nitem = malloc(sizeof(Item));
-		//nitem = &(Item) { 0 };
 		nitem->Type = item->Type;
 		nitem->AffectedBaseStat = item->AffectedBaseStat;
 		nitem->Duration = item->Duration;
@@ -294,7 +290,6 @@ UpdateEffects:
 			head = next;
 			continue;
 		}
-		//head->key->Start = MobCycleTimer;
 		head = head->next;
 	}
 }
@@ -310,7 +305,6 @@ void DrawAppliedEffects() {
 	CP_Image SImg;
 	int iconsize = 64, nx = P.coor.x + (CP_System_GetWindowWidth()/ 2) - iconsize, ny = P.coor.y + (CP_System_GetWindowHeight() /2 ) - iconsize /2;
 	int IHeight, IWidth, SpriteIndex;
-	//CP_Settings_ImageMode(CP_POSITION_CENTER);
 	for (;head != NULL; head = head->next, nx -= iconsize) {
 		SImg = ItemSprites[head->key->Type];
 		IHeight = CP_Image_GetHeight(SImg);
@@ -354,11 +348,6 @@ void CheckItems(void) {
 	}
 }
 
-/*
-*	LINKED LIST IMPLEMENTATION
-*/
-#pragma region
-
 int IsMagnet = 0, ToCollect = 0;
 ItemLink* ItemInteraction(ItemLink* head) {
 	if (head == NULL)
@@ -369,10 +358,8 @@ ItemLink* ItemInteraction(ItemLink* head) {
 	while (current != NULL) {
 		int CType = current->key->Type;
 		if (CType == MAGNET && current->key->applying == 1) {
-			//printf("IM MAGNET.\n");
 			IsMagnet = 1;
 			P.STATTOTAL.PICKUP_TOTAL = 3000;
-			//CP_Graphics_DrawCircle(P.x, P.y, P.STATTOTAL.PICKUP_TOTAL);
 		}
 		CP_Vector target = CP_Vector_Subtract(CP_Vector_Set(P.x, P.y), current->key->coor);
 		float dist = CP_Vector_Length(target);
@@ -380,7 +367,6 @@ ItemLink* ItemInteraction(ItemLink* head) {
 			current->key->collected = -1;
 		if (current->key->collected == -1) {
 			float speed = dist * CP_System_GetDt() * 2;
-			//speed = speed > slowest ? speed : slowest;
 			CP_Vector Movement = CP_Vector_Scale(CP_Vector_Normalize(target), speed * (P.STATTOTAL.SPEED_TOTAL / 100));
 			if (current->key->knockback > 0) {
 				current->key->coor = CP_Vector_Subtract(current->key->coor, CP_Vector_Scale(Movement, 2));
@@ -434,7 +420,6 @@ ItemLink* ItemInteraction(ItemLink* head) {
 			if (timeDiff > current->key->Duration && current->key->applying == 1) {
 				//time to delete item's stat boost
 				if (CType == MAGNET) {
-					//printf("IM NOT MAGNET.\n");
 					IsMagnet = 0;
 				}
 				IAffectPlayer(current->key, -1);
@@ -457,6 +442,11 @@ ItemLink* ItemInteraction(ItemLink* head) {
 	return head;
 }
 
+/*
+*	LINKED LIST IMPLEMENTATION
+*/
+#pragma region
+
 ItemLink* newLink(Item *item) {
 	ItemLink* link = malloc(sizeof(ItemLink));
 
@@ -468,7 +458,6 @@ ItemLink* newLink(Item *item) {
 void insertItemLink(ItemLink** head, Item* item) {
 	ItemLink* nLink = newLink(item);
 	ItemTracker->DropCount[item->Type][0]++;
-	//PrintItemCount();
 	//Maintain Magnet Item as head of linkedlist
 	if ((*head) != NULL && (*head)->key->Type == MAGNET) {
 		ItemLink* cnext = (*head)->next;
@@ -487,7 +476,6 @@ void deleteItemLink(ItemLink**head, Item* item) {
 
 	if (curr != NULL && curr->key == item) {
 		*head = curr->next;
-		//printf("Freeing: %p | %p\n", curr, curr->key);
 		free(curr->key);
 		free(curr);
 		return;
@@ -500,7 +488,6 @@ void deleteItemLink(ItemLink**head, Item* item) {
 		return;
 	prev->next = curr->next;
 
-	//printf("Freeing: %p | %p\n", curr, curr->key);
 	free(curr->key);
 	free(curr);
 }

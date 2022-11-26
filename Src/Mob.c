@@ -3,9 +3,24 @@
 #include <stdlib.h>
 #include <stdio.h>
 #include <math.h>
+#include <utils.h>
 #include "Mob.h"
 #include "Map.h"
+const double PI = 22.0 / 7.0;
 
+/* --------------------------------------
+* File Level Documentation
+* @author	Edgar Yong
+* @email	y.yiphanedgar.digipen.edu
+* @file		Mob.c
+* @brief	This file contains all functions required for Mob Spawning during game runtime.
+			-> Initialises, generate mob objects, draw mob objects
+			-> Pathing for different mobs
+			-> Mob and player iteraction
+			-> Free All resources created through malloc
+
+* Copyright 2022 Digipen, All Rights Reserved.
+*//*-------------------------------------*/
 
 
 
@@ -55,7 +70,6 @@ void CreateBaseStat(MobStats* cStat, int type)
 }
 
 
-
 /*
 @brief		Function to Update mob with relevant information
 @brief		m	-> target mob to update values with
@@ -64,20 +78,11 @@ void CreateBaseStat(MobStats* cStat, int type)
 			offset	-> radius of which mobs cannot be spawned in
 @return		Updated Mob struct
 */
-#include <math.h>
-const double PI = 22.0 / 7.0;
 void CreateMob(Mob*m, MobStats *Base, Player*player, int offSet)
 {
 	float MaxRadius = (float) WHeight * BoundScale;
-	//Uncomment below if you want to manually set spawn radius
-	//MaxRadius = 600;
-	//Assume Player center of spawnable area
 	float nx, ny, rTheta, r, Diff = 0.0;
-	//do {
-	//} while (Diff <= offSet);
-		/*Formula for generating points in circle*/
 	rTheta = CP_Random_RangeFloat(0, 1) * 2 * PI;
-	//eqn = sqrt( random() * (MaxRadius**2 - MinRadius**2) + MinRadius**2 ) <- MinRadius == offSet
 	r = sqrt(CP_Random_RangeFloat(0, 1) * (squareDist(MaxRadius,0) - squareDist(offSet, 0)) + squareDist(offSet,0));
 	nx = player->x + r * cos(rTheta);
 	ny = player->y + r * sin(rTheta);
@@ -87,8 +92,6 @@ void CreateMob(Mob*m, MobStats *Base, Player*player, int offSet)
 	m->CStats = *Base;
 	m->Status = 1;
 }
-
-
 
 
 int MobCycleTimer = 0;
@@ -117,9 +120,7 @@ void CreateWaveTracker(void) {
 
 void InitWavesArr(WaveTrack* tracker, int start) {
 
-	MobStats bs = (MobStats){
-		0,0,0,0,0,0
-	};
+	MobStats bs = (MobStats){0};
 	for (int w = start; w < tracker->arrSize; w++) {
 		//Allocate memory to it
 		tracker->arr[w] = malloc(sizeof(Mob));
@@ -135,18 +136,13 @@ void InitWavesArr(WaveTrack* tracker, int start) {
 }
 
 
-
-
 void GenerateMobs(WaveTrack* tracker, Player* p) {
 	int MobC = 0, cost = tracker->WaveCost, randM, randMCost;
-	//MobNode* root = tracker->tree, *current;
-	
 	while (cost > 0) {
 		if (MobC == tracker->MaxMob) {
 			break;
 		}
 		randM = CP_Random_RangeInt(0, 1);
-		//randM = 0;
 		randMCost = MobCosts[randM];		//Expand array
 		if (MobC >= tracker->arrSize) {
 			int nQ = tracker->arrSize * 2;
@@ -169,18 +165,10 @@ void GenerateMobs(WaveTrack* tracker, Player* p) {
 		}
 		cost -= randMCost;
 		MobC += 1;
-		
 	}
-	//for (int i = 0; i < MobC; i++) {
-	//	tracker->tree = insert(tracker->tree, *tracker->arr[i]);
-	//}
-
-	//free(tarr);
-
 	tracker->MobCount = MobC;
 	tracker->CurrentCount = MobC;
 }
-#include <utils.h>
 void GenerateWaves(void) {
 		static int TimesUP = 0;
 		if (MobCycleTimer >= BIGNONO) {
@@ -191,9 +179,7 @@ void GenerateWaves(void) {
 			if (MobCycleTimer % BIGNONO == 1 && TimesUP == 1) {
 				TimesUP = 0;
 			}
-			
 		}
-	//	printf("Mob timer: %d | Scale: %f\n", MobCycleTimer, statscale);
 		static int DifficultyBL = 0;
 		if (MobCycleTimer % Wave_Timer == 0) {
 			DifficultyBL++;
@@ -218,7 +204,6 @@ void GenerateWaves(void) {
 						WaveTracker[i].MaxMob = MaxMob;								//Update Max Mob limit
 						WaveTracker[i].WaveCost = CWaveCost += WaveCostGrowthRate;	//Update Value which allows spawning of mobs
 					}
-					printf("Wave: %d => Cost: %d | C2: %d\n", CWave, WaveTracker[i].WaveCost, CWaveCost);
 					//Generate Waves at avaiable slot 
 					GenerateMobs(&WaveTracker[i], &P);
 					//Edit increment to spawn more mob each waves
@@ -228,9 +213,7 @@ void GenerateWaves(void) {
 				}
 			}
 		}
-	//}
 }
-
 
 
 /*
@@ -248,33 +231,18 @@ void MobLoadImage(void) {
 		"./Assets/Mobs/RangeM.png",
 		"./Assets/Mobs/RangeM_Flipped.png"
 	};
-	/*
-	(Walk = +0, Flipped = +1)
-	Small Mob  => 0 ~ 1
-	Medium Mob => 2 ~ 3
-	Big Mob    => 4 ~ 5
-	*/
-
 	Mob_Img = (sizeof(FilePaths) / sizeof(FilePaths[0]));
 	MobSprites = malloc(sizeof(CP_Image*) * Mob_Img);
 	for (int i = 0; i < Mob_Img; i++) {
 		MobSprites[i] = malloc(sizeof(CP_Image));
 		MobSprites[i] = CP_Image_Load(FilePaths[i]);
 	}
-
 }
 void DrawMobImage(Mob* m, Player* p) {
-	
 	int IHeight, IWidth, alpha = 255,original_Size, scale, leftOS = 0, rightOS = 0, topOS = 0, btmOS = 0;
 	int SizeDef = 5, StartImgI = m->Title * 2, flip = 0;
 	int FrameStep = 0, targetFPS = 6;
-	//m->AnimationCycle += 1;
 	int u0 = 0, v0 = 0, u1 = 0, v1 = 0;
-	/*
-	SM = 0, 0 * 2 = 0
-	MM = 1, 1 * 2 = 2
-	BM = 2, 2 * 2 = 4
-	*/
 	if(CP_Vector_Distance(m->coor, p->coor) <= p->HITBOX){
 		//Dying
 		alpha = (m->CStats.HP / m->BaseStats.HP) * 255;
@@ -345,20 +313,6 @@ void DrawMobImage(Mob* m, Player* p) {
 }
 
 
-/*
-@brief		Handles Collision between Mobs and Player
-@params		Mob	-> current mob obj
-			Player	-> target player location
-@returns	Nothing
-*/
-
-/*
-@brief		Function that check mob to mob collision
-@params		mob	-> Pointer to Mob
-			P	-> Pointer to Player
-			tracker	-> Pointer to WaveTrack[No_Waves] (in map.c)
-@return		
-*/
 float squareDist(float one, float two) {
 	if (two == 0)
 		return one * one;
@@ -368,15 +322,6 @@ void MobTMobCollision(Mob* m) {
 	if (m->h > 0) {
 		int status = 0;
 		Mob* tm, * main, * bounce;
-		/*
-			3 Objs m, tm, p;
-			Vector, distance from m to p
-			Distance from m to tm
-			Distance from tm to p
-
-			radius of contact of m && tm
-			dist will be left in squared form
-		*/
 		float mRad = squareDist(m->w / 2, m->h / 2), tmRad;
 		float dMtoP = squareDist(P.x - m->coor.x, P.y - m->coor.y), dTMtoP, dMtoTM;
 		CP_Vector NormBase = CP_Vector_Normalize(CP_Vector_Subtract(P.coor, m->coor));
@@ -430,7 +375,6 @@ void MobTPlayerCollision(Mob* m, Player* p) {
 
 
 void PrintWaveStats(void) {
-
 	//Result Print Start
 	printf("Current Max Mob: %5d | Current Cost: %5d\n", MaxMob, CWaveCost);
 	printf("\nCurrent Wave: %d\n%10s: ", CWave, "Wave Queue");

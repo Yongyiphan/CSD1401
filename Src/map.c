@@ -10,6 +10,13 @@
 #include "bullet.h"
 #include "Items.h"
 
+/*---------------------------------------------------
+@file		map.c
+@contributors	Sen chuan, Michael, Edgar, Geoffrey
+@brief			Main File for Zombie Break Gameplay
+
+* Copyright 2022 Digipen, All Rights Reserved.
+*//*-----------------------------------------------*/
 
 #define MAP_SIZEX 1300
 #define MAP_SIZEY 900
@@ -23,10 +30,7 @@ CP_Color dark_green;
 CP_Matrix transform;
 
 Mob* cMob;
-WaveTrack *cWave; // pause state for the game when paused.
-
-//Might be useful variable for Waves Tracking
-int totalWave = 0;
+WaveTrack* cWave;
 float mousex, mousey;
 int isPaused, isUpgrade, isDead;
 
