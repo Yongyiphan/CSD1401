@@ -106,7 +106,7 @@ void map_Update(void) {
 			isPaused = 1;
 		}
 		// If the game has proceeded over specified time
-		if (timer(isPaused, init) >= 5.0 && hasWon == 0) {
+		if (timer(isPaused, init) >= BIGNONO && hasWon == 0) {
 			isPaused = 1;
 			hasWon = 1;
 		}
