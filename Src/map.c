@@ -92,7 +92,6 @@ void map_Update(void) {
 		if (isDead) {
 			death_screen(timer(isDead, init));
 		}
-	
 		// Resume the game
 		if (CP_Input_KeyTriggered(KEY_ESCAPE))
 			isPaused = 0;
