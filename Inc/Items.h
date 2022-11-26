@@ -83,7 +83,6 @@ Item Storage
 			-> collision check player's position with items
 Mobs have a chance to drop items upon death
 */
-ItemLink* GetCurrentEffects(void);
 void UpdateAppliedEffects(Item* item);
 void DrawAppliedEffects(void);
 
@@ -94,7 +93,6 @@ void CreateItemTracker(void);
 int ItemCountSum(void);
 Item* CreateItemEffect(CP_Vector coor, int exp, int expVal);
 void IAffectPlayer(Item* i, int method);
-void PrintItemCount(void);
 
 
 void CheckItems(void);
