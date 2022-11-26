@@ -110,6 +110,7 @@ void freeLink(ItemLink* head);
 
 void FreeItemResource(void);
 
+// Checks whether a bullet item buff is active given the type of bullet
 int Bulletlegal(int);
 
 

@@ -2,7 +2,6 @@
 #ifndef BULLET_H
 #define BULLET_H
 
-
 #define BULLET_CAP 100
 #define BULLET_MOB 0
 #define BULLET_PLAYER 1
@@ -40,22 +39,31 @@ void Bulletinit(void);
 // Sets the bullet Coords and angle (x,y,degree)
 void BulletCoor(float, float, float);
 
-// Sets the data for bullet type presets (type, x, y, angle, friendly)
+// Sets the data for bullet type (type, x, y, angle, friendly)
 void BulletType(int, float, float, float, int);
 
 // Calculate the direction of the bullet (angle, bulletid)
 void BulletDirection(float, int);
 
-// Call to shoot bullet (playerx, playery, angle, type, bulletowner)
+// Call to shoot bullet (playerx, playery, angle, type, friendly)
 void BulletShoot(float, float, float, int, int);
 
-// Draws the location of all bullets
+// Draws the location of all active bullets
 void BulletDraw(void);
 
-// Check existing bullets collision against a target (x, y, w, h)
+// Check existing bullets collision against a target (x, y, width, height) of target
 int BulletCollision(float, float, float, float);
 
 // Updates homing bullet angle to lock onto mob
 void BulletHomingTrack(float targetx, float targety, float size, int i);
+
+// Updates an array with timer (array, size of array)
+void UpdateCDTimer(float*, int);
+
+// Load images assets
+void BulletImgLoad(void);
+
+// Free images assets
+void BulletImgFree(void);
 
 #endif

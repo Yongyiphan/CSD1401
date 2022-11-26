@@ -33,6 +33,7 @@ void CreateItemTracker() {
 	//Specific Drop Limitations
 	ItemTracker->DropCount[MAGNET][1] = 1;
 	AppliedEffects = NULL;
+	blegal2 = blegal3 = blegal4 = 0;
 }
 int ItemCountSum(void) {
 	int s = 0;
@@ -109,7 +110,7 @@ Item* CreateItemEffect(CP_Vector coor, int exp, int expVal) {
 		break;
 	case BULLETType:
 		newItem->Duration = 5;
-		newItem->Hitbox = 25;
+		newItem->Hitbox = 42;
 		newItem->AffectedBaseStat = B_RNG;
 	//	printf("BulletType! %d", B_RNG);
 		break;
@@ -158,18 +159,18 @@ void IAffectPlayer(Item* item, int method) {
 		switch (item->AffectedBaseStat) {
 			case 2: // Bullet Spilt
 				if (method == -1)
-					blegal2 = 0;
-				else blegal2 = 1;
+					blegal2 -= 1;
+				else blegal2 += 1;
 				break;
 			case 3: // Bullet Rocket
 				if (method == -1)
-					blegal3 = 0;
-				else blegal3 = 1;
+					blegal3 -= 1;
+				else blegal3 += 1;
 				break;
 			case 4: // Bullet Homing
 				if (method == -1)
-					blegal4 = 0;
-				else blegal4 = 1;
+					blegal4 -= 1;
+				else blegal4 += 1;
 				break;
 			}
 			break;
@@ -183,7 +184,7 @@ void ItemLoadImage(void) {
 	char* FilePaths[] = {
 		"./Assets/Items/EXP Sprite.png",
 		"./Assets/Items/Base Item Sprite.png",
-		"./Assets/Items/placeholderbullet.png",
+		"./Assets/Items/bulletitemsprite.png",
 		"./Assets/Items/Magnet.png",
 		"./Assets/Items/coin.png",
 	};
@@ -236,6 +237,15 @@ void DrawItemImage(Item* item) {
 				item->AffectedBaseStat * IWidth + IWidth - rightOS,
 				IHeight - btmOS,		
 				255);
+		break;
+	case BULLETType:
+		IWidth = CP_Image_GetWidth(SImg) / 3; //theres only 3 types of bulletitem
+		CP_Image_DrawSubImage(SImg, item->coor.x, item->coor.y, pw, ph,
+			(item->AffectedBaseStat - 2) * IWidth,
+			0,
+			(item->AffectedBaseStat - 2) * IWidth + IWidth,
+			IHeight,
+			255);
 		break;
 	default:
 		IWidth = CP_Image_GetWidth(SImg);
@@ -321,6 +331,15 @@ void DrawAppliedEffects() {
 				IWidth * SpriteIndex,
 				0,
 				IWidth * SpriteIndex + IWidth,
+				IHeight,
+				255);
+			break;
+		case BULLETType:
+			IWidth = CP_Image_GetWidth(SImg) / 3;
+			CP_Image_DrawSubImage(SImg, nx, ny, iconsize, iconsize,
+				(head->key->AffectedBaseStat - 2) * IWidth,
+				0,
+				(head->key->AffectedBaseStat - 2) * IWidth + IWidth,
 				IHeight,
 				255);
 			break;
@@ -535,19 +554,20 @@ void FreeItemResource(void) {
 	printf("Freeing Item Structures\n");
 }
 
+// Checks whether a bullet item buff is active based on bullet type
 int Bulletlegal(int i)
 {
 	switch (i) {
 	case 2:
-		if (blegal2 == 1)
+		if (blegal2 > 0)
 			return 1;
 		break;
 	case 3:
-		if (blegal3 == 1)
+		if (blegal3 > 0)
 			return 1;
 		break;
 	case 4:
-		if (blegal4 == 1)
+		if (blegal4 > 0)
 			return 1;
 		break;
 	default:
