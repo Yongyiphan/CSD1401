@@ -97,11 +97,19 @@ void Main_Menu_Update()
 				CP_Engine_SetNextGameState(upgrades_Init, upgrades_Update, upgrades_Exit);
 			}
 			//click how to play to go to instructions screen
-			
+			if (IsAreaClicked(width / 2, (height / 2) - (height / 10) + (height / 10 * 2), (width / 5), ((height / 6) / 2), CP_Input_GetMouseX(), CP_Input_GetMouseY()))
+			{
+				CP_Engine_SetNextGameState(Instructions_Init, Instructions_Update, Instructions_Exit);
+			}
 			//click options to go to options screen
 			if (IsAreaClicked(width / 2, (height / 2) - (height / 10) + (height / 10 * 3), (width / 5), ((height / 6) / 2), CP_Input_GetMouseX(), CP_Input_GetMouseY()))
 			{
 				CP_Engine_SetNextGameState(options_Init, options_Update, options_Exit);
+			}
+			//click to go to credits screen
+			if (IsAreaClicked(width / 2, (height / 2) - (height / 10) + (height / 10 * 4), (width / 5), ((height / 6) / 2), CP_Input_GetMouseX(), CP_Input_GetMouseY()))
+			{
+				CP_Engine_SetNextGameState(Credits_Init, Credits_Update, Credits_Exit);
 			}
 			//click exit to exit
 			if (IsAreaClicked(width / 2, (height / 2) - (height / 10) + (height / 10 * 5), (width / 5), ((height / 6) / 2), CP_Input_GetMouseX(), CP_Input_GetMouseY()))
