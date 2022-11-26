@@ -7,7 +7,7 @@
 #define WINDOWSIZEX 1300
 #define WINDOWSIZEY 900
 
-CP_Color white, black, grey;
+CP_Color white, black, grey, dark_green;
 float width, height;
 float SFX_length, BGM_length;
 //float SFX_vol, BGM_vol;
@@ -19,6 +19,7 @@ void options_Init(void)
 	white = CP_Color_Create(255, 255, 255, 255);
 	black = CP_Color_Create(0, 0, 0, 255);
 	grey = CP_Color_Create(100, 100, 100, 255);
+	dark_green = CP_Color_Create(17, 39, 0, 255);
 	//CP_System_SetWindowSize(WINDOWSIZEX, WINDOWSIZEY);
 	CP_Graphics_ClearBackground(grey);
 	width = CP_System_GetWindowWidth();
@@ -33,7 +34,7 @@ void options_Init(void)
 
 void options_Update(void)
 {
-	CP_Graphics_ClearBackground(grey);
+	CP_Graphics_ClearBackground(dark_green);
 	CP_Settings_RectMode(CP_POSITION_CENTER);
 	CP_Settings_TextAlignment(CP_TEXT_ALIGN_H_CENTER, CP_TEXT_ALIGN_V_MIDDLE);
 	//upgrades header

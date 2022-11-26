@@ -9,6 +9,7 @@
 #include "Mob.h"
 #include "bullet.h"
 #include "Items.h"
+#include "upgrades.h"
 
 
 #define MAP_SIZEX 1880
@@ -79,6 +80,8 @@ void map_Update(void) {
 		if (isDead) {
 			//float elapsedTime = timer(0);
 			death_screen(timer(0, isDead));
+			money.amount += P.STAT.Coin_Gained;
+			save_all_upgrades_to_file();
 		}
 	
 		// Resume the game
@@ -337,12 +340,15 @@ void map_Update(void) {
 	if (CP_Input_KeyTriggered(KEY_SPACE))
 		CP_Engine_Terminate();
 	CP_Graphics_ClearBackground(dark_green);
+
+	
 }
 
 void map_Exit(void) {
 	FreeMobResource();
 	
 	FreeItemResource();
+
 	printf("Coin Gained: %d", P.STAT.Coin_Gained);
 	
 	//free(ItemTracker);

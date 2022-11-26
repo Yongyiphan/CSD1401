@@ -18,8 +18,13 @@ typedef struct Upgrades
 	float stat;
 } upgrade;
 
-extern upgrade upgrades[NUM_UPGRADES];
+typedef struct currency
+{
+	int amount;
+} coins;
 
+extern upgrade upgrades[NUM_UPGRADES];
+extern coins money;
 char* convert_int_to_string(int value);
 
 FILE* openfile(const char* path, const char* mode);
