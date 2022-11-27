@@ -101,11 +101,13 @@ xcopy "$(SolutionDir)Assets\*" "$(OutDir)Assets\" /s /r /y /q
     </PostBuildEvent>
   </ItemDefinitionGroup>
   <ItemGroup>
+    <Image Include="..\Resources\DigiPen_Singapore_Logo (2)\DigiPen Singapore Logo\DigiPen_Singapore_WEB_WHITE.png" />
     <Image Include="Assests\DigiPen_Singapore_WEB_RED.png" />
     <Image Include="Assets\background.png" />
     <Image Include="Assets\Credits\credits.png" />
     <Image Include="Assets\Credits\ournames.png" />
     <Image Include="Assets\Credits\smeg.png" />
+    <Image Include="Assets\DigiPen_Singapore_WEB_WHITE.png" />
     <Image Include="Assets\Instructions\atkSpd_text.png" />
     <Image Include="Assets\Instructions\directionalKeys_text.png" />
     <Image Include="Assets\Instructions\dmg_text.png" />

@@ -35,12 +35,12 @@ float songLength = 500;
 int isPlaying = 0;
 int MMAudio = 0;
 float SFX_vol, BGM_vol;
-int splashscreen_time = 2;
+int splashscreen_time = 5;
 void Main_Menu_Init(void)
 {
 	title = CP_Image_Load("./Assets/Title.png");
 	zombie = CP_Image_Load("./Assets/Zombie.png");
-	logo = CP_Image_Load("./Assets/DigiPen_Singapore_WEB_RED.png");
+	logo = CP_Image_Load("./Assets/DigiPen_Singapore_WEB_WHITE.png");
 	white = CP_Color_Create(255, 255, 255, 255);
 	black = CP_Color_Create(0, 0, 0, 255);
 	grey = CP_Color_Create(100, 100, 100, 255);
