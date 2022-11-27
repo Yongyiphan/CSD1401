@@ -253,6 +253,7 @@ void map_Update(void) {
 				// Bulletlegal checks for when bullet item buff is active
 				if ((Bulletlegal(i + 1) == 1) && bulletcd[i] == 0) {
 					BulletShoot(P.x, P.y, bulletangle, i + 1, BULLET_PLAYER);
+					Audio_Bullet();
 				}
 			}
 

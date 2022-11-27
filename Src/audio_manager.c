@@ -49,8 +49,9 @@ void Audio_Pickup_EXP(void) {
 }
 
 void Audio_Pickup_Item(void) {
-	if (pickup_item_sound)
+	if (pickup_item_sound) {
 		CP_Sound_PlayAdvanced(button_click, SFX_vol, 1.0f, FALSE, SFX);
+	}
 }
 
 void Audio_Bullet(void) {

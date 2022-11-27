@@ -171,6 +171,7 @@ void IAffectPlayer(Item* item, int method) {
 		break;
 	case EXP:
 		P.LEVEL.P_EXP += item->Modifier;
+		Audio_Pickup_EXP();
 		break;
 
 	case BULLETType:
