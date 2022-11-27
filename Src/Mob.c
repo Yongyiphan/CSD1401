@@ -213,6 +213,7 @@ void GenerateWaves(void) {
 				}
 			}
 		}
+		return;
 }
 
 
@@ -324,12 +325,10 @@ float squareDist(float one, float two) {
 void MobMovement(Mob* m) {
 	if (m->h > 0) {
 		int status = 0;
-		Mob* tm, * main, * bounce;
-		float mRad = squareDist(m->w / 2, m->h / 2), tmRad;
-		float dMtoP = squareDist(P.x - m->coor.x, P.y - m->coor.y), dTMtoP, dMtoTM;
+		float dMtoP = squareDist(P.x - m->coor.x, P.y - m->coor.y);
 		CP_Vector NormBase = CP_Vector_Normalize(CP_Vector_Subtract(P.coor, m->coor));
 		CP_Vector BasePF = CP_Vector_Scale(NormBase, m->CStats.Speed);
-		int duration, interval = 2;
+		int duration;
 		float maxDistanceDelta, mag;
 		switch (m->Title) {
 		case SmallMob:
@@ -398,13 +397,15 @@ void FreeMobResource(void) {
 	for (int i = 0; i < NO_WAVES; i++) {
 		for (int a = 0; a < WaveTracker[i].arrSize; a++) {
 			free(WaveTracker[i].arr[a]);
+			WaveTracker[i].arr[a] = NULL;
 		}
 		free(WaveTracker[i].arr);
+		WaveTracker[i].arr = NULL;
 	}
 	for (int i = 0; i < Mob_Img; i++) {
-		CP_Image* c = *MobSprites[i];
 		CP_Image_Free(&(MobSprites[i]));
 		free(MobSprites[i]);
+		MobSprites[i] = NULL;
 	}
 	free(MobSprites);
 	MobSprites = NULL;

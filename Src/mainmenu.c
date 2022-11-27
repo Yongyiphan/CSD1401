@@ -39,13 +39,14 @@ float width, height;
 float songLength = 500;
 int isPlaying = 0;
 int MMAudio = 0;
-float SFX_vol = 0.2, BGM_vol = 0.05;
+//float SFX_vol = 1.0, BGM_vol = 1.0;
+float SFX_vol = 0.5, BGM_vol = 0.05;
 int splashscreen_time = 2;
 void Main_Menu_Init(void)
 {
 	title = CP_Image_Load("./Assets/Title.png");
 	zombie = CP_Image_Load("./Assets/Zombie.png");
-	logo = CP_Image_Load("./Assets/DigiPen_Singapore_WEB_RED.png");
+	logo = CP_Image_Load("./Assets/DigiPen_Singapore_WEB_WHITE.png");
 	white = CP_Color_Create(255, 255, 255, 255);
 	black = CP_Color_Create(0, 0, 0, 255);
 	grey = CP_Color_Create(100, 100, 100, 255);
@@ -70,7 +71,6 @@ void Main_Menu_Update()
 	if (totalElapsedTime < splashscreen_time)
 	{
 		CP_Image_Draw(logo, CP_System_GetWindowWidth() / 2, CP_System_GetWindowHeight() / 2, CP_System_GetWindowWidth(), CP_System_GetWindowHeight()/2, transparency);
-		printf("%f\n", totalElapsedTime);
 	}
 	if (totalElapsedTime >= splashscreen_time)
 	{
@@ -129,20 +129,16 @@ void Main_Menu_Update()
 			if (IsAreaClicked(width / 2, (height / 2) - (height / 10) + (height / 10 * 5), (width / 5), ((height / 6) / 2), CP_Input_GetMouseX(), CP_Input_GetMouseY()))
 			{
 				save_all_upgrades_to_file();
+				Audio_Exit();
 				CP_Engine_Terminate();
 			}
 		}
 	}
 
-
-	if (CP_Input_KeyDown(KEY_ENTER))
-	{
-		CP_Engine_SetNextGameState(map_Init, map_Update, map_Exit);
-	}
 }
 
 
 void Main_Menu_Exit()
 {
-	Audio_Exit();
+	//Audio_Exit();
 }

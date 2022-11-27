@@ -39,6 +39,7 @@ void options_Init(void)
 	center = CP_Vector_Set(width / 2, height / 2);
 	SFX_length = rectWidth * (SFX_vol);
 	BGM_length = rectWidth * BGM_vol;
+	//Audio_Init();
 }
 
 void options_Update(void)
@@ -111,5 +112,5 @@ void options_Update(void)
 
 void options_Exit(void)
 {
-
+	
 }

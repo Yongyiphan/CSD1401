@@ -2,7 +2,7 @@
 #include "cprocessing.h"
 #include "mainmenu.h"
 #include <stdio.h>
-
+#include "audio_manager.h"
 /* --------------------------------------
 * File Level Documentation
 * @contributor	Sen Chuan Tay, Michael Mah, Edgar Yong, Geoffrey Cho

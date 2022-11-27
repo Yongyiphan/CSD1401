@@ -46,6 +46,8 @@
     <Image Include="Assets\Instructions\normal_exp.png" />
     <Image Include="Assets\Instructions\magnet_text.png" />
     <Image Include="Assets\Instructions\directionalKeys_text.png" />
+    <Image Include="..\Resources\DigiPen_Singapore_Logo (2)\DigiPen Singapore Logo\DigiPen_Singapore_WEB_WHITE.png" />
+    <Image Include="Assets\DigiPen_Singapore_WEB_WHITE.png" />
   </ItemGroup>
   <ItemGroup>
     <Media Include="Assets\Sound\click.wav" />

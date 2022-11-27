@@ -165,7 +165,7 @@ void IAffectPlayer(Item* item, int method) {
 		break;
 	case EXP:
 		P.LEVEL.P_EXP += item->Modifier;
-		Audio_Pickup_EXP();
+		//Audio_Pickup_EXP();
 		break;
 
 	case BULLETType:
@@ -544,9 +544,9 @@ void freeLink(ItemLink* head) {
 void FreeItemResource(void) {
 	printf("Freeing Item Images\n");
 	for (int i = 0; i < Img_C; i++) {
-		CP_Image* c = ItemSprites[i];
 		CP_Image_Free(&(ItemSprites[i]));
 		free(ItemSprites[i]);
+		ItemSprites[i] = NULL;
 	}
 	free(ItemSprites);
 	ItemSprites = NULL;
