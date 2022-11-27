@@ -74,7 +74,7 @@ void PrintItemCount(void) {
 #pragma region
 Item* CreateItemEffect(CP_Vector coor, int exp, int expVal) {
 	//Get Random chance generator
-	float RNG = CP_Random_RangeFloat(0, 1), DropChance;
+	float RNG = CP_Random_RangeFloat(0, 1);
 	//Get Random Type of effect
 	// Get Random Type of bullet
 	int B_RNG = CP_Random_RangeInt(2, 4);
@@ -109,7 +109,7 @@ Item* CreateItemEffect(CP_Vector coor, int exp, int expVal) {
 		if (statgen == 0) {
 			newItem->Duration = -1;
 		}
-		newItem->Modifier = 0.10;
+		newItem->Modifier = 0.10f;
 		newItem->Hitbox = 42;
 		break;
 	case MAGNET:
@@ -164,8 +164,8 @@ void IAffectPlayer(Item* item, int method) {
 		}
 		break;
 	case EXP:
-		P.LEVEL.P_EXP += item->Modifier;
-		//Audio_Pickup_EXP();
+		P.LEVEL.P_EXP += (int) item->Modifier;
+		Audio_Pickup_EXP();
 		break;
 
 	case BULLETType:
@@ -188,13 +188,13 @@ void IAffectPlayer(Item* item, int method) {
 		}
 		break;
 	case COIN:
-		P.STAT.Coin_Gained += item->Modifier;
+		P.STAT.Coin_Gained += (int) item->Modifier;
 		break;
 	}
 }
 
 
-CP_Image** ItemSprites = NULL;
+CP_Image ItemSprites[ISpriteSize];
 int Img_C;
 void ItemLoadImage(void) {
 	char* FilePaths[] = {
@@ -205,21 +205,17 @@ void ItemLoadImage(void) {
 		"./Assets/Items/coin.png",
 	};
 	Img_C = (sizeof(FilePaths) / sizeof(FilePaths[0]));
-	if (ItemSprites == NULL) {
-		ItemSprites = malloc(sizeof(CP_Image*) * Img_C);
-		for (int i = 0; i < Img_C; i++) {
-			ItemSprites[i] = malloc(sizeof(CP_Image));
-			ItemSprites[i] = CP_Image_Load(FilePaths[i]);
-		}
+	for (int i = 0; i < Img_C; i++) {
+		ItemSprites[i] = CP_Image_Load(FilePaths[i]);
 	}
 }
 void DrawItemImage(Item* item) {
 	if (item == NULL)
 		return;
-	int original_Size = 32, scale, leftOS = 0, rightOS = 0, topOS = 0, btmOS = 0;
-	CP_Image* SImg = ItemSprites[item->Type];
-	int IHeight = CP_Image_GetHeight(SImg),IWidth;
-	int ph = IHeight * item->Hitbox / IHeight, pw = ph;
+	float original_Size = 32, scale, leftOS = 0, rightOS = 0, topOS = 0, btmOS = 0;
+	CP_Image SImg = ItemSprites[item->Type];
+	float IHeight =(float) CP_Image_GetHeight(SImg),IWidth = (float) CP_Image_GetWidth(SImg);
+	float ph = IHeight * item->Hitbox / IHeight, pw = ph;
 	int Displacement[3] = { -1, 0, 1 }, dx, dy;
 	if (item->Dis[0] == 0 && item->Dis[1] == 0 && item->Type != EXP) {
 		//draw item at random location around exp
@@ -234,11 +230,11 @@ void DrawItemImage(Item* item) {
 	}
 	switch (item->Type) {
 	case StatBoost:
-		IWidth = CP_Image_GetWidth(SImg) / NoBaseStats;
-		CP_Image_DrawSubImage(SImg, item->coor.x, item->coor.y, pw, ph,
-			IWidth * (item->AffectedBaseStat % 5) ,
+		IWidth = IWidth / NoBaseStats;
+		CP_Image_DrawSubImage(SImg, item->coor.x, item->coor.y, (float) pw, (float) ph,
+			 IWidth * (item->AffectedBaseStat % 5),
 			0,
-			IWidth * (item->AffectedBaseStat % 5) + IWidth,
+			 IWidth * (item->AffectedBaseStat % 5) + IWidth,
 			IHeight,
 			255);
 		break;
@@ -247,7 +243,7 @@ void DrawItemImage(Item* item) {
 		scale = IHeight / original_Size;
 		leftOS = scale * 0, rightOS = scale * 10;
 		topOS = scale * 0, btmOS = scale * 10;
-		IWidth = CP_Image_GetWidth(SImg) / 3; //theres only 3 types of exp
+		IWidth = IWidth / 3; //theres only 3 types of exp
 		//Update when exp get increase as progression
 		CP_Image_DrawSubImage(SImg, item->coor.x, item->coor.y,pw, ph, 
 				item->AffectedBaseStat * IWidth + leftOS,
@@ -257,7 +253,7 @@ void DrawItemImage(Item* item) {
 				255);
 		break;
 	case BULLETType:
-		IWidth = CP_Image_GetWidth(SImg) / 3; //theres only 3 types of bulletitem
+		IWidth = IWidth / 3; //theres only 3 types of bulletitem
 		CP_Image_DrawSubImage(SImg, item->coor.x, item->coor.y, pw, ph,
 			(item->AffectedBaseStat - 2) * IWidth,
 			0,
@@ -266,7 +262,7 @@ void DrawItemImage(Item* item) {
 			255);
 		break;
 	default:
-		IWidth = CP_Image_GetWidth(SImg);
+		//IWidth = CP_Image_GetWidth(SImg);
 		CP_Image_DrawSubImage(SImg, item->coor.x, item->coor.y, pw, ph,0,0,IWidth,IHeight,255);
 		break;
 	}
@@ -283,7 +279,7 @@ void UpdateAppliedEffects(Item* item) {
 	while (head != NULL) {
 		count++;
 		if (item->Type == head->key->Type && item->AffectedBaseStat == head->key->AffectedBaseStat) {
-			float durationleft = head->key->Duration - ( MobCycleTimer - head->key->Start);
+			int durationleft = head->key->Duration - ( MobCycleTimer - head->key->Start);
 			head->key->Start = MobCycleTimer;
 			found = 1;
 			//Found existing applied effect, break, time for next loop -> iter == 1
@@ -306,7 +302,7 @@ void UpdateAppliedEffects(Item* item) {
 
 UpdateEffects:
 	while (head != NULL) {
-		float timeLeft = head->key->Duration - ( MobCycleTimer - head->key->Start);
+		int timeLeft = head->key->Duration - ( MobCycleTimer - head->key->Start);
 		if (timeLeft <= 0) {
 			ItemLink* next = head->next;
 			deleteItemLink(&AppliedEffects, head->key);
@@ -326,14 +322,16 @@ void DrawAppliedEffects() {
 	* Use For loop, easier to control
 	*/
 	CP_Image SImg;
-	int iconsize = 64, nx = P.coor.x + (CP_System_GetWindowWidth()/ 2) - iconsize, ny = P.coor.y + (CP_System_GetWindowHeight() /2 ) - iconsize /2;
-	int IHeight, IWidth, SpriteIndex;
+	float iconsize = 64, nx = (int) P.coor.x + (CP_System_GetWindowWidth()/ 2) - iconsize, ny = (int) P.coor.y + (CP_System_GetWindowHeight() /2 ) - iconsize /2;
+	float IHeight, IWidth;
+	int SpriteIndex;
 	for (;head != NULL; head = head->next, nx -= iconsize) {
 		SImg = ItemSprites[head->key->Type];
-		IHeight = CP_Image_GetHeight(SImg);
+		IHeight = (float) CP_Image_GetHeight(SImg);
+		IWidth = (float)CP_Image_GetWidth(SImg);
 		switch (head->key->Type) {
 		case StatBoost:
-			IWidth = CP_Image_GetWidth(SImg) / NoBaseStats, SpriteIndex = head->key->AffectedBaseStat % NoBaseStats;
+			IWidth = IWidth / NoBaseStats, SpriteIndex = head->key->AffectedBaseStat % NoBaseStats;
 			CP_Image_DrawSubImage(SImg, nx, ny, iconsize, iconsize,
 				IWidth * SpriteIndex,
 				0,
@@ -342,7 +340,7 @@ void DrawAppliedEffects() {
 				255);
 			break;
 		case BULLETType:
-			IWidth = CP_Image_GetWidth(SImg) / 3;
+			IWidth = IWidth / 3;
 			CP_Image_DrawSubImage(SImg, nx, ny, iconsize, iconsize,
 				(head->key->AffectedBaseStat - 2) * IWidth,
 				0,
@@ -351,14 +349,14 @@ void DrawAppliedEffects() {
 				255);
 			break;
 		default:
-			IWidth = CP_Image_GetWidth(SImg);
+			//IWidth = CP_Image_GetWidth(SImg);
 			CP_Image_DrawSubImage(SImg, nx, ny, iconsize, iconsize,0,0,IWidth,IHeight,255);
 			break;
 		}
 		CP_Settings_StrokeWeight(0);
 		CP_Settings_RectMode(CP_POSITION_CENTER);
 		CP_Settings_Fill(CP_Color_Create(0,0,0,80));
-		float timeLeft = head->key->Duration - ( MobCycleTimer - head->key->Start);
+		float timeLeft =  (float) head->key->Duration - ( (float) MobCycleTimer - (float) head->key->Start);
 		float nheight = (timeLeft / (float) head->key->Duration) * iconsize;
 		CP_Graphics_DrawRect(nx, ny + (iconsize/2), iconsize, nheight);
 		char buffer[255];
@@ -473,7 +471,7 @@ void ItemInteraction(ItemLink** head) {
 		}
 		current = current->next;
 	}
-	return head;
+	return;
 }
 
 /*
@@ -528,7 +526,7 @@ void deleteItemLink(ItemLink**head, Item* item) {
 
 void freeLink(ItemLink* head) {
 	if (NULL == head)
-		return NULL;
+		return;
 	ItemLink* tmp = NULL;
 	while (head != NULL) {
 		tmp = head;
@@ -542,21 +540,18 @@ void freeLink(ItemLink* head) {
 
 
 void FreeItemResource(void) {
-	printf("Freeing Item Images\n");
 	for (int i = 0; i < Img_C; i++) {
-		CP_Image_Free(&(ItemSprites[i]));
+		CP_Image_Free(&ItemSprites[i]);
 		free(ItemSprites[i]);
 		ItemSprites[i] = NULL;
 	}
-	free(ItemSprites);
-	ItemSprites = NULL;
+	
 
 	freeLink(ItemTracker->ExpLL);
 	freeLink(ItemTracker->ItemLL);
 	freeLink(AppliedEffects);
 	free(ItemTracker);
 	ItemTracker = NULL;
-	printf("Freeing Item Structures\n");
 }
 
 // Checks whether a bullet item buff is active based on bullet type
@@ -578,5 +573,6 @@ int Bulletlegal(int i)
 	default:
 		return 0;
 	}
+	return 0;
 }
 

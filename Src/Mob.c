@@ -82,11 +82,11 @@ void CreateMob(Mob*m, MobStats *Base, Player*player, int offSet)
 {
 	float MaxRadius = (float) WHeight * BoundScale;
 	float nx, ny, rTheta, r, Diff = 0.0;
-	rTheta = CP_Random_RangeFloat(0, 1) * 2 * PI;
-	r = sqrt(CP_Random_RangeFloat(0, 1) * (squareDist(MaxRadius,0) - squareDist(offSet, 0)) + squareDist(offSet,0));
-	nx = player->x + r * cos(rTheta);
-	ny = player->y + r * sin(rTheta);
-	m->coor = CP_Vector_Add(CP_Vector_Scale(CP_Vector_Set(cos(rTheta), sin(rTheta)), r), player->coor);
+	rTheta = CP_Random_RangeFloat(0, 1) * 2 * (float) PI;
+	r = (float) sqrt(CP_Random_RangeFloat(0.0f, 1.0f) * (squareDist(MaxRadius,0.0f) - squareDist((float) offSet, 0.0f)) + squareDist((float)offSet,0.0f));
+	nx = player->x + r * (float) cos(rTheta);
+	ny = player->y + r * (float) sin(rTheta);
+	m->coor = CP_Vector_Add(CP_Vector_Scale(CP_Vector_Set((float) cos(rTheta), (float) sin(rTheta)), r), player->coor);
 	m->dest = player->coor;
 	m->BaseStats = *Base;
 	m->CStats = *Base;
@@ -100,7 +100,7 @@ int MobCount[NO_WAVES];
 WaveTrack WaveTracker[NO_WAVES];
 void CreateWaveTracker(void) {
 	CWave = 0, MaxMob = MaxMobGrowthRate, CWaveCost = WaveCostGrowthRate;
-	MobCycleTimer = 0, statscale = 1.1;
+	MobCycleTimer = 0, statscale = 1.1f;
 	for (int i = 0; i < NO_WAVES; i++) {
 		WaveTracker[i] = (WaveTrack){
 			MaxMob, //Max Mob
@@ -125,13 +125,16 @@ void InitWavesArr(WaveTrack* tracker, int start) {
 		//Allocate memory to it
 		tracker->arr[w] = malloc(sizeof(Mob));
 		//Fill each mob pointers with data
-		*tracker->arr[w] = (Mob){ 0 };
-		tracker->arr[w]->Title = w;
-		tracker->arr[w]->BaseStats = bs;
-		tracker->arr[w]->CStats = bs;
-		//Dead = 0, Alive = 1, Blank = 2
-		tracker->arr[w]->Status = 2;
-		tracker->arr[w]->coor = CP_Vector_Zero();
+		if (tracker->arr[w] != NULL) {
+			*tracker->arr[w] = (Mob){ 0 };
+			tracker->arr[w]->Title = w;
+			tracker->arr[w]->BaseStats = bs;
+			tracker->arr[w]->CStats = bs;
+			//Dead = 0, Alive = 1, Blank = 2
+			tracker->arr[w]->Status = 2;
+			tracker->arr[w]->coor = CP_Vector_Zero();
+
+		}
 	}
 }
 
@@ -145,23 +148,25 @@ void GenerateMobs(WaveTrack* tracker, Player* p) {
 		randM = CP_Random_RangeInt(0, 1);
 		randMCost = MobCosts[randM];		//Expand array
 		if (MobC >= tracker->arrSize) {
-			int nQ = tracker->arrSize * 2;
-			Mob** tArr = realloc(tracker->arr,sizeof(Mob*) * nQ);
-			if (NULL == tArr) {
-				return NULL;
-			}
-			tracker->arr = tArr;
-			tracker->arrSize = nQ;
-			InitWavesArr(tracker, MobC);
-			printf("\tNew Arr Size = %d", nQ);
+			//Not really necessary to realloc.
+			//int nQ = tracker->arrSize * 2;
+			//Mob** tArr = realloc(tracker->arr, sizeof(Mob*) * nQ);
+			//if (NULL != tArr) {
+			//	tracker->arr = tArr;
+			//	tracker->arrSize = nQ;
+			//	InitWavesArr(tracker, MobC);
+			//	printf("\tNew Arr Size = %d", nQ);
+			//}
+			break;
 		}
 
 		if (cost >= randMCost) {
-			Mob* cMob = tracker->arr[MobC];
-			cMob->Title = randM;
-			CreateBaseStat(&cMob->BaseStats, randM);
-			CreateMob(cMob, &cMob->BaseStats, p, tracker->spawnOffset);
-			
+			if (tracker->arr[MobC] != 0) {
+				Mob* cMob = tracker->arr[MobC];
+				cMob->Title = randM;
+				CreateBaseStat(&cMob->BaseStats, randM);
+				CreateMob(cMob, &cMob->BaseStats, p, tracker->spawnOffset);
+			}
 		}
 		cost -= randMCost;
 		MobC += 1;
@@ -223,7 +228,8 @@ void GenerateWaves(void) {
 			Size	-> Size of array
 @returns	Filled up array of pointers to CP_Image Objs
 */
-CP_Image** MobSprites = NULL;
+//CP_Image** MobSprites = NULL;
+CP_Image MobSprites[MSpriteSize];
 int Mob_Img;
 void MobLoadImage(void) {
 	char* FilePaths[] = {
@@ -233,41 +239,40 @@ void MobLoadImage(void) {
 		"./Assets/Mobs/RangeM_Flipped.png"
 	};
 	Mob_Img = (sizeof(FilePaths) / sizeof(FilePaths[0]));
-	if (MobSprites == NULL) {
-		MobSprites = malloc(sizeof(CP_Image*) * Mob_Img);
-		for (int i = 0; i < Mob_Img; i++) {
-			MobSprites[i] = malloc(sizeof(CP_Image));
-			MobSprites[i] = CP_Image_Load(FilePaths[i]);
-		}
+	for (int i = 0; i < Mob_Img; i++) {
+		MobSprites[i] = CP_Image_Load(FilePaths[i]);
 	}
 }
 void DrawMobImage(Mob* m, Player* p) {
-	int IHeight, IWidth, alpha = 255,original_Size, scale, leftOS = 0, rightOS = 0, topOS = 0, btmOS = 0;
-	int SizeDef = 5, StartImgI = m->Title * 2, flip = 0;
+	float IHeight, IWidth, original_Size, scale, leftOS = 0, rightOS = 0, topOS = 0, btmOS = 0;
+	int SizeDef = 5, StartImgI = m->Title * 2, flip = 0, alpha = 255;
 	int FrameStep = 0, targetFPS = 6;
 	int u0 = 0, v0 = 0, u1 = 0, v1 = 0;
 	if(CP_Vector_Distance(m->coor, p->coor) <= p->HITBOX){
 		//Dying
-		alpha = (m->CStats.HP / m->BaseStats.HP) * 255;
+		alpha = (int)((m->CStats.HP / m->BaseStats.HP) * 255);
 	}
 	if (m->coor.x > p->coor.x) {
 		StartImgI += 1;
 		flip = 1;
 	}
-	CP_Image* SImg = MobSprites[StartImgI];
-	IHeight = CP_Image_GetHeight(SImg);
-	int h, w;
-	float t;
+	CP_Image SImg = MobSprites[StartImgI];
+	IHeight = (float) CP_Image_GetHeight(SImg), IWidth = (float) CP_Image_GetWidth(SImg);
+	float h, w, t, temp;
 	switch (m->Title) {
 		case SmallMob:
 			original_Size = 32;
 			SizeDef = 5, targetFPS = 6;
 			scale = IHeight / original_Size;
-			IWidth = CP_Image_GetWidth(SImg) / SizeDef;
+			IWidth = IWidth/ SizeDef;
 
-			leftOS = scale * 9, rightOS = scale * 6;
-			if (flip == 1) SWAP(leftOS, rightOS);
-			topOS = scale * 7, btmOS = scale * 5;
+			leftOS = scale * 10, rightOS = scale * 7;
+			if (flip == 1) {
+				temp = rightOS;
+				rightOS = leftOS;
+				leftOS = temp;
+			}
+			topOS = scale * 8, btmOS = scale * 6;
 			
 			if (m->h == 0 && m->w == 0) {
 				h = original_Size * scale - topOS - btmOS;
@@ -279,10 +284,10 @@ void DrawMobImage(Mob* m, Player* p) {
 
 			FrameStep = (m->AnimationCycle / targetFPS) % SizeDef;
 			
-			CP_Image_DrawSubImage(SImg, m->coor.x, m->coor.y,m->w, m->h, 
-				FrameStep * IWidth + leftOS,
+			CP_Image_DrawSubImage(SImg, m->coor.x, m->coor.y, m->w, m->h, 
+				(float) (FrameStep * IWidth + leftOS),
 				topOS,
-				FrameStep * IWidth + IWidth - rightOS,
+				(float) (FrameStep * IWidth + IWidth - rightOS),
 				IHeight - btmOS,		
 				alpha);
 			break;
@@ -290,11 +295,15 @@ void DrawMobImage(Mob* m, Player* p) {
 			original_Size = 32;
 			SizeDef = 2, targetFPS = 4;
 			scale = IHeight / original_Size;
-			IWidth = CP_Image_GetWidth(SImg) / SizeDef;
+			IWidth = IWidth / SizeDef;
 
-			leftOS = scale * 8, rightOS = scale * 7;
-			if (flip == 1) SWAP(leftOS, rightOS);
-			topOS = scale * 6, btmOS = scale * 4;
+			leftOS = scale * 9, rightOS = scale * 8;
+			if (flip == 1) {
+				temp = rightOS;
+				rightOS = leftOS;
+				leftOS = temp;
+			}
+			topOS = scale * 7, btmOS = scale * 5;
 			if (m->h == 0 && m->w == 0) {
 				h = original_Size * scale - topOS - btmOS;
 				w = original_Size * scale - leftOS - rightOS;
@@ -304,9 +313,9 @@ void DrawMobImage(Mob* m, Player* p) {
 			}
 			FrameStep = (m->AnimationCycle / targetFPS) % SizeDef;
 			CP_Image_DrawSubImage(SImg, m->coor.x, m->coor.y, m->w, m->h,
-				FrameStep * IWidth + leftOS,
+				(float) (FrameStep * IWidth + leftOS),
 				topOS,
-				FrameStep * IWidth + IWidth - rightOS,
+				(float) (FrameStep * IWidth + IWidth - rightOS),
 				IHeight - btmOS,		
 				alpha);
 			break;
@@ -335,7 +344,7 @@ void MobMovement(Mob* m) {
 			break;
 		case MediumMob:
 			duration = 5;
-			if (dMtoP < squareDist(CP_System_GetWindowWidth() / 2, 0)) {
+			if (dMtoP < squareDist((float) CP_System_GetWindowWidth() / 2, 0)) {
 				if (m->AnimationCycle % 80 == 0) {
 					m->boost = 1;
 					m->dest = P.coor;
@@ -373,8 +382,6 @@ void MobTPlayerCollision(Mob* m, Player* p) {
 	}
 }
 
- 
-
 
 void PrintWaveStats(void) {
 	//Result Print Start
@@ -399,15 +406,11 @@ void FreeMobResource(void) {
 			free(WaveTracker[i].arr[a]);
 			WaveTracker[i].arr[a] = NULL;
 		}
-		free(WaveTracker[i].arr);
-		WaveTracker[i].arr = NULL;
+		free(*WaveTracker[i].arr);
+		//WaveTracker[i].arr = NULL;
 	}
 	for (int i = 0; i < Mob_Img; i++) {
-		CP_Image_Free(&(MobSprites[i]));
-		free(MobSprites[i]);
-		MobSprites[i] = NULL;
+		CP_Image_Free(&MobSprites[i]);
 	}
-	free(MobSprites);
-	MobSprites = NULL;
 
 }

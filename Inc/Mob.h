@@ -19,12 +19,9 @@
 #include "player.h"
 #include "cprocessing.h"
 
-#define MobTypes 5
+#define MobTypes 2
 #define SmallMob 0
 #define MediumMob 1
-#define BigMob 2
-#define RangedMob 3
-#define BigBoss 4
 
 
 
@@ -33,9 +30,9 @@ typedef struct MobBase {
 	float DEF;
 	float Speed;
 
-	int Range;
-	int Dmg;
-	int size;
+	float Range;
+	float Dmg;
+	float size;
 
 }MobStats;
 
@@ -48,7 +45,7 @@ typedef struct Mob {
 	CP_Vector coor, dest;
 	int Status; 
 	int AnimationCycle;
-	int w, h;
+	float w, h;
 	//Dead = 0 | Alive = 1
 	int boost, jump;
 } Mob;
@@ -71,7 +68,9 @@ typedef struct WaveTracker {
 #define Img_Scale 80
 #define BoundScale 1.2f
 
-extern CP_Image** MobSprites;
+//extern CP_Image** MobSprites;
+#define MSpriteSize 5
+extern CP_Image MobSprites[MSpriteSize];
 extern int Mob_Img;
 // --------------------------- //
 
@@ -83,8 +82,8 @@ extern int Mob_Img;
 #define MaxUpperLimit 1000
 #define WaveCostGrowthRate 2
 #define SpawnAreaOffset 1000
-#define StartMobQuantity 150
-#define MobStatScale 1.04
+#define StartMobQuantity 1500
+#define MobStatScale 1.04f
 #define BIGNONO 180
 
 extern int WaveIDQueue[NO_WAVES], MobCount[NO_WAVES], CWave, CWaveCost, CMaxMob;

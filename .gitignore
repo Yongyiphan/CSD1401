@@ -1,9 +1,11 @@
 #git ignore
 /.tmp
+.tmp/
 
 /bin
 /Trash
 /.vs
+.vs/
 *vcxproj.user
 
 # User-specific files

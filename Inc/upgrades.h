@@ -40,7 +40,7 @@ typedef struct currency
 
 extern upgrade upgrades[NUM_UPGRADES];
 extern coins money;
-char* convert_int_to_string(int value);
+char* convert_int_to_string(char buffer[], int value);
 
 FILE* openfile(const char* path, const char* mode);
 void closefile(FILE* file);

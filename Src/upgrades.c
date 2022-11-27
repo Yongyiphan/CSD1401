@@ -46,8 +46,8 @@ void upgrades_Init(void)
 	red = CP_Color_Create(200, 0, 0, 255);
 	//window size
 	CP_Graphics_ClearBackground(dark_green);
-	width = CP_System_GetWindowWidth();
-	height = CP_System_GetWindowHeight();
+	width = (float) CP_System_GetWindowWidth();
+	height = (float) CP_System_GetWindowHeight();
 
 	//name upgrades
 	char* upgradename[7] = { "HEALTH", "SPEED", "DAMAGE", "FIRE RATE", "DEFENSE", "PICK UP", "BULLET SPEED" };
@@ -80,7 +80,7 @@ void upgrades_Update(void)
 	CP_Settings_Fill(white);
 	CP_Settings_TextSize(50);
 	char buffer[16];
-	CP_Font_DrawText(convert_int_to_string(buffer, money.amount), width - width / 10, height / 7, width / 20);
+	CP_Font_DrawText(convert_int_to_string(buffer, money.amount), width - width / 10.0f, height / 7.0f);
 
 	CP_Settings_Fill(black);
 	//boxes for upgrades row 1
@@ -96,15 +96,10 @@ void upgrades_Update(void)
 	{	
 		char buffer[16];
 		CP_Settings_Fill(white);
-		CP_Font_DrawText(text[i], (width / 6) * (i + 1), height / 3 - height / 24, width / 8);
+		CP_Font_DrawText(text[i], (width / 6.0f) * (i + 1), height / 3.0f - height / 24.0f);
 		CP_Font_DrawText(convert_int_to_string(buffer, upgrades[i].level), (width / 6)* (i + 1), height / 3);
 		
 		CP_Font_DrawText("$2000", (width / 6) * (i + 1), height / 3 + height / 24);
-	}
-
-	for (int i = 0; i < 5; i++)
-	{
-		
 	}
 
 	//draw increase rect
@@ -122,7 +117,7 @@ void upgrades_Update(void)
 					money.amount -= upgrades[i].cost;
 					upgrades[i].level += 1;
 					printf("%d ", upgrades[i].level);
-					upgrades[i].stat = upgrades[i].level * 10;
+					upgrades[i].stat = (float) upgrades[i].level * 10.0f;
 					printf("%f\n", upgrades[i].stat);
 					save_all_upgrades_to_file();
 				}
@@ -154,7 +149,7 @@ void upgrades_Update(void)
 					upgrades[i + 5].level += 1;
 					printf("%d ", upgrades[i + 5].level);
 
-					upgrades[i + 5].stat = upgrades[i + 5].level * 10;
+					upgrades[i + 5].stat = (float) upgrades[i + 5].level * 10.0f;
 
 					printf("%f\n", upgrades[i + 5].stat);
 					save_all_upgrades_to_file();
@@ -163,7 +158,7 @@ void upgrades_Update(void)
 		}
 		CP_Settings_Fill(white);
 		CP_Settings_TextSize(100);
-		CP_Font_DrawText("+", (width / 6) * (i + 1), height / 3 + height / 4 + height / 10, width / 12);
+		CP_Font_DrawText("+", (width / 6) * (i + 1), height / 3 + height / 4 + height / 10);
 	}
 
 	char* text2[] = { "PICK UP", "PROJECTILE SPEED" };
@@ -173,9 +168,9 @@ void upgrades_Update(void)
 		CP_Settings_TextSize(30);
 		CP_Settings_Fill(white);
 		char buffer[16];
-		CP_Font_DrawText(text2[i], (width / 6)* (i + 1), height / 3 + height / 4 - height / 24, width / 8, height / 8);
-		CP_Font_DrawText(convert_int_to_string(buffer, upgrades[i+5].level), (width / 6) * (i + 1), height / 3 + height / 4, width / 8, height / 8);
-		CP_Font_DrawText("$2000", (width / 6) * (i + 1), height / 3 + height / 4 + height / 24);
+		CP_Font_DrawText(text2[i], (width / 6.0f)* (i + 1), height / 3.0f + height / 4.0f - height / 24.0f);
+		CP_Font_DrawText(convert_int_to_string(buffer, upgrades[i+5].level), (width / 6.0f) * (i + 1), height / 3.0f + height / 4.0f);
+		CP_Font_DrawText("$2000", (width / 6.0f) * (i + 1), height / 3 + height / 4 + height / 24);
 	}
 
 	//reset button
@@ -261,28 +256,28 @@ FILE* openfile(const char* path, const char* mode)
 {
 	FILE* fptr = NULL;
 	errno_t err = fopen_s(&fptr, path, mode);
-	if (err == 0)
-	{
-		printf("File %s opened.\n", path);
-	}
-	else
-	{
-		printf("File %s is not opened.\n", path);
-	}
+	//if (err == 0)
+	//{
+	//	printf("File %s opened.\n", path);
+	//}
+	//else
+	//{
+	//	printf("File %s is not opened.\n", path);
+	//}
 	return fptr;
 }
 
 void closefile(FILE* file)
 {
 	errno_t err = fclose(file);
-	if (err == 0)
-	{
-		printf("File is closed,\n");
-	}
-	else
-	{
-		printf("File not closed.\n");
-	}
+	//if (err == 0)
+	//{
+	//	printf("File is closed,\n");
+	//}
+	//else
+	//{
+	//	printf("File not closed.\n");
+	//}
 }
 void upgrades_Exit(void)
 {

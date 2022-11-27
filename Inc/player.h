@@ -116,7 +116,6 @@ When "exp" reaches the value of "exp_req":
 */
 int level_up(LEVEL *level);
 
-char* GetBaseStats(int type);
 
 
 #endif

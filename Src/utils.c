@@ -24,31 +24,28 @@
 int IsAreaClicked(float area_center_x, float area_center_y, float area_width, float area_height, float click_x, float click_y)
 {
 	// within x dimensions of the given area
-	int leftLimit = area_center_x - area_width / 2;
-	int rightLimit = area_center_x + area_width / 2;
-	int topLimit = area_center_y - area_height / 2;
-	int bottomLimit = area_center_y + area_height / 2;
+	float leftLimit = area_center_x - area_width / 2.0f;
+	float rightLimit = area_center_x + area_width / 2.0f;
+	float topLimit = area_center_y - area_height / 2.0f;
+	float bottomLimit = area_center_y + area_height / 2.0f;
 
 	// if x-coordinate of click is within left and right of the area, and 
 	// y-coordinate is within top and bottom of the area, then return 1. If not, return 0.
 	if (leftLimit < click_x && click_x < rightLimit && topLimit < click_y && click_y < bottomLimit) {
-		//Audio_ButtonClick();
+		Audio_ButtonClick();
 		return 1;
 	}
 	return 0;
 }
 
 void option_screen(int* isPaused) {
-	float screen_width = CP_System_GetWindowWidth();
-	float screen_height = CP_System_GetWindowHeight();
+	float screen_width = (float) CP_System_GetWindowWidth();
+	float screen_height = (float) CP_System_GetWindowHeight();
 	CP_Vector middle = CP_Vector_Set(screen_width / 2, screen_height / 2);
 
-	int width = 300;
-	int height = 60;
-	int padding = 30;
-	float cornerRadius = 20;
+	float width = 300.0f, height = 60.0f, padding = 30.0f,  cornerRadius = 20.0f;
 
-	float textSize = 30.0;
+	float textSize = 30.0f;
 
 	CP_Settings_RectMode(CP_POSITION_CENTER);
 
@@ -56,7 +53,7 @@ void option_screen(int* isPaused) {
 	// Options background
 	CP_Settings_Fill(CP_Color_Create(80, 80, 100, 120));
 
-	CP_Graphics_DrawRectAdvanced(middle.x, middle.y, screen_width * 4.0 / 10, screen_height * 8.0 / 10, 0, cornerRadius);
+	CP_Graphics_DrawRectAdvanced(middle.x, middle.y, screen_width * 4.0f / 10, screen_height * 8.0f / 10, 0, cornerRadius);
 
 	// Draw out option boxes
 	CP_Settings_Fill(CP_Color_Create(255, 100, 100, 255));
@@ -106,7 +103,7 @@ float timer(int isPaused, int init) {
 // Prints out a countdown timer in the middle of the screen
 // If timer has reached 0, return TRUE. Else, return FALSE.
 int Timer_CountDown(void) {
-	CP_Vector middle = CP_Vector_Set(CP_System_GetWindowWidth() / 2.0, CP_System_GetWindowHeight() / 2.0);
+	CP_Vector middle = CP_Vector_Set((float) CP_System_GetWindowWidth() / 2.0f, (float) CP_System_GetWindowHeight() / 2.0f);
 	float currentElapsedTime = CP_System_GetDt();
 	static float countDownTime = 3;
 
@@ -124,8 +121,8 @@ int Timer_CountDown(void) {
 }
 
 void Draw_Time(float totalElapsedTime) {
-	float x = CP_System_GetWindowWidth() / 2;
-	float y = CP_System_GetWindowHeight() * 0.8 / 10;
+	float x = (float) CP_System_GetWindowWidth() / 2;
+	float y = (float) CP_System_GetWindowHeight() * 0.8f/ 10;
 
 	// Draw text of respective boxes at respective coordinates.
 	CP_Settings_TextSize(40.0f);
@@ -143,7 +140,7 @@ float point_point_angle(float x1, float y1, float x2, float y2)
 	float tempx=0, tempy=0, temp=0;
 	tempx = x2 - x1;
 	tempy = y2 - y1;
-	temp = atan2(tempy, tempx);
+	temp = (float) atan2(tempy, tempx);
 	temp = CP_Math_Degrees(temp);
 	return temp;
 }
