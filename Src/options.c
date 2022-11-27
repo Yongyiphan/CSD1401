@@ -4,6 +4,16 @@
 #include "mainmenu.h"
 #include "options.h"
 #include "audio_manager.h"
+/* --------------------------------------
+* File Level Documentation
+* @author		Geoffrey Cho Jian Ming
+* @email		g.cho@digipen.edu
+* @file			options.c
+* @brief		This file contains definition to allow player to adjust
+*				BGM and SFX volum with slider bar
+
+* Copyright 2022 Digipen, All Rights Reserved.
+*//*-------------------------------------*/
 
 #define WINDOWSIZEX 1300
 #define WINDOWSIZEY 900

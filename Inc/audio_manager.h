@@ -5,7 +5,7 @@
 * @author		Geoffrey Cho Jian Ming
 * @email		g.cho@digipen.edu
 * @contributor	Edgar Yong
-* @file			audio_manager.c
+* @file			audio_manager.h
 * @brief		This file contains sound files
 				and the loading, and freeing of music
 

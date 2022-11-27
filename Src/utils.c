@@ -3,7 +3,6 @@
 #include <stdio.h>
 #include <math.h>
 #include "player.h"
-#include "game.h"
 #include "mainmenu.h"
 #include "audio_manager.h"
 #include "Mob.h"

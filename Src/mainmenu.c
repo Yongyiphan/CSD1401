@@ -1,16 +1,3 @@
-/*----------------------------------------------------------------------
-	file:	mainmenu.c
-  author:	Mah Ming Qian Michael
-   email:	m.mah@digipen.edu
-
-   brief:	Main menu source file.
-				Manages initialization, updating and drawing of main menu.
-				Contains functions to display other sub menus to upgrades,
-				options, instructions, credits.
-				Entry point into the main game and also the exit.
-
-Copyright 2022 Digipen, All rights reserved
-----------------------------------------------------------------------*/
 #pragma once
 #include "cprocessing.h"
 #include "utils.h"
@@ -21,6 +8,21 @@ Copyright 2022 Digipen, All rights reserved
 #include "audio_manager.h"
 #include "credits.h"
 #include "instructions.h"
+
+/* --------------------------------------
+* File Level Documentation
+* @author:		Mah Ming Qian Michael
+* @email:		m.mah@digipen.edu
+* @contributor	Geoffrey Cho, Edgar Yong
+* @file:		mainmenu.c
+* @brief:		Main menu source file.
+				Manages initialization, updating and drawing of main menu.
+				Contains functions to display other sub menus to upgrades,
+				options, instructions, credits.
+				Entry point into the main game and also the exit.
+
+* Copyright 2022 Digipen, All rights reserved
+*//*-------------------------------------*/
 
 
 

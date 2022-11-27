@@ -1,21 +1,23 @@
-/*----------------------------------------------------------------------
-	file: upgrades.h
-  author: Mah Ming Qian Michael
-   email: m.mah@digipen.edu
 
-   brief: Upgrades header file.
-				Manages initialization, updating and drawing of the upgrades screen.
-				Saves, loads and updates player uprgades.
-				Provides an interface to level up or reset the specific 
-				upgrades and apply them to the player.
-				Utilises a currency to allow players to upgrade as well.
-Copyright 2022 Digipen, All rights reserved
-----------------------------------------------------------------------*/
 #pragma once
 #include <stdio.h>
 
 #ifndef UPGRADES_H
 #define UPGRADES_H
+/* --------------------------------------
+* File Level Documentation
+* @author		Mah Ming Qian Michael
+* @email		m.mah@digipen.edu
+* @file			upgrades.h
+* @brief		Upgrades header file.
+					Manages initialization, updating and drawing of the upgrades screen.
+					Saves, loads and updates player uprgades.
+					Provides an interface to level up or reset the specific 
+					upgrades and apply them to the player.
+					Utilises a currency to allow players to upgrade as well.
+
+* Copyright 2022 Digipen, All Rights Reserved.
+*//*-------------------------------------*/
 
 #define NUM_UPGRADES 7
 void upgrades_Init(void);

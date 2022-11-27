@@ -13,8 +13,9 @@
 #include "audio_manager.h"
 
 /*---------------------------------------------------
-@file		map.c
-@contributors	Sen chuan, Michael, Edgar, Geoffrey
+* File Level Documentation
+@contributors	Sen chuan Tay, Michael Mah, Edgar Yong, Geoffrey Cho
+@file			map.c
 @brief			Main File for Zombie Break Gameplay
 
 * Copyright 2022 Digipen, All Rights Reserved.

@@ -5,8 +5,8 @@
 
 /* --------------------------------------
 * File Level Documentation
-* @contributor	Sen Chuan, Michael, Edgar, Geoffrey
-* @file			Mob.c
+* @contributor	Sen Chuan Tay, Michael Mah, Edgar Yong, Geoffrey Cho
+* @file			main.c
 * @brief		This File is the entry point of the game
 
 * Copyright 2022 Digipen, All Rights Reserved.

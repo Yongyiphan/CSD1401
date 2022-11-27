@@ -6,11 +6,11 @@
 
 /* --------------------------------------
 * File Level Documentation
-* @author	Geoffrey Cho
-* @email	g.cho@digipen.edu
-* @contributor Edgar Yong
-* @file		Credits.c
-* @brief	This file draws the credit page
+* @author		Geoffrey Cho Jian Ming
+* @email		g.cho@digipen.edu
+* @contributor	Edgar Yong
+* @file			Credits.c
+* @brief		This file draws the credit page
 
 * Copyright 2022 Digipen, All Rights Reserved.
 *//*-------------------------------------*/

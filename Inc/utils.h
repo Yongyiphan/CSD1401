@@ -2,19 +2,19 @@
 #ifndef UTILS_H
 #define UTILS_H
 
-#include "player.h"
 
 /* --------------------------------------
 * File Level Documentation
 * @author		Geoffrey Cho Jian Ming
 * @email		g.cho@digipen.edu
 * @contributor	Sen Chuan
-* @file			utils.c
+* @file			utils.h
 * @brief		This file contains utilities and
 *				miscellaneous functions for the game.
 
 * Copyright 2022 Digipen, All Rights Reserved.
 *//*-------------------------------------*/
+#include "player.h"
 
 // Create options screen
 void option_screen(int*);

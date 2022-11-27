@@ -13,15 +13,15 @@
 
 /* --------------------------------------
 * File Level Documentation
-* @author	Edgar Yong
-* @email	y.yiphanedgar.digipen.edu
-* @contributor Sen Chuan, Geoffrey
-* @file		Items.c
-* @brief	This file contains all functions required for item generation
-			-> Store items in linked list, and draw items' sprites
-			-> Generate different effects for items with RNG
-			-> Item and player iteraction
-			-> Free All resources created through malloc
+* @author		Edgar Yong Yip Han
+* @email		y.yiphanedgar.digipen.edu
+* @contributor	Sen Chuan Tay, Geoffrey Cho
+* @file			Items.c
+* @brief		This file contains all functions required for item generation
+				-> Store items in linked list, and draw items' sprites
+				-> Generate different effects for items with RNG
+				-> Item and player iteraction
+				-> Free All resources created through malloc
 * Copyright 2022 Digipen, All Rights Reserved.
 *//*-------------------------------------*/
 

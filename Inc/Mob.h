@@ -4,7 +4,7 @@
 
 /* --------------------------------------
 * File Level Documentation
-* @author	Edgar Yong
+* @author	Edgar Yong Yip Han
 * @email	y.yiphanedgar.digipen.edu
 * @file		Mob.h
 * @brief	This file contains all functions required for Mob Spawning during game runtime.
