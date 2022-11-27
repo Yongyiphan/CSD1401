@@ -1,3 +1,17 @@
+/* --------------------------------------
+* File Level Documentation
+* @author	Tay Sen Chuan
+* @email	t.senchuan.digipen.edu
+* @file		bullet.c
+* @brief	This file contains all functions required for bullets interactions during game runtime.
+			-> Initialises, generate bullets, draw bullets
+			-> Bullet physics and stats
+			-> Mob and bullet iteraction
+			-> Load/Free bullet resources
+
+* Copyright 2022 Digipen, All Rights Reserved.
+*//*-------------------------------------*/
+
 #pragma once
 #include "cprocessing.h"
 #include <stdio.h>
