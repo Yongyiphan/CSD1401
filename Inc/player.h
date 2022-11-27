@@ -2,6 +2,21 @@
 #ifndef PLAYER_H
 #define PLAYER_H
 
+
+/* --------------------------------------
+* File Level Documentation
+* @author		Geoffrey Cho Jian Ming
+* @email		g.cho@digipen.edu
+* @contributor	Edgar Yong, Sen Chuan Tay
+* @file			player.h
+* @brief		This file contains all functions required for player functions and movement
+				-> Create Interfaces that interact with player
+				e.g. death screen, upgrade screen
+				-> Create stats of players
+				-> Draw out stats of players
+
+* Copyright 2022 Digipen, All Rights Reserved.
+*//*-------------------------------------*/
 #include "bullet.h"
 #include "cprocessing.h"
 
@@ -63,7 +78,6 @@ typedef struct Player{
 #define ATK_SPD 5.0f
 #define PLAYER_DEFENSE 10
 #define PLAYER_HITBOX 50
-//#define PLAYER_PICKUP 500
 #define PLAYER_PICKUP 80
 #define PLAYER_PROJ_SPD 1.3f
 
@@ -77,6 +91,10 @@ void Player_Init(Player* player);
 void Player_Stats_Update(Player* player);
 
 void Player_Show_Stats(Player player);
+
+void Player_Show_Coins(void);
+
+void Player_Win_Condition(int* isPaused, int* hasWon);
 
 void show_healthbar(Player* player);
 

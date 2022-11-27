@@ -3,14 +3,24 @@
 #include "utils.h"
 #include "mainmenu.h"
 #include "options.h"
+#include "audio_manager.h"
+/* --------------------------------------
+* File Level Documentation
+* @author		Geoffrey Cho Jian Ming
+* @email		g.cho@digipen.edu
+* @file			options.c
+* @brief		This file contains definition to allow player to adjust
+*				BGM and SFX volum with slider bar
+
+* Copyright 2022 Digipen, All Rights Reserved.
+*//*-------------------------------------*/
 
 #define WINDOWSIZEX 1300
 #define WINDOWSIZEY 900
 
-CP_Color white, black, grey;
+CP_Color white, black, grey, dark_green;
 float width, height;
 float SFX_length, BGM_length;
-//float SFX_vol, BGM_vol;
 float rectWidth, rectHeight;
 CP_Vector center;
 
@@ -19,21 +29,22 @@ void options_Init(void)
 	white = CP_Color_Create(255, 255, 255, 255);
 	black = CP_Color_Create(0, 0, 0, 255);
 	grey = CP_Color_Create(100, 100, 100, 255);
-	//CP_System_SetWindowSize(WINDOWSIZEX, WINDOWSIZEY);
+	dark_green = CP_Color_Create(17, 39, 0, 255);
 	CP_Graphics_ClearBackground(grey);
 	width = CP_System_GetWindowWidth();
 	height = CP_System_GetWindowHeight();
-	//SFX_vol = BGM_vol = 0.7;
 	
 	rectWidth = width / 3;
 	rectHeight = height / 16;
 	center = CP_Vector_Set(width / 2, height / 2);
-	SFX_length = BGM_length = rectWidth * (SFX_vol);
+	SFX_length = rectWidth * (SFX_vol);
+	BGM_length = rectWidth * BGM_vol;
+	//Audio_Init();
 }
 
 void options_Update(void)
 {
-	CP_Graphics_ClearBackground(grey);
+	CP_Graphics_ClearBackground(dark_green);
 	CP_Settings_RectMode(CP_POSITION_CENTER);
 	CP_Settings_TextAlignment(CP_TEXT_ALIGN_H_CENTER, CP_TEXT_ALIGN_V_MIDDLE);
 	//upgrades header
@@ -49,6 +60,7 @@ void options_Update(void)
 		CP_Settings_Fill(white);
 		CP_Font_DrawText(text[i], (width / 4), (center.y) - (height / 10) + (height / 10 * i));
 		CP_Settings_Fill(grey);
+		CP_Settings_StrokeWeight(5.0f);
 		// rectangle width: rectWidth;
 		CP_Graphics_DrawRectAdvanced(center.x, (center.y) - (height / 10) + (height / 10 * i), rectWidth, rectHeight, 0, 0);
 	}
@@ -69,7 +81,7 @@ void options_Update(void)
 		{
 			BGM_length = CP_Input_GetMouseX() - (rectWidth);
 			BGM_vol = BGM_length / rectWidth;
-			//*bgmLen = BGM_length / rectWidth;
+			CP_Sound_SetGroupVolume(MUSIC, BGM_vol);
 		}
 	}
 	
@@ -100,5 +112,5 @@ void options_Update(void)
 
 void options_Exit(void)
 {
-
+	
 }

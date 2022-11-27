@@ -1,17 +1,31 @@
 #pragma once
 #include "cprocessing.h"
 #include <stdlib.h>
+#include <stdio.h>
 #include <math.h>
+#include <assert.h>
 #include "Items.h"
 #include "Mob.h"
 #include "player.h"
 #include "Map.h"
 #include <assert.h>
-/*
-@brief		Function that initialise array with empty items
-@params		tracker	-> Contains stats for tracking Items
-@returns	Item arr with blank items
-*/
+#include "audio_manager.h"
+
+/* --------------------------------------
+* File Level Documentation
+* @author		Edgar Yong Yip Han
+* @email		y.yiphanedgar.digipen.edu
+* @contributor	Sen Chuan Tay, Geoffrey Cho
+* @file			Items.c
+* @brief		This file contains all functions required for item generation
+				-> Store items in linked list, and draw items' sprites
+				-> Generate different effects for items with RNG
+				-> Item and player iteraction
+				-> Free All resources created through malloc
+* Copyright 2022 Digipen, All Rights Reserved.
+*//*-------------------------------------*/
+
+
 
 #ifdef _DEBUG
 #  define _CRTDBG_MAP_ALLOC
@@ -21,18 +35,22 @@
 #endif
 
 static int blegal2 = 0, blegal3 = 0, blegal4 = 0;
-ItemTrack* ItemTracker;
+ItemTrack* ItemTracker = NULL;
 ItemLink* AppliedEffects = NULL;
 void CreateItemTracker() {
-    ItemTracker = malloc(sizeof(ItemTrack));
-	*ItemTracker = (ItemTrack){ 0 };
-	for (int i = 0; i < No_Items; i++) {
-		ItemTracker->DropCount[i][0] = 0;
-		ItemTracker->DropCount[i][1] = 0;
+	if (ItemTracker == NULL) {
+		ItemTracker = malloc(sizeof(ItemTrack));
+		*ItemTracker = (ItemTrack){ 0 };
+		for (int i = 0; i < No_Items; i++) {
+			ItemTracker->DropCount[i][0] = 0;
+			ItemTracker->DropCount[i][1] = 0;
+		}
+		//Specific Drop Limitations
+		ItemTracker->DropCount[MAGNET][1] = 1;
+		AppliedEffects = NULL;
+		blegal2 = blegal3 = blegal4 = 0;
+
 	}
-	//Specific Drop Limitations
-	ItemTracker->DropCount[MAGNET][1] = 1;
-	AppliedEffects = NULL;
 }
 int ItemCountSum(void) {
 	int s = 0;
@@ -46,7 +64,6 @@ ItemTracker->DropCount[] = {EXP,..., Magnet etc)
 	-> 0 = Count
 	-> 1 = Limit (-1 = ignore limit)
 */
-
 void PrintItemCount(void) {
 	printf("EXP Drop count: %d | Limit: %d\n", ItemTracker->DropCount[EXP][0], ItemTracker->DropCount[EXP][1]);
 	printf("Stat Drop count: %d | Limit: %d\n", ItemTracker->DropCount[StatBoost][0], ItemTracker->DropCount[StatBoost][1]);
@@ -54,7 +71,6 @@ void PrintItemCount(void) {
 }
 
 
-#include <stdio.h>
 #pragma region
 Item* CreateItemEffect(CP_Vector coor, int exp, int expVal) {
 	//Get Random chance generator
@@ -69,11 +85,9 @@ Item* CreateItemEffect(CP_Vector coor, int exp, int expVal) {
 	else {
 		EType = exp;
 	}
-
 	if (ItemCountSum() > 50) {
 		if (ItemTracker->DropCount[MAGNET][0] < ItemTracker->DropCount[MAGNET][1]) {
 			EType = MAGNET;
-			printf("Creating a magnet\n");
 		}
 	}
 
@@ -84,12 +98,11 @@ Item* CreateItemEffect(CP_Vector coor, int exp, int expVal) {
 	case EXP:
 		newItem->AffectedBaseStat = expVal;
 		newItem->Duration = -1;
-		newItem->Modifier = (float)pow(5, expVal + 1);
+		newItem->Modifier = 5 * (expVal + 1) + (float)MobCycleTimer;
 		newItem->Hitbox = 25;
 
 		break;
 	case StatBoost: //All Base Stats Upgrade
-		//char* PStats[] = {"HEALTH", "SPEED", "DAMAGE", "FIRE RATE", "BULLET SPEED"};
 		statgen = CP_Random_RangeInt(0, NoBaseStats - 1);
 		newItem->AffectedBaseStat = statgen;
 		newItem->Duration = 2; //in secs
@@ -101,27 +114,24 @@ Item* CreateItemEffect(CP_Vector coor, int exp, int expVal) {
 		break;
 	case MAGNET:
 		newItem->Duration = 2;
-		newItem->Hitbox = 32;
+		newItem->Hitbox = 45;
 		break;
 	case COIN:
 		newItem->Duration = -1;
 		newItem->Hitbox = 25;
+		newItem->Modifier = 10;
 		break;
 	case BULLETType:
 		newItem->Duration = 5;
-		newItem->Hitbox = 25;
+		newItem->Hitbox = 42;
 		newItem->AffectedBaseStat = B_RNG;
-		printf("BulletType! %d", B_RNG);
 		break;
-
 	}
 	newItem->Start = MobCycleTimer;
 	newItem->Type = EType;
-	//newItem->x = x;
-	//newItem->y = y;
 	newItem->coor = coor;
-	newItem->collected = 0;
-	newItem->knockback = 5;
+	newItem->collected = 1;
+	newItem->knockback = 3;
 	return newItem;
 };
 
@@ -131,75 +141,76 @@ Item* CreateItemEffect(CP_Vector coor, int exp, int expVal) {
 void IAffectPlayer(Item* item, int method) {
 	float boost = item->Modifier * method;
 	switch (item->Type) {
-		case StatBoost://Affect Base Stats
+	case StatBoost://Affect Base Stats
 		switch (item->AffectedBaseStat) {
-			case 0://HP
-				P.CURRENT_HP += (item->Modifier * 1000);
-				break;
-			case 1://Movement Speed
-				P.STATMULT.SPEED_MULT += boost;
-				break;
-			case 2://Damage
-				P.STATMULT.DAMAGE_MULT += boost * 2;
-				break;
-			case 3://Attack speed
-				P.STATMULT.ATK_SPEED_MULT += boost;
-				break;
-				P.STATMULT.PROJECTILE_SPD_MULT += boost;
-			case 4://Bullet Speed
-				break;
-			case 5:
-				P.STATMULT.MAX_HP_MULT += boost;
-				break;
+		case 0://HP
+			P.CURRENT_HP += (item->Modifier * 1000);
+			break;
+		case 1://Movement Speed
+			P.STATMULT.SPEED_MULT += boost;
+			break;
+		case 2://Damage
+			P.STATMULT.DAMAGE_MULT += boost * 2;
+			break;
+		case 3://Attack speed
+			P.STATMULT.ATK_SPEED_MULT += boost;
+			break;
+		case 4://Bullet Speed
+			P.STATMULT.PROJECTILE_SPD_MULT += boost;
+			break;
+		case 5:
+			P.STATMULT.MAX_HP_MULT += boost;
+			break;
 		}
-		case EXP:
-			P.LEVEL.P_EXP += item->Modifier;
-			//level_up(&P.LEVEL);
-			//printf("Item x: %f | y: %f\n", item->x, item->y);
-			break;
+		break;
+	case EXP:
+		P.LEVEL.P_EXP += item->Modifier;
+		//Audio_Pickup_EXP();
+		break;
 
-		case BULLETType:
+	case BULLETType:
 		switch (item->AffectedBaseStat) {
-			case 2: // Bullet Spilt
-				if (method == -1)
-					blegal2 = 0;
-				else blegal2 = 1;
-				printf("Bullet spilt check\n");
-				break;
-			case 3: // Bullet Rocket
-				if (method == -1)
-					blegal3 = 0;
-				else blegal3 = 1;
-				printf("Bullet rocket check\n");
-				break;
-			case 4: // Bullet Homing
-				if (method == -1)
-					blegal4 = 0;
-				else blegal4 = 1;
-				printf("Bullet homing check\n");
-				break;
-			}
+		case 2: // Bullet Spilt
+			if (method == -1)
+				blegal2 -= 1;
+			else blegal2 += 1;
 			break;
+		case 3: // Bullet Rocket
+			if (method == -1)
+				blegal3 -= 1;
+			else blegal3 += 1;
+			break;
+		case 4: // Bullet Homing
+			if (method == -1)
+				blegal4 -= 1;
+			else blegal4 += 1;
+			break;
+		}
+		break;
+	case COIN:
+		P.STAT.Coin_Gained += item->Modifier;
+		break;
 	}
 }
 
 
-CP_Image** ItemSprites;
+CP_Image** ItemSprites = NULL;
 int Img_C;
 void ItemLoadImage(void) {
 	char* FilePaths[] = {
 		"./Assets/Items/EXP Sprite.png",
 		"./Assets/Items/Base Item Sprite.png",
-		"./Assets/Items/placeholderbullet.png",
+		"./Assets/Items/bulletitemsprite.png",
 		"./Assets/Items/Magnet.png",
 		"./Assets/Items/coin.png",
 	};
-
 	Img_C = (sizeof(FilePaths) / sizeof(FilePaths[0]));
-	ItemSprites = malloc(sizeof(CP_Image*) * Img_C);
-	for (int i = 0; i < Img_C; i++) {
-		ItemSprites[i] = malloc(sizeof(CP_Image));
-		ItemSprites[i] = CP_Image_Load(FilePaths[i]);
+	if (ItemSprites == NULL) {
+		ItemSprites = malloc(sizeof(CP_Image*) * Img_C);
+		for (int i = 0; i < Img_C; i++) {
+			ItemSprites[i] = malloc(sizeof(CP_Image));
+			ItemSprites[i] = CP_Image_Load(FilePaths[i]);
+		}
 	}
 }
 void DrawItemImage(Item* item) {
@@ -211,6 +222,7 @@ void DrawItemImage(Item* item) {
 	int ph = IHeight * item->Hitbox / IHeight, pw = ph;
 	int Displacement[3] = { -1, 0, 1 }, dx, dy;
 	if (item->Dis[0] == 0 && item->Dis[1] == 0 && item->Type != EXP) {
+		//draw item at random location around exp
 		do {
 			dx = Displacement[CP_Random_RangeInt(0, 2)];
 			dy = Displacement[CP_Random_RangeInt(0, 2)];
@@ -244,22 +256,22 @@ void DrawItemImage(Item* item) {
 				IHeight - btmOS,		
 				255);
 		break;
-	default:
-		IWidth = CP_Image_GetWidth(SImg);
+	case BULLETType:
+		IWidth = CP_Image_GetWidth(SImg) / 3; //theres only 3 types of bulletitem
 		CP_Image_DrawSubImage(SImg, item->coor.x, item->coor.y, pw, ph,
+			(item->AffectedBaseStat - 2) * IWidth,
 			0,
-			0,
-			IWidth,
+			(item->AffectedBaseStat - 2) * IWidth + IWidth,
 			IHeight,
 			255);
+		break;
+	default:
+		IWidth = CP_Image_GetWidth(SImg);
+		CP_Image_DrawSubImage(SImg, item->coor.x, item->coor.y, pw, ph,0,0,IWidth,IHeight,255);
 		break;
 	}
 }
 
-
-ItemLink* GetCurrentEffects(void) {
-	return AppliedEffects;
-}
 
 void UpdateAppliedEffects(Item* item) {
 	int found = 0;
@@ -267,10 +279,11 @@ void UpdateAppliedEffects(Item* item) {
 	head = AppliedEffects;
 	if (item == NULL)
 		goto UpdateEffects;
+	int count = 0;
 	while (head != NULL) {
+		count++;
 		if (item->Type == head->key->Type && item->AffectedBaseStat == head->key->AffectedBaseStat) {
 			float durationleft = head->key->Duration - ( MobCycleTimer - head->key->Start);
-			head->key->Duration = item->Duration;
 			head->key->Start = MobCycleTimer;
 			found = 1;
 			//Found existing applied effect, break, time for next loop -> iter == 1
@@ -282,7 +295,6 @@ void UpdateAppliedEffects(Item* item) {
 		//item not currently being applied
 		ItemLink* nLink = malloc(sizeof(ItemLink));
 		Item* nitem = malloc(sizeof(Item));
-		//nitem = &(Item) { 0 };
 		nitem->Type = item->Type;
 		nitem->AffectedBaseStat = item->AffectedBaseStat;
 		nitem->Duration = item->Duration;
@@ -301,7 +313,6 @@ UpdateEffects:
 			head = next;
 			continue;
 		}
-		//head->key->Start = MobCycleTimer;
 		head = head->next;
 	}
 }
@@ -317,7 +328,6 @@ void DrawAppliedEffects() {
 	CP_Image SImg;
 	int iconsize = 64, nx = P.coor.x + (CP_System_GetWindowWidth()/ 2) - iconsize, ny = P.coor.y + (CP_System_GetWindowHeight() /2 ) - iconsize /2;
 	int IHeight, IWidth, SpriteIndex;
-	//CP_Settings_ImageMode(CP_POSITION_CENTER);
 	for (;head != NULL; head = head->next, nx -= iconsize) {
 		SImg = ItemSprites[head->key->Type];
 		IHeight = CP_Image_GetHeight(SImg);
@@ -328,6 +338,15 @@ void DrawAppliedEffects() {
 				IWidth * SpriteIndex,
 				0,
 				IWidth * SpriteIndex + IWidth,
+				IHeight,
+				255);
+			break;
+		case BULLETType:
+			IWidth = CP_Image_GetWidth(SImg) / 3;
+			CP_Image_DrawSubImage(SImg, nx, ny, iconsize, iconsize,
+				(head->key->AffectedBaseStat - 2) * IWidth,
+				0,
+				(head->key->AffectedBaseStat - 2) * IWidth + IWidth,
 				IHeight,
 				255);
 			break;
@@ -349,36 +368,50 @@ void DrawAppliedEffects() {
 	}
 }
 
-/*
-*	LINKED LIST IMPLEMENTATION
-*/
-#pragma region
+void CheckItems(void) {
+	if (ItemTracker->ItemLL != NULL) {
+		ItemInteraction(&ItemTracker->ItemLL);
+	}
+	if (ItemTracker->ExpLL != NULL) {
+		ItemInteraction(&ItemTracker->ExpLL);
+	}
+	if (ItemTracker->CoinLL != NULL) {
+		ItemInteraction(&ItemTracker->CoinLL);
+	}
+	UpdateAppliedEffects(NULL);
+	DrawAppliedEffects();
+}
 
 int IsMagnet = 0, ToCollect = 0;
-ItemLink* ItemInteraction(ItemLink* head) {
+void ItemInteraction(ItemLink** head) {
 	if (head == NULL)
 		return;
 	
-	ItemLink* current = head, *next = NULL;
+	ItemLink* current = *head, *next = NULL;
 	//assert(_CrtCheckMemory());
 	while (current != NULL) {
 		int CType = current->key->Type;
 		if (CType == MAGNET && current->key->applying == 1) {
-			//printf("IM MAGNET.\n");
 			IsMagnet = 1;
 			P.STATTOTAL.PICKUP_TOTAL = 3000;
-			CP_Graphics_DrawCircle(P.x, P.y, P.STATTOTAL.PICKUP_TOTAL);
 		}
 		CP_Vector target = CP_Vector_Subtract(CP_Vector_Set(P.x, P.y), current->key->coor);
 		float dist = CP_Vector_Length(target);
-		if (dist < P.STATTOTAL.PICKUP_TOTAL)
+		if (dist < P.STATTOTAL.PICKUP_TOTAL) {
 			current->key->collected = -1;
+		}
 		if (current->key->collected == -1) {
 			float speed = dist * CP_System_GetDt() * 2;
-			//speed = speed > slowest ? speed : slowest;
-			CP_Vector Movement = CP_Vector_Scale(CP_Vector_Normalize(target), speed * (P.STATTOTAL.SPEED_TOTAL / 100));
-			if (dist < P.STAT.PICKUP && dist > P.HITBOX) {
-				Movement = CP_Vector_Scale(Movement, 1.5);
+			CP_Vector Movement = CP_Vector_Scale(CP_Vector_Normalize(target), speed * (P.STAT.SPEED / 100));
+			if (current->key->knockback > 0) {
+				current->key->coor = CP_Vector_Subtract(current->key->coor, CP_Vector_Scale(Movement, 2));
+				current->key->knockback--;
+			}
+			else {
+				if (dist < P.STAT.PICKUP && dist > P.HITBOX) {
+					Movement = CP_Vector_Scale(Movement, 1.5);
+				}
+
 			}
 			current->key->coor = CP_Vector_Add(current->key->coor, Movement);
 		}
@@ -393,7 +426,7 @@ ItemLink* ItemInteraction(ItemLink* head) {
 			if(CType == EXP) {
 				IAffectPlayer(current->key, 1);
 				next = current->next;
-				deleteItemLink(&head, current->key);
+				deleteItemLink(head, current->key);
 				current = next;
 				ItemTracker->DropCount[EXP][0]--;
 				continue;
@@ -403,15 +436,12 @@ ItemLink* ItemInteraction(ItemLink* head) {
 				if (current->key->Duration == -1) {
 					IAffectPlayer(current->key, 1);
 					next = current->next;
-					deleteItemLink(&head, current->key);
+					deleteItemLink(head, current->key);
 					current = next;
 					ItemTracker->DropCount[CType][0]--;
-					if (CType == COIN)
-						P.STAT.Coin_Gained += 5;
 					continue;
 				}
 				if (current->key->applying == 0) {
-
 					IAffectPlayer(current->key, 1);
 					current->key->Start = MobCycleTimer;
 					current->key->applying = 1;
@@ -420,17 +450,16 @@ ItemLink* ItemInteraction(ItemLink* head) {
 			}
 		}
 	
-		int timeDiff = MobCycleTimer - current->key->Start;
 		if (CType != EXP) {
+			int timeDiff = MobCycleTimer - current->key->Start;
 			if (timeDiff > current->key->Duration && current->key->applying == 1) {
 				//time to delete item's stat boost
 				if (CType == MAGNET) {
-					//printf("IM NOT MAGNET.\n");
 					IsMagnet = 0;
 				}
 				IAffectPlayer(current->key, -1);
 				next = current->next;
-				deleteItemLink(&head, current->key);
+				deleteItemLink(head, current->key);
 				current = next;
 				ItemTracker->DropCount[CType][0]--;
 				UpdateAppliedEffects(NULL);
@@ -438,15 +467,19 @@ ItemLink* ItemInteraction(ItemLink* head) {
 			}
 		}
 
-
 		//only draw items that are newly initialised or not collected
-		if (current->key->collected = -1 && current->key->applying != 1) {
+		if (current->key->applying != 1) {
 			DrawItemImage(current->key);
 		}
 		current = current->next;
 	}
 	return head;
 }
+
+/*
+*	LINKED LIST IMPLEMENTATION
+*/
+#pragma region
 
 ItemLink* newLink(Item *item) {
 	ItemLink* link = malloc(sizeof(ItemLink));
@@ -459,7 +492,6 @@ ItemLink* newLink(Item *item) {
 void insertItemLink(ItemLink** head, Item* item) {
 	ItemLink* nLink = newLink(item);
 	ItemTracker->DropCount[item->Type][0]++;
-	//PrintItemCount();
 	//Maintain Magnet Item as head of linkedlist
 	if ((*head) != NULL && (*head)->key->Type == MAGNET) {
 		ItemLink* cnext = (*head)->next;
@@ -478,7 +510,6 @@ void deleteItemLink(ItemLink**head, Item* item) {
 
 	if (curr != NULL && curr->key == item) {
 		*head = curr->next;
-		//printf("Freeing: %p | %p\n", curr, curr->key);
 		free(curr->key);
 		free(curr);
 		return;
@@ -491,7 +522,6 @@ void deleteItemLink(ItemLink**head, Item* item) {
 		return;
 	prev->next = curr->next;
 
-	//printf("Freeing: %p | %p\n", curr, curr->key);
 	free(curr->key);
 	free(curr);
 }
@@ -514,31 +544,35 @@ void freeLink(ItemLink* head) {
 void FreeItemResource(void) {
 	printf("Freeing Item Images\n");
 	for (int i = 0; i < Img_C; i++) {
-		CP_Image* c = ItemSprites[i];
 		CP_Image_Free(&(ItemSprites[i]));
 		free(ItemSprites[i]);
+		ItemSprites[i] = NULL;
 	}
 	free(ItemSprites);
+	ItemSprites = NULL;
+
 	freeLink(ItemTracker->ExpLL);
 	freeLink(ItemTracker->ItemLL);
 	freeLink(AppliedEffects);
 	free(ItemTracker);
+	ItemTracker = NULL;
 	printf("Freeing Item Structures\n");
 }
 
+// Checks whether a bullet item buff is active based on bullet type
 int Bulletlegal(int i)
 {
 	switch (i) {
 	case 2:
-		if (blegal2 == 1)
+		if (blegal2 > 0)
 			return 1;
 		break;
 	case 3:
-		if (blegal3 == 1)
+		if (blegal3 > 0)
 			return 1;
 		break;
 	case 4:
-		if (blegal4 == 1)
+		if (blegal4 > 0)
 			return 1;
 		break;
 	default:

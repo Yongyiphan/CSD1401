@@ -2,6 +2,20 @@
 #ifndef MOB_H
 #define MOB_H
 
+/* --------------------------------------
+* File Level Documentation
+* @author	Edgar Yong Yip Han
+* @email	y.yiphanedgar.digipen.edu
+* @file		Mob.h
+* @brief	This file contains all functions required for Mob Spawning during game runtime.
+			-> Initialises, generate mob objects, draw mob objects
+			-> Pathing for different mobs
+			-> Mob and player iteraction
+			-> Free All resources created through malloc
+
+* Copyright 2022 Digipen, All Rights Reserved.
+*//*-------------------------------------*/
+
 #include "player.h"
 #include "cprocessing.h"
 
@@ -31,12 +45,12 @@ typedef struct Mob {
 	MobStats BaseStats;
 	MobStats CStats;
 	//float x, y;
-	CP_Vector coor;
+	CP_Vector coor, dest;
 	int Status; 
 	int AnimationCycle;
 	int w, h;
-	int dmginstance;
 	//Dead = 0 | Alive = 1
+	int boost, jump;
 } Mob;
 
 static const struct Mob EmptyMob;
@@ -62,15 +76,16 @@ extern int Mob_Img;
 // --------------------------- //
 
 //Mob Stuff
-#define NO_WAVES 4
-#define Spawn_Timer 1
-#define Wave_Timer 10
-#define MaxMobGrowthRate 20
-#define MaxUpperLimit 200
-#define WaveCostGrowthRate 10
+#define NO_WAVES 5
+#define Spawn_Timer 5
+#define Wave_Timer 30
+#define MaxMobGrowthRate 30
+#define MaxUpperLimit 1000
+#define WaveCostGrowthRate 2
 #define SpawnAreaOffset 1000
 #define StartMobQuantity 150
-#define MobStatScale 1.02
+#define MobStatScale 1.04
+#define BIGNONO 180
 
 extern int WaveIDQueue[NO_WAVES], MobCount[NO_WAVES], CWave, CWaveCost, CMaxMob;
 extern WaveTrack WaveTracker[NO_WAVES];
@@ -100,8 +115,6 @@ Print Conditions
 
 
 
-
-
 void MobLoadImage(void);
 void CreateWaveTracker(void);
 void InitWavesArr(WaveTrack* tracker, int start);
@@ -109,13 +122,12 @@ void InitWavesArr(WaveTrack* tracker, int start);
 void CreateBaseStat(MobStats* ms, int type);
 void CreateMob(Mob* m, MobStats *Base, Player*player, int offSet);
 void GenerateMobs(WaveTrack* tracker, Player* player);
-//void GenerateWaves(Player* P, WaveTrack* queue, int* queueID, int WavesNo, int CostGrowth, int MaxMobGrowth,int *TotalWaveCount,  int* MobCount);
 void GenerateWaves(void);
 
 void DrawMobImage(Mob* m, Player*p);
 
 void MobTPlayerCollision(Mob* m, Player* p);
-void MobTMobCollision(Mob* mob);
+void MobMovement(Mob* mob);
 
 void PrintWaveStats(void);
 
@@ -125,14 +137,12 @@ float squareDist(float one, float two);
 
 
 
-
-
-
-
-
-
-
-
-
-
 #endif
+
+
+
+
+
+
+
+

@@ -2,6 +2,19 @@
 #ifndef ITEMS_H
 #define ITEMS_H
 
+/* --------------------------------------
+* File Level Documentation
+* @author		Edgar Yong Yip Han
+* @email		y.yiphanedgar.digipen.edu
+* @contributor	Sen Chuan Tay, Geoffrey Cho
+* @file			Items.h
+* @brief		This file contains declarations to functions and struct required for item generation
+				-> Store items in linked list, and draw items' sprites
+				-> Generate different effects for items with RNG
+				-> Item and player iteraction
+				-> Free All resources created through malloc
+* Copyright 2022 Digipen, All Rights Reserved.
+*//*-------------------------------------*/
 
 #include "player.h"
 
@@ -31,12 +44,11 @@ typedef struct ItemStat {
 	float Modifier; //Stat Modified amt
 
 	//Coordinates
-	//double x;
-	//double y;
 	CP_Vector coor;
-	//-1 = Collected, 1 = Not collected, 2 = applying;
-	//0 = initialised value
-	int collected, applying;
+	//-1 = Collected, 0 = initialised, 1 = Not collected
+	int collected;
+	//1 = applying;
+	int applying;
 	int knockback;
 	int Dis[2];
 }Item;
@@ -83,7 +95,6 @@ Item Storage
 			-> collision check player's position with items
 Mobs have a chance to drop items upon death
 */
-ItemLink* GetCurrentEffects(void);
 void UpdateAppliedEffects(Item* item);
 void DrawAppliedEffects(void);
 
@@ -94,12 +105,12 @@ void CreateItemTracker(void);
 int ItemCountSum(void);
 Item* CreateItemEffect(CP_Vector coor, int exp, int expVal);
 void IAffectPlayer(Item* i, int method);
-void PrintItemCount(void);
 
 
+void CheckItems(void);
 
 
-ItemLink* ItemInteraction(ItemLink* head);
+void ItemInteraction(ItemLink** head);
 ItemLink* newLink(Item* item);
 void insertItemLink(ItemLink** head, Item *item);
 void deleteItemLink(ItemLink** head, Item *item);
@@ -109,6 +120,7 @@ void freeLink(ItemLink* head);
 
 void FreeItemResource(void);
 
+// Checks whether a bullet item buff is active given the type of bullet
 int Bulletlegal(int);
 
 
