@@ -4,9 +4,20 @@
 
 #include "player.h"
 
+/* --------------------------------------
+* File Level Documentation
+* @author		Geoffrey Cho Jian Ming
+* @email		g.cho@digipen.edu
+* @contributor	Sen Chuan
+* @file			utils.c
+* @brief		This file contains utilities and
+*				miscellaneous functions for the game.
+
+* Copyright 2022 Digipen, All Rights Reserved.
+*//*-------------------------------------*/
+
 // Create options screen
 void option_screen(int*);
-
 
 /*
 Check if an area is clicked

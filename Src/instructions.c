@@ -7,6 +7,15 @@
 #include "utils.h"
 #include "mainmenu.h"
 
+/* --------------------------------------
+* File Level Documentation
+* @author	Geoffrey Cho Jian Ming
+* @email	g.cho@digipen.edu
+* @file		instructions.c
+* @brief	This file contains instructions for the game
+
+* Copyright 2022 Digipen, All Rights Reserved.
+*//*-------------------------------------*/
 
 CP_Image imageArr[20], textArr[20];
 float wWidth, wHeight;
