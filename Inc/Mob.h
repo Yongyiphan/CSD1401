@@ -2,6 +2,20 @@
 #ifndef MOB_H
 #define MOB_H
 
+/* --------------------------------------
+* File Level Documentation
+* @author	Edgar Yong
+* @email	y.yiphanedgar.digipen.edu
+* @file		Mob.h
+* @brief	This file contains all functions required for Mob Spawning during game runtime.
+			-> Initialises, generate mob objects, draw mob objects
+			-> Pathing for different mobs
+			-> Mob and player iteraction
+			-> Free All resources created through malloc
+
+* Copyright 2022 Digipen, All Rights Reserved.
+*//*-------------------------------------*/
+
 #include "player.h"
 #include "cprocessing.h"
 

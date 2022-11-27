@@ -15,7 +15,7 @@
 * File Level Documentation
 * @author	Geoffrey Cho Jian Ming
 * @email	g.cho@digipen.edu
-* @contributor Edgar Yong
+* @contributor Edgar Yong, Sen Chuan
 * @file		player.c
 * @brief	This file contains all functions required for player functions
 *			and movement
@@ -44,7 +44,6 @@ void Player_Init(Player* P) {
 	P_stats_total's MAX_HP_TOTAL = MAX_HP * MAX_HP_MULT
 								 = 100 * 1.2 = 120
 	*/
-
 	start_vector = CP_Vector_Zero();
 	P_stats = (Stats){ PLAYER_HP + upgrades[0].stat, PLAYER_SPEED + upgrades[1].stat, PLAYER_DAMAGE + (upgrades[2].stat / 10), ATK_SPD + (upgrades[3].stat / 50), PLAYER_DEFENSE + upgrades[4].stat , PLAYER_PICKUP + upgrades[5].stat, PLAYER_PROJ_SPD + (upgrades[6].stat / 100)};
 	P_stats_mult = (StatsMult){ 1, 1, 1, 1, 1, 1, 1 };
@@ -92,8 +91,6 @@ void Player_Show_Stats(Player P) {
 		CP_Font_DrawText(bufferName[i], printX, printY + padding * i);
 		CP_Font_DrawText(bufferList[i], printX + 200, printY + padding * i);
 	}
-	/*sprintf_s(buffer, _countof(buffer), "%d", P.STATTOTAL.MAX_HP_TOTAL);
-	CP_Font_DrawText(buffer,)*/
 }
 
 
@@ -206,9 +203,6 @@ void show_level(Player* P) {
 	int rectWidth = 300;
 	int rectHeight = 30;
 
-	/*CP_Settings_TextSize(40.0f);
-	CP_Settings_TextAlignment(CP_TEXT_ALIGN_H_LEFT, CP_TEXT_ALIGN_V_TOP);
-	CP_Font_DrawText("Health", 10, 10);*/
 	CP_Settings_Fill(CP_Color_Create(200, 200, 255, 255));
 	CP_Settings_StrokeWeight(3.0f);
 	CP_Graphics_DrawRectAdvanced(x_coord, y_coord, rectWidth, rectHeight, 0, 0);
@@ -222,13 +216,8 @@ void show_level(Player* P) {
 	CP_Settings_Fill(CP_Color_Create(0, 0, 0, 255));
 	char buffer[3][16] = { {0}, {0}, {0} };
 	sprintf_s(buffer[0], _countof(buffer[0]), "%d", P->LEVEL.VAL);
-//	sprintf_s(buffer[1], _countof(buffer[1]), "%d", P->LEVEL.P_EXP);
-//	sprintf_s(buffer[2], _countof(buffer[2]), "%d", P->LEVEL.EXP_REQ);
 	CP_Font_DrawText("Lv:", (x_coord * 2 + rectWidth) / 2 - 110, y_coord);
 	CP_Font_DrawText(buffer[0], (x_coord * 2 + rectWidth) / 2 - 85, y_coord);
-//	CP_Font_DrawText(buffer[1], (x_coord * 2 + rectWidth) / 2 - 40, y_coord);
-//	CP_Font_DrawText("/", (x_coord * 2 + rectWidth) / 2, y_coord);
-//	CP_Font_DrawText(buffer[2], (x_coord * 2 + rectWidth) / 2 + 40, y_coord);
 	sprintf_s(buffer[1], _countof(buffer[1]), "%.2f", lvlperc * 100);
 	CP_Font_DrawText(buffer[1], (x_coord * 2 + rectWidth) / 2, y_coord);
 	CP_Font_DrawText("%", (x_coord * 2 + rectWidth) / 2 + 45, y_coord);
@@ -330,9 +319,6 @@ void upgrade_screen(Player* P, int* isUpgrade, int* isPaused) {
 
 	float textSize = 30.0;
 
-	
-	//float stats[] = { P->CURRENT_HP, P->MAX_HP, P->DAMAGE, P->SPEED, P->DEFENSE, P->ATK_SPEED };
-	
 
 	CP_Settings_RectMode(CP_POSITION_CENTER);
 
@@ -405,11 +391,6 @@ void upgrade_screen(Player* P, int* isUpgrade, int* isPaused) {
 		currentX = background_topX, currentY = background_topY;
 		currentY += box_height + padding;
 	}
-	/*if (isClicked && Timer_CountDown()) {
-		*isPaused = 0;
-		*isUpgrade = 0;
-	}*/
-
 	// Remove rectangle align-center and add stroke back in
 	CP_Settings_RectMode(CP_POSITION_CORNER);
 	CP_Settings_Stroke(CP_Color_Create(0, 0, 0, 255));

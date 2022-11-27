@@ -2,6 +2,19 @@
 #ifndef ITEMS_H
 #define ITEMS_H
 
+/* --------------------------------------
+* File Level Documentation
+* @author	Edgar Yong
+* @email	y.yiphanedgar.digipen.edu
+* @contributor Sen Chuan, Geoffrey
+* @file		Items.h
+* @brief	This file contains declarations to functions and struct required for item generation
+			-> Store items in linked list, and draw items' sprites
+			-> Generate different effects for items with RNG
+			-> Item and player iteraction
+			-> Free All resources created through malloc
+* Copyright 2022 Digipen, All Rights Reserved.
+*//*-------------------------------------*/
 
 #include "player.h"
 

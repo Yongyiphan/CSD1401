@@ -4,6 +4,18 @@
 #include "mainmenu.h"
 
 
+/* --------------------------------------
+* File Level Documentation
+* @author	Geoffrey Cho
+* @email	g.cho@digipen.edu
+* @contributor Edgar Yong
+* @file		Credits.c
+* @brief	This file draws the credit page
+
+* Copyright 2022 Digipen, All Rights Reserved.
+*//*-------------------------------------*/
+
+
 #define WINDOWSIZEX 1300
 #define WINDOWSIZEY 900
 

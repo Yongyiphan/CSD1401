@@ -9,7 +9,7 @@
 * File Level Documentation
 * @author	Geoffrey Cho Jian Ming
 * @email	g.cho@digipen.edu
-* @contributor Edgar Yong
+* @contributor Edgar Yong, Sen Chuan
 * @file		player.h
 * @brief	This file contains all functions required for player functions
 *			and movement
