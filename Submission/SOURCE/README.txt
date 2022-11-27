@@ -1,7 +1,7 @@
 Game Name: Zombie Break
 Team Name: SMEG
 
-Class: 2022 CSD1401 A
+Class: Fall 2022 CSD1401 A
 ========================================================================
 Team Members:
 Sen Chuan Tay	(t.senchuan@digipen.edu)

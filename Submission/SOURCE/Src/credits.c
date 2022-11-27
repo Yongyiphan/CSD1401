@@ -69,6 +69,10 @@ void Credits_Update(void) {
 			CP_Engine_SetNextGameState(Main_Menu_Init, Main_Menu_Update, Main_Menu_Exit);
 		}
 	}
+	if (CP_Input_KeyTriggered(KEY_ESCAPE)) 
+	{
+		CP_Engine_SetNextGameState(Main_Menu_Init, Main_Menu_Update,Main_Menu_Exit);
+	}
 }
 
 void Credits_Exit(void) {

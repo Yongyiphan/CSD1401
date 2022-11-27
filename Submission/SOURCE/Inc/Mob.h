@@ -19,12 +19,9 @@
 #include "player.h"
 #include "cprocessing.h"
 
-#define MobTypes 5
+#define MobTypes 2
 #define SmallMob 0
 #define MediumMob 1
-#define BigMob 2
-#define RangedMob 3
-#define BigBoss 4
 
 
 
@@ -85,7 +82,7 @@ extern int Mob_Img;
 #define MaxUpperLimit 1000
 #define WaveCostGrowthRate 2
 #define SpawnAreaOffset 1000
-#define StartMobQuantity 150
+#define StartMobQuantity 1500
 #define MobStatScale 1.04f
 #define BIGNONO 180
 

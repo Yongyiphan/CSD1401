@@ -165,7 +165,7 @@ void IAffectPlayer(Item* item, int method) {
 		break;
 	case EXP:
 		P.LEVEL.P_EXP += (int) item->Modifier;
-		//Audio_Pickup_EXP();
+		Audio_Pickup_EXP();
 		break;
 
 	case BULLETType:
@@ -540,7 +540,6 @@ void freeLink(ItemLink* head) {
 
 
 void FreeItemResource(void) {
-	printf("Freeing Item Images\n");
 	for (int i = 0; i < Img_C; i++) {
 		CP_Image_Free(&ItemSprites[i]);
 		free(ItemSprites[i]);
@@ -553,7 +552,6 @@ void FreeItemResource(void) {
 	freeLink(AppliedEffects);
 	free(ItemTracker);
 	ItemTracker = NULL;
-	printf("Freeing Item Structures\n");
 }
 
 // Checks whether a bullet item buff is active based on bullet type

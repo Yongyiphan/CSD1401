@@ -256,28 +256,28 @@ FILE* openfile(const char* path, const char* mode)
 {
 	FILE* fptr = NULL;
 	errno_t err = fopen_s(&fptr, path, mode);
-	if (err == 0)
-	{
-		printf("File %s opened.\n", path);
-	}
-	else
-	{
-		printf("File %s is not opened.\n", path);
-	}
+	//if (err == 0)
+	//{
+	//	printf("File %s opened.\n", path);
+	//}
+	//else
+	//{
+	//	printf("File %s is not opened.\n", path);
+	//}
 	return fptr;
 }
 
 void closefile(FILE* file)
 {
 	errno_t err = fclose(file);
-	if (err == 0)
-	{
-		printf("File is closed,\n");
-	}
-	else
-	{
-		printf("File not closed.\n");
-	}
+	//if (err == 0)
+	//{
+	//	printf("File is closed,\n");
+	//}
+	//else
+	//{
+	//	printf("File not closed.\n");
+	//}
 }
 void upgrades_Exit(void)
 {

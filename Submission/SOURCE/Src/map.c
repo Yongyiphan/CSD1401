@@ -289,7 +289,6 @@ void map_Exit(void) {
 	FreeMobResource();
 	FreeItemResource();
 	BulletImgFree();
-	printf("Coin Gained: %d\n", P.STAT.Coin_Gained);
 	money.amount += P.STAT.Coin_Gained;
 	save_all_upgrades_to_file();
 	Audio_Exit();
