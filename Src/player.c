@@ -1,6 +1,7 @@
 #pragma once
 #include "cprocessing.h"
 #include <stdio.h>
+#include <stdlib.h>
 #include "map.h"
 #include "player.h"
 #include "utils.h"
@@ -27,7 +28,6 @@
 
 // Player hitbox is a circle
 
-#define _countof(array) (sizeof(array) / sizeof(array[0]))
 
 //Declaring player variables
 CP_Vector start_vector;
@@ -69,8 +69,8 @@ void Player_Stats_Update(Player* P) {
 Shows Player's stats: HP, SPEED, DMG, ATK_SPEED, PICKUP_RADIUS and BULLET_SPD.
 */
 void Player_Show_Stats(Player P) {
-	float printX = CP_System_GetWindowWidth() * 0.7 / 10;
-	float printY = CP_System_GetWindowHeight() * 7.5 / 10;
+	float printX = CP_System_GetWindowWidth() * 0.7f / 10;
+	float printY = CP_System_GetWindowHeight() * 7.5f / 10;
 	float padding = 30;
 	char bufferList[6][30] = { {0},{0},{0},{0},{0},{0} };
 	char* bufferName[] = { "HP: ", "SPEED: ", "DAMAGE: ", "FIRE RATE: ", "PICKUP RADIUS: ", "BULLET SPEED: " };
@@ -94,8 +94,8 @@ void Player_Show_Stats(Player P) {
 
 
 void Player_Show_Coins(void) {
-	float printX = CP_System_GetWindowWidth() * 7.0 / 10;
-	float printY = CP_System_GetWindowHeight() * 1.0 / 10;
+	float printX = CP_System_GetWindowWidth() * 7.0f / 10;
+	float printY = CP_System_GetWindowHeight() * 1.0f / 10;
 
 	
 	CP_Image_Draw(ItemSprites[COIN], printX + 200, printY + 17, 50, 50, 255);
@@ -126,7 +126,7 @@ void Player_Win_Condition(int *isPaused, int *hasWon) {
 
 	// Options background
 	CP_Settings_Fill(CP_Color_Create(80, 80, 100, 120));
-	CP_Graphics_DrawRectAdvanced(middle.x, middle.y, screen_width * 4.0 / 10, screen_height * 8.0 / 10, 0, 20);
+	CP_Graphics_DrawRectAdvanced(middle.x, middle.y, screen_width * 4.0f / 10, screen_height * 8.0f / 10, 0.0f, 20.0f);
 
 	// Draw out option boxes
 	CP_Settings_Fill(CP_Color_Create(255, 100, 100, 255));
@@ -165,10 +165,10 @@ Current HP is always proportional to the length of max HP.
 */
 void show_healthbar(Player* p) {
 	CP_Settings_RectMode(CP_POSITION_CORNER);
-	float x_coord = (float)CP_System_GetWindowWidth() * 1 / 10;
-	float y_coord = (float)CP_System_GetWindowHeight() * 0.65 / 10;
-	int rectWidth = 300;
-	int rectHeight = 30;
+	float x_coord = (float)CP_System_GetWindowWidth() * 1.0f / 10;
+	float y_coord = (float)CP_System_GetWindowHeight() * 0.65f / 10;
+	float rectWidth = 300.0f;
+	float rectHeight = 30.0f;
 
 	CP_Settings_Fill(CP_Color_Create(255, 200, 200, 255));
 	CP_Settings_StrokeWeight(3.0f);
@@ -180,7 +180,7 @@ void show_healthbar(Player* p) {
 	else if (p->CURRENT_HP <= 0)
 		p->CURRENT_HP = 0;
 
-	CP_Graphics_DrawRectAdvanced(x_coord, y_coord, p->CURRENT_HP / p->STAT.MAX_HP * rectWidth, rectHeight, 0, 0);
+	CP_Graphics_DrawRectAdvanced(x_coord, y_coord, p->CURRENT_HP / p->STAT.MAX_HP * rectWidth, rectHeight, 0.0f, 0.0f);
 	CP_Settings_RectMode(CP_POSITION_CENTER);
 	
 	CP_Settings_TextAlignment(CP_TEXT_ALIGN_H_CENTER, CP_TEXT_ALIGN_V_TOP);
@@ -195,11 +195,11 @@ void show_healthbar(Player* p) {
 
 void show_level(Player* P) {
 	CP_Settings_RectMode(CP_POSITION_CORNER);
-	float x_coord = (float)CP_System_GetWindowWidth() * 1 / 10;
-	float y_coord = (float)CP_System_GetWindowHeight() * 1.1 / 10;
+	float x_coord = (float)CP_System_GetWindowWidth() * 1.0f / 10;
+	float y_coord = (float)CP_System_GetWindowHeight() * 1.1f / 10;
 
-	int rectWidth = 300;
-	int rectHeight = 30;
+	float rectWidth = 300.0f;
+	float rectHeight = 30.0f;
 
 	CP_Settings_Fill(CP_Color_Create(200, 200, 255, 255));
 	CP_Settings_StrokeWeight(3.0f);
@@ -207,7 +207,7 @@ void show_level(Player* P) {
 
 	CP_Settings_Fill(CP_Color_Create(100, 200, 100, 255));
 	float lvlperc = (P->LEVEL.P_EXP / (float)P->LEVEL.EXP_REQ);
-	CP_Graphics_DrawRectAdvanced(x_coord, y_coord, lvlperc * rectWidth, rectHeight, 0, 0);
+	CP_Graphics_DrawRectAdvanced(x_coord, y_coord, lvlperc * rectWidth, rectHeight, 0.0f, 0.0f);
 	CP_Settings_RectMode(CP_POSITION_CENTER);
 
 	CP_Settings_TextAlignment(CP_TEXT_ALIGN_H_CENTER, CP_TEXT_ALIGN_V_TOP);
@@ -231,17 +231,14 @@ void death_screen(float totalElapsedTime) {
 	float screen_height = (float) CP_System_GetWindowHeight();
 	CP_Vector middle = CP_Vector_Set(screen_width / 2, screen_height / 2);
 
-	float width = 300;
-	float height = 60;
-	float padding = 30;
 
-	float textSize = 30.0;
+	float width = 300.0f, height = 60.0f, padding = 30.0f, textSize = 30.0f;
 
 	CP_Settings_RectMode(CP_POSITION_CENTER);
 	CP_Settings_NoStroke();
 	// Options background
 	CP_Settings_Fill(CP_Color_Create(80, 80, 100, 120));
-	CP_Graphics_DrawRect(middle.x, middle.y, screen_width * 4.0 / 10, screen_height * 8.0 / 10);
+	CP_Graphics_DrawRect(middle.x, middle.y, screen_width * 4.0f / 10, screen_height * 8.0f / 10);
 
 	// Draw out option boxes
 	CP_Settings_Fill(CP_Color_Create(255, 100, 100, 255));
@@ -290,7 +287,7 @@ void death_screen(float totalElapsedTime) {
 int level_up(LEVEL* level) {
 	if (level->P_EXP >= level->EXP_REQ) {
 		level->P_EXP = 0;
-		level->EXP_REQ = level->VAL % Level_Req_Jump == 0 ? level->EXP_REQ * Level_Jump_Perc : level->EXP_REQ * Level_Up_Perc;
+		level->EXP_REQ = level->VAL % Level_Req_Jump == 0 ? (int) (level->EXP_REQ * Level_Jump_Perc) : (int) (level->EXP_REQ * Level_Up_Perc);
 		level->VAL += 1;
 
 		return 1;
@@ -299,15 +296,16 @@ int level_up(LEVEL* level) {
 }
 
 // Show player's available upgrades
+int NoBaseStats = 6;
 void upgrade_screen(Player* P, int* isUpgrade, int* isPaused) {
 	CP_Graphics_ClearBackground(CP_Color_Create(50, 50, 0, 255));
 	float screen_width = (float) CP_System_GetWindowWidth();
 	float screen_height = (float) CP_System_GetWindowHeight();
 	CP_Vector middle = CP_Vector_Set(screen_width / 2, screen_height / 2);
 
-	float background_width = screen_width * 6.0 / 10;
-	float background_height = screen_height * 7.0 / 10;
-	float upgrades_height = screen_height * 4.0 / 10;
+	float background_width = screen_width * 6.0f / 10;
+	float background_height = screen_height * 7.0f / 10;
+	float upgrades_height = screen_height * 4.0f / 10;
 
 	float padding = 40;
 	int numBoxes_hor = 3, numBoxes_vert = 2, isClicked = FALSE;
@@ -358,20 +356,20 @@ void upgrade_screen(Player* P, int* isUpgrade, int* isPaused) {
 				if (IsAreaClicked(boxX, boxY, box_width, box_height, CP_Input_GetMouseX(), CP_Input_GetMouseY())) {
 					
 					if (strcmp(name[countStats % 6], "Pickup Radius") == 0) {
-						P->STATMULT.PICKUP_MULT += 0.2;
+						P->STATMULT.PICKUP_MULT += 0.2f;
 					}
 					else if (strcmp(name[countStats % 6], "Max HP") == 0) {
-						P->STATMULT.MAX_HP_MULT += 1.0 / 100;
+						P->STATMULT.MAX_HP_MULT += 1.0f / 100;
 					}
 					else if (strcmp(name[countStats % 6], "Damage") == 0) {
-						P->STATMULT.DAMAGE_MULT += 0.3;
+						P->STATMULT.DAMAGE_MULT += 0.3f;
 					}
 					else if (strcmp(name[countStats % 6], "Speed") == 0)
-						P->STATMULT.SPEED_MULT += 0.2;
+						P->STATMULT.SPEED_MULT += 0.2f;
 					else if (strcmp(name[countStats % 6], "Bullet Speed") == 0)
-						P->STATMULT.PROJECTILE_SPD_MULT += 0.15;
+						P->STATMULT.PROJECTILE_SPD_MULT += 0.15f;
 					else if (strcmp(name[countStats % 6], "Attack Speed") == 0)
-						P->STATMULT.ATK_SPEED_MULT += 0.05;
+						P->STATMULT.ATK_SPEED_MULT += 0.05f;
 
 					isClicked = TRUE;
 					*isPaused = 0;
@@ -390,17 +388,5 @@ void upgrade_screen(Player* P, int* isUpgrade, int* isPaused) {
 	// Remove rectangle align-center and add stroke back in
 	CP_Settings_RectMode(CP_POSITION_CORNER);
 	CP_Settings_Stroke(CP_Color_Create(0, 0, 0, 255));
-}
-
-char* PStats[] = {"HEALTH", "SPEED", "DAMAGE", "FIRE RATE", "BULLET SPEED", "MAX HP"};
-int NoBaseStats = 6;
-char* GetBaseStats(int type) {
-	type = type == -1 ? -1 : type % NoBaseStats;
-	switch (type) {
-	case -1:
-		return PStats;
-	default:
-		return PStats[type];
-	}
 }
 

@@ -31,8 +31,8 @@ int Audioinit = 0;
 void Audio_Init(void) {
 	if (Audioinit == 0) {
 		button_click = CP_Sound_Load("./Assets/Sound/click.wav");
-		bullet_sound = CP_Sound_LoadMusic("./Assets/Sound/laserShoot.wav");
-
+		bullet_sound = CP_Sound_Load("./Assets/Sound/laserShoot.wav");
+		pickup_exp_sound = CP_Sound_Load("./Assets/Sound/pickupCoin.wav");
 		main_bgm_music = CP_Sound_Load("./Assets/Sound/mainmenu_music.mp3");
 		ingame_bgm_music = CP_Sound_Load("./Assets/Sound/bgm_music.mp3");
 		Audioinit = 1;
@@ -56,7 +56,6 @@ void Audio_Play_Music(int sound) {
 
 void Audio_ButtonClick(void) {
 	if (button_click != NULL) {
-		printf("BTN: %p\n", button_click);
 		CP_Sound_PlayAdvanced(button_click, SFX_vol, 1.0f, FALSE, SFX);
 	}
 }
@@ -70,7 +69,6 @@ void Audio_Pickup_EXP(void) {
 
 void Audio_Bullet(void) {
 	if (bullet_sound != NULL) {
-		printf("BLT: %p\n", bullet_sound);
 		CP_Sound_PlayAdvanced(bullet_sound, SFX_vol, 1.0f, FALSE, SFX);
 	}
 }
@@ -80,24 +78,13 @@ void Audio_Bullet(void) {
 
 void Audio_Exit(void) {
 	if (Audioinit == 1) {
-		if (button_click != NULL) {
-			CP_Sound_Free(&button_click);
-		}
+		CP_Sound_Free(&button_click);
+		CP_Sound_Free(&bullet_sound);
+		CP_Sound_Free(&pickup_exp_sound);
 
-		
-		if (bullet_sound != NULL) {
-			CP_Sound_Free(&bullet_sound);
-		}
-		
-		if (main_bgm_music != NULL) {
-			CP_Sound_Free(&main_bgm_music);
-		}
-		if (ingame_bgm_music != NULL) {
-			CP_Sound_Free(&ingame_bgm_music);
-		}
-
+		CP_Sound_Free(&main_bgm_music);
+		CP_Sound_Free(&ingame_bgm_music);
 		Audioinit = 0;
-		printf("Destroy Audio\n");
 
 	}
 }

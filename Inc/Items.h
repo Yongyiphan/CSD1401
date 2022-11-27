@@ -77,7 +77,9 @@ typedef struct ItemTracker {
 extern ItemTrack* ItemTracker;
 
 extern int Img_C;
-extern CP_Image** ItemSprites;
+//extern CP_Image** ItemSprites;
+#define ISpriteSize 20
+extern CP_Image ItemSprites[ISpriteSize];
 
 /*
 Item Planning

@@ -31,8 +31,8 @@ void options_Init(void)
 	grey = CP_Color_Create(100, 100, 100, 255);
 	dark_green = CP_Color_Create(17, 39, 0, 255);
 	CP_Graphics_ClearBackground(grey);
-	width = CP_System_GetWindowWidth();
-	height = CP_System_GetWindowHeight();
+	width = (float) CP_System_GetWindowWidth();
+	height = (float) CP_System_GetWindowHeight();
 	
 	rectWidth = width / 3;
 	rectHeight = height / 16;

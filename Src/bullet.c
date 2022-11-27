@@ -128,7 +128,7 @@ void BulletDraw(void) //Draws the location of all active bullets
 			// Bullet image settings
 			CP_Settings_ImageMode(CP_POSITION_CENTER);
 			CP_Settings_Fill(CP_Color_Create(0, 0, 0, 255));
-			float IWidth = CP_Image_GetWidth(bulletimg) / 3, IHeight = CP_Image_GetHeight(bulletimg);
+			float IWidth = (float) CP_Image_GetWidth(bulletimg) / 3, IHeight = (float) CP_Image_GetHeight(bulletimg);
 			float Imgsize = 30;
 
 			// Draw image for normal/spilt bullets
@@ -151,8 +151,8 @@ void BulletDraw(void) //Draws the location of all active bullets
 			{
 				// Timer for explosion image duration
 				bullet[i].timer += CP_System_GetDt();
-				CP_Image_DrawSubImage(bulletimg1, bullet[i].x, bullet[i].y, CP_Image_GetWidth(bulletimg1), CP_Image_GetHeight(bulletimg1),
-					0, 0, CP_Image_GetWidth(bulletimg1) , IHeight, 255);
+				CP_Image_DrawSubImage(bulletimg1, bullet[i].x, bullet[i].y, (float) CP_Image_GetWidth(bulletimg1), (float) CP_Image_GetHeight(bulletimg1),
+					0, 0, (float) CP_Image_GetWidth(bulletimg1) , IHeight, 255);
 
 				if (bullet[i].timer > 2) { // number - 1 => timer explosion effects lasts (in seconds)
 					bullet[i].timer = 0;
@@ -205,7 +205,7 @@ int BulletCollision(float targetx, float targety, float width, float height)
 // Re-set the bullet direction towards the mob
 void BulletHomingTrack(float targetx, float targety, float size, int i)
 {
-	int homingzone = 3 * size; // Current setting is 3 times of mob hitbox for homing range
+	int homingzone = 3 * (int) size; // Current setting is 3 times of mob hitbox for homing range
 	if (CP_Math_Distance(bullet[i].x, bullet[i].y, targetx, targety) < homingzone)
 	{
 		bullet[i].degree = point_point_angle(bullet[i].x, bullet[i].y, targetx, targety);

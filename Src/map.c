@@ -154,7 +154,7 @@ void map_Update(void) {
 
 					int bchecker;
 					// Check if current mob is colliding with a bullet, bchecker will be the collided bullet
-					bchecker = BulletCollision(cMob->coor.x, cMob->coor.y, cMob->w, cMob->h);
+					bchecker = BulletCollision(cMob->coor.x, cMob->coor.y, (float) cMob->w, (float) cMob->h);
 					// Check collision of mob against the explosion radius of explosive bullet
 					if (bullet[bchecker].type == PBULLET_ROCKET && bullet[bchecker].friendly == BULLET_PLAYER
 						&& bullet[bchecker].exist == FALSE) // Specific type for explosion zone
@@ -204,7 +204,7 @@ void map_Update(void) {
 			}
 		}
 		if (MobCycleTimer % 2 == 0) {
-			float deduct = 1 + P.LEVEL.VAL / 4;
+			float deduct = 1 + (float) P.LEVEL.VAL / 4;
 			deduct = deduct > P.STATTOTAL.MAX_HP_TOTAL / 2 ? P.STATTOTAL.MAX_HP_TOTAL / 2 : deduct;
 			P.CURRENT_HP -= deduct;
 		}
@@ -289,7 +289,6 @@ void map_Exit(void) {
 	FreeMobResource();
 	FreeItemResource();
 	BulletImgFree();
-	printf("Coin Gained: %d\n", P.STAT.Coin_Gained);
 	money.amount += P.STAT.Coin_Gained;
 	save_all_upgrades_to_file();
 	Audio_Exit();
