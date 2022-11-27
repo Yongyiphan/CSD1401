@@ -148,7 +148,7 @@ void map_Update(void) {
 				if (cMob->Status == 1) {
 					//MobTPlayerCollision(cMob, &P);
 					cMob->AnimationCycle += 1;
-					MobTMobCollision(cMob);
+					MobMovement(cMob);
 					MobTPlayerCollision(cMob, &P);
 
 
@@ -294,5 +294,4 @@ void map_Exit(void) {
 	save_all_upgrades_to_file();
 	Audio_Exit();
 	
-	//free(ItemTracker);
 }

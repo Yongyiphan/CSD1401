@@ -44,8 +44,6 @@ typedef struct ItemStat {
 	float Modifier; //Stat Modified amt
 
 	//Coordinates
-	//double x;
-	//double y;
 	CP_Vector coor;
 	//-1 = Collected, 0 = initialised, 1 = Not collected
 	int collected;
@@ -112,7 +110,6 @@ void IAffectPlayer(Item* i, int method);
 void CheckItems(void);
 
 
-//ItemLink* ItemInteraction(ItemLink* head);
 void ItemInteraction(ItemLink** head);
 ItemLink* newLink(Item* item);
 void insertItemLink(ItemLink** head, Item *item);

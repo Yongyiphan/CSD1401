@@ -320,7 +320,8 @@ float squareDist(float one, float two) {
 		return one * one;
 	 return one * one + two * two;
 }
-void MobTMobCollision(Mob* m) {
+
+void MobMovement(Mob* m) {
 	if (m->h > 0) {
 		int status = 0;
 		Mob* tm, * main, * bounce;

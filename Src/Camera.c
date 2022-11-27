@@ -48,17 +48,6 @@ void CameraDemo_Update(Player *player, CP_Matrix *trans)
 {
 	float dt = CP_System_GetDt();
 
-	// Inputs for increasing and reducing camera view
-	/*if (CP_Input_KeyDown(KEY_I))
-	{
-		currentScale += dt * SCALE_QUANTUM;
-		scaleMatrix = CP_Matrix_Scale(CP_Vector_Set(currentScale, currentScale));
-	}
-	else if (CP_Input_KeyDown(KEY_O))
-	{
-		currentScale += dt * -SCALE_QUANTUM;
-		scaleMatrix = CP_Matrix_Scale(CP_Vector_Set(currentScale, currentScale));
-	}*/
 
 	// THIS IS ALL CAMERA MOVEMENT, ARROW KEYS UP DOWN LEFT RIGHT FOR CAMERA CONTROL
 	
@@ -66,28 +55,23 @@ void CameraDemo_Update(Player *player, CP_Matrix *trans)
 	{
 		currentPosition.y += dt * player->STATTOTAL.SPEED_TOTAL;
 		translationMatrix = CP_Matrix_Translate(currentPosition);
-		//printf("Current Pos: %f %f\n", currentPosition.x, currentPosition.y);
 	}
 	if (CP_Input_KeyDown(KEY_S))
 	{
 		currentPosition.y += dt * -player->STATTOTAL.SPEED_TOTAL;
 		translationMatrix = CP_Matrix_Translate(currentPosition);
-		//printf("Current Pos: %f %f\n", currentPosition.x, currentPosition.y);
 	}
 	if (CP_Input_KeyDown(KEY_D))
 	{
 		currentPosition.x += dt * -player->STATTOTAL.SPEED_TOTAL;
 		translationMatrix = CP_Matrix_Translate(currentPosition);
-		//printf("Current Pos: %f %f\n", currentPosition.x, currentPosition.y);
 	}
 	if (CP_Input_KeyDown(KEY_A))
 	{
 		currentPosition.x += dt * player->STATTOTAL.SPEED_TOTAL;
 		translationMatrix = CP_Matrix_Translate(currentPosition);
-		//printf("Current Pos: %f %f\n", currentPosition.x, currentPosition.y);
 	}
 
-	//printf("Current Pos: %f %f\n", currentPosition.x, currentPosition.y);
 	CP_Vector offsetOrigin = CP_Vector_Scale(currentPosition, -1.0f);
 	CP_Vector offsetVector = CP_Vector_Add(offsetOrigin, centerOffset);
 	CP_Matrix offsetMatrix = CP_Matrix_Translate(CP_Vector_Scale(offsetVector, -1.0f));
@@ -107,13 +91,11 @@ void CameraDemo_Update(Player *player, CP_Matrix *trans)
 	*trans = transform;
 	CP_Settings_ApplyMatrix(transform);
 
-	//CP_Graphics_ClearBackground(CP_Color_Create(100, 100, 100, 255));
 	//Draw environment props that do not move
 	CP_Settings_Fill(CP_Color_Create(255, 0, 0, 255));
 	CP_Settings_TextAlignment(CP_TEXT_ALIGN_H_CENTER, CP_TEXT_ALIGN_V_MIDDLE);
 	CP_Font_DrawText("W A S D to move", 450, 300);
 	CP_Font_DrawText("Hold Left Mouse Click to Shoot", 450, 200);
-	//CP_Font_DrawText("No jokes about chuck norris", 2000, 20);
 
 	//this draws the center circle in which the scale and rotation transformations
 	//take reference from

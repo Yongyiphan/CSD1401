@@ -52,8 +52,6 @@ void Main_Menu_Init(void)
 	dark_green = CP_Color_Create(17, 39, 0, 255);
 	red = CP_Color_Create(200, 0, 0, 255);
 	CP_System_SetWindowSize(WINDOWSIZEX, WINDOWSIZEY);
-	//CP_System_Fullscreen();
-	//CP_Graphics_ClearBackground(dark_green);
 	width = CP_System_GetWindowWidth();
 	height = CP_System_GetWindowHeight();
 	
@@ -85,7 +83,6 @@ void Main_Menu_Update()
 		CP_Image_Draw(zombie, width / 2 + width / 3, height / 2, width / 4, height / 3, 255);
 		CP_Image_Draw(zombie, width / 2 - width / 3, height / 2, width / 4, height / 3, 255);
 
-		//CP_Graphics_ClearBackground(grey);
 		CP_Settings_RectMode(CP_POSITION_CENTER);
 
 		char* text[] = {"PLAY", "UPGRADES", "HOW TO PLAY", "OPTIONS", "CREDITS", "EXIT"};
@@ -107,7 +104,6 @@ void Main_Menu_Update()
 			
 			if (IsAreaClicked(width / 2, (height / 2) - (height / 10) + (height / 10 * 0), (height / 5), ((height / 6) / 2), CP_Input_GetMouseX(), CP_Input_GetMouseY())) {
 				CP_Engine_SetNextGameState(map_Init, map_Update, map_Exit);
-				//CP_Sound_Free(&BGM);
 			}
 			//click upgrades to go to upgrades screen
 			if (IsAreaClicked(width / 2, (height / 2) - (height / 10) + (height / 10 * 1), (width / 5), ((height / 6) / 2), CP_Input_GetMouseX(), CP_Input_GetMouseY()))
@@ -132,11 +128,6 @@ void Main_Menu_Update()
 			//click exit to exit
 			if (IsAreaClicked(width / 2, (height / 2) - (height / 10) + (height / 10 * 5), (width / 5), ((height / 6) / 2), CP_Input_GetMouseX(), CP_Input_GetMouseY()))
 			{
-				/*int exit = 1;
-				if (exit)
-				{
-					confirm_exit(exit);
-				}*/
 				save_all_upgrades_to_file();
 				CP_Engine_Terminate();
 			}
@@ -144,14 +135,10 @@ void Main_Menu_Update()
 	}
 
 
-
 	if (CP_Input_KeyDown(KEY_ENTER))
 	{
 		CP_Engine_SetNextGameState(map_Init, map_Update, map_Exit);
 	}
-	//if (CP_Input_KeyTriggered(KEY_ESCAPE)) {
-	//	CP_Engine_Terminate();
-	//}
 }
 
 

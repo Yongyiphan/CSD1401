@@ -30,11 +30,9 @@ void options_Init(void)
 	black = CP_Color_Create(0, 0, 0, 255);
 	grey = CP_Color_Create(100, 100, 100, 255);
 	dark_green = CP_Color_Create(17, 39, 0, 255);
-	//CP_System_SetWindowSize(WINDOWSIZEX, WINDOWSIZEY);
 	CP_Graphics_ClearBackground(grey);
 	width = CP_System_GetWindowWidth();
 	height = CP_System_GetWindowHeight();
-	//SFX_vol = BGM_vol = 0.7;
 	
 	rectWidth = width / 3;
 	rectHeight = height / 16;
@@ -83,7 +81,6 @@ void options_Update(void)
 			BGM_length = CP_Input_GetMouseX() - (rectWidth);
 			BGM_vol = BGM_length / rectWidth;
 			CP_Sound_SetGroupVolume(MUSIC, BGM_vol);
-			//*bgmLen = BGM_length / rectWidth;
 		}
 	}
 	

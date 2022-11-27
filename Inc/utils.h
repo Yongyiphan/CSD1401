@@ -7,7 +7,7 @@
 * File Level Documentation
 * @author		Geoffrey Cho Jian Ming
 * @email		g.cho@digipen.edu
-* @contributor	Sen Chuan
+* @contributor	Sen Chuan Tay
 * @file			utils.h
 * @brief		This file contains utilities and
 *				miscellaneous functions for the game.

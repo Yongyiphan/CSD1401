@@ -23,7 +23,6 @@
 
 int IsAreaClicked(float area_center_x, float area_center_y, float area_width, float area_height, float click_x, float click_y)
 {
-	// TODO
 	// within x dimensions of the given area
 	int leftLimit = area_center_x - area_width / 2;
 	int rightLimit = area_center_x + area_width / 2;
@@ -68,7 +67,6 @@ void option_screen(int* isPaused) {
 	// Draw text of respective boxes at respective coordinates.
 	CP_Settings_TextSize(40.0f);
 	CP_Settings_TextAlignment(CP_TEXT_ALIGN_H_CENTER, CP_TEXT_ALIGN_V_MIDDLE);
-	//CP_Font_DrawTextBox("Upgrades", middle.x, middle.y - height - padding, width);
 	CP_Font_DrawText("Resume Game", middle.x, middle.y);
 	CP_Font_DrawText("Exit to main menu", middle.x, middle.y + height + padding);
 
@@ -100,7 +98,6 @@ float timer(int isPaused, int init) {
 	}
 	if (!isPaused) {
 		totalElapsedTime += currentElapsedTime;
-		//CP_Font_DrawTextBox("Upgrades", middle.x, middle.y - height - padding, width);
 	}
 	MobCycleTimer = (int)totalElapsedTime;
 	return totalElapsedTime;

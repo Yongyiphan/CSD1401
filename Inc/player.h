@@ -7,7 +7,7 @@
 * File Level Documentation
 * @author		Geoffrey Cho Jian Ming
 * @email		g.cho@digipen.edu
-* @contributor	Edgar Yong, Sen Chuan
+* @contributor	Edgar Yong, Sen Chuan Tay
 * @file			player.h
 * @brief		This file contains all functions required for player functions and movement
 				-> Create Interfaces that interact with player

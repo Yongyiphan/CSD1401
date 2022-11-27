@@ -172,7 +172,6 @@ void show_healthbar(Player* p) {
 
 	CP_Settings_Fill(CP_Color_Create(255, 200, 200, 255));
 	CP_Settings_StrokeWeight(3.0f);
-	//CP_Settings_TextSize(20.0f);
 	CP_Graphics_DrawRectAdvanced(x_coord, y_coord, rectWidth, rectHeight, 0, 0);
 	CP_Settings_Fill(CP_Color_Create(255, 0, 0, 255));
 
@@ -214,10 +213,12 @@ void show_level(Player* P) {
 	CP_Settings_TextAlignment(CP_TEXT_ALIGN_H_CENTER, CP_TEXT_ALIGN_V_TOP);
 	CP_Settings_Fill(CP_Color_Create(0, 0, 0, 255));
 	char buffer[3][16] = { {0}, {0}, {0} };
+	//Draw Current Lvl
 	sprintf_s(buffer[0], _countof(buffer[0]), "%d", P->LEVEL.VAL);
 	CP_Font_DrawText("Lv:", (x_coord * 2 + rectWidth) / 2 - 110, y_coord);
 	CP_Font_DrawText(buffer[0], (x_coord * 2 + rectWidth) / 2 - 85, y_coord);
 	sprintf_s(buffer[1], _countof(buffer[1]), "%.2f", lvlperc * 100);
+	//Draw Current Exp perc
 	CP_Font_DrawText(buffer[1], (x_coord * 2 + rectWidth) / 2, y_coord);
 	CP_Font_DrawText("%", (x_coord * 2 + rectWidth) / 2 + 45, y_coord);
 }
@@ -292,7 +293,6 @@ int level_up(LEVEL* level) {
 		level->EXP_REQ = level->VAL % Level_Req_Jump == 0 ? level->EXP_REQ * Level_Jump_Perc : level->EXP_REQ * Level_Up_Perc;
 		level->VAL += 1;
 
-		//Audio_LevelUp();
 		return 1;
 	}
 	return 0;
@@ -356,18 +356,15 @@ void upgrade_screen(Player* P, int* isUpgrade, int* isPaused) {
 
 			if (CP_Input_MouseTriggered(MOUSE_BUTTON_LEFT)) {
 				if (IsAreaClicked(boxX, boxY, box_width, box_height, CP_Input_GetMouseX(), CP_Input_GetMouseY())) {
-					//stats[countStats % 6] += 1;
 					
 					if (strcmp(name[countStats % 6], "Pickup Radius") == 0) {
 						P->STATMULT.PICKUP_MULT += 0.2;
-						//printf("%s: %.2f\n", name[countStats % 6], P->STATMULT.MAX_HP_MULT);
 					}
 					else if (strcmp(name[countStats % 6], "Max HP") == 0) {
 						P->STATMULT.MAX_HP_MULT += 1.0 / 100;
 					}
 					else if (strcmp(name[countStats % 6], "Damage") == 0) {
 						P->STATMULT.DAMAGE_MULT += 0.3;
-						//printf("%s: %.2f\n", name[countStats % 6], P->STATMULT.DAMAGE_MULT);
 					}
 					else if (strcmp(name[countStats % 6], "Speed") == 0)
 						P->STATMULT.SPEED_MULT += 0.2;

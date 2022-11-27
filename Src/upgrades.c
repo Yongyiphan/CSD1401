@@ -45,7 +45,6 @@ void upgrades_Init(void)
 	dark_green = CP_Color_Create(17, 39, 0, 255);
 	red = CP_Color_Create(200, 0, 0, 255);
 	//window size
-	//CP_System_SetWindowSize(WINDOWSIZEX, WINDOWSIZEY);
 	CP_Graphics_ClearBackground(dark_green);
 	width = CP_System_GetWindowWidth();
 	height = CP_System_GetWindowHeight();
@@ -62,7 +61,6 @@ void upgrades_Init(void)
 }
 char* convert_int_to_string(char buffer[], int value)
 {
-	//char buffer[16];
 	sprintf_s(buffer, _countof(buffer), "%d", value);
 	return buffer;
 }
@@ -92,7 +90,6 @@ void upgrades_Update(void)
 	}
 	//draw text on boxes
 	char* text[] = { "HEALTH", "SPEED", "DAMAGE", "ATTACK SPEED",  "DEFENSE" };
-	//char* text = GetBaseStats(-1); //from player.c
 	
 	CP_Settings_TextSize(30);
 	for (int i = 0; i < 5; i++)
@@ -103,7 +100,6 @@ void upgrades_Update(void)
 		CP_Font_DrawText(convert_int_to_string(buffer, upgrades[i].level), (width / 6)* (i + 1), height / 3);
 		
 		CP_Font_DrawText("$2000", (width / 6) * (i + 1), height / 3 + height / 24);
-		//printf("string\n");
 	}
 
 	for (int i = 0; i < 5; i++)
@@ -257,7 +253,6 @@ void reset_all_upgrades(void)
 	{
 		money.amount += upgrades[i].cost * upgrades[i].level;
 		upgrades[i].level = 0;
-		//upgrades[i].cost = 0;
 		upgrades[i].stat = 0;
 	}
 }

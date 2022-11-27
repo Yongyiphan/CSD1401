@@ -115,8 +115,6 @@ Print Conditions
 
 
 
-
-
 void MobLoadImage(void);
 void CreateWaveTracker(void);
 void InitWavesArr(WaveTrack* tracker, int start);
@@ -124,13 +122,12 @@ void InitWavesArr(WaveTrack* tracker, int start);
 void CreateBaseStat(MobStats* ms, int type);
 void CreateMob(Mob* m, MobStats *Base, Player*player, int offSet);
 void GenerateMobs(WaveTrack* tracker, Player* player);
-//void GenerateWaves(Player* P, WaveTrack* queue, int* queueID, int WavesNo, int CostGrowth, int MaxMobGrowth,int *TotalWaveCount,  int* MobCount);
 void GenerateWaves(void);
 
 void DrawMobImage(Mob* m, Player*p);
 
 void MobTPlayerCollision(Mob* m, Player* p);
-void MobTMobCollision(Mob* mob);
+void MobMovement(Mob* mob);
 
 void PrintWaveStats(void);
 
