@@ -42,7 +42,7 @@ void BulletReset() //Reset active bullet
 
 void Bulletinit() //Include this in mapinit (Reset for all bullets)
 {
-	for (bulletcounter = 0; bulletcounter < (BULLET_CAP - 1); bulletcounter++)
+	for (bulletcounter = 0; bulletcounter < (BULLET_CAP - 2); bulletcounter++)
 		BulletReset();
 }
 
@@ -105,7 +105,7 @@ void BulletType(int type, float coordx, float coordy, float angle, int friendly)
 void BulletShoot(float coordx, float coordy, float angle, int type, int friendly) // Sets the bullet to active
 {
 	BulletType(type, coordx, coordy, angle, friendly); // Set necessary data to the bullet
-	if (bulletcounter < (BULLET_CAP - 1)) // Adjustments to bullet data should be before this to prevent buffer overrun
+	if (bulletcounter < (BULLET_CAP - 2)) // Adjustments to bullet data should be before this to prevent buffer overrun
 		bulletcounter++;
 	else bulletcounter = 0;
 }
@@ -177,7 +177,7 @@ void BulletDraw(void) //Draws the location of all active bullets
 int BulletCollision(float targetx, float targety, float width, float height)
 {	
 	float distance = 0;
-	for (int i = 0; i < BULLET_CAP; i++) {
+	for (int i = 0; i < BULLET_CAP ; i++) {
 
 		// Check when a target is within the range of the explosive bullet
 		if (bullet[i].type == PBULLET_ROCKET && bullet[i].exist == FALSE && bullet[i].timer == 1)

@@ -1,0 +1,73 @@
+﻿<?xml version="1.0" encoding="utf-8"?>
+<Project ToolsVersion="4.0" xmlns="http://schemas.microsoft.com/developer/msbuild/2003">
+  <ItemGroup>
+    <ClCompile Include="Src\bullet.c" />
+    <ClCompile Include="Src\Camera.c" />
+    <ClCompile Include="Src\Items.c" />
+    <ClCompile Include="Src\main.c" />
+    <ClCompile Include="Src\mainmenu.c" />
+    <ClCompile Include="Src\map.c" />
+    <ClCompile Include="Src\options.c" />
+    <ClCompile Include="Src\player.c" />
+    <ClCompile Include="Src\upgrades.c" />
+    <ClCompile Include="Src\utils.c" />
+    <ClCompile Include="Src\Mob.c" />
+    <ClCompile Include="Src\audio_manager.c" />
+    <ClCompile Include="Src\credits.c" />
+    <ClCompile Include="Src\instructions.c" />
+  </ItemGroup>
+  <ItemGroup>
+    <ClInclude Include="Inc\bullet.h" />
+    <ClInclude Include="Inc\Camera.h" />
+    <ClInclude Include="Inc\mainmenu.h" />
+    <ClInclude Include="Inc\Items.h" />
+    <ClInclude Include="Inc\map.h" />
+    <ClInclude Include="Inc\options.h" />
+    <ClInclude Include="Inc\player.h" />
+    <ClInclude Include="Inc\upgrades.h" />
+    <ClInclude Include="Inc\utils.h" />
+    <ClInclude Include="Inc\Mob.h" />
+    <ClInclude Include="Inc\audio_manager.h" />
+    <ClInclude Include="Inc\credits.h" />
+    <ClInclude Include="Inc\instructions.h" />
+  </ItemGroup>
+  <ItemGroup>
+    <Image Include="Assests\DigiPen_Singapore_WEB_RED.png" />
+    <Image Include="Assets\background.png" />
+    <Image Include="Assets\Credits\credits.png" />
+    <Image Include="Assets\Credits\ournames.png" />
+    <Image Include="Assets\Credits\smeg.png" />
+    <Image Include="Assets\Instructions\atkSpd_text.png" />
+    <Image Include="Assets\Instructions\dmg_text.png" />
+    <Image Include="Assets\Instructions\hp_text.png" />
+    <Image Include="Assets\Instructions\maxHP_text.png" />
+    <Image Include="Assets\Instructions\mvmtSpd_text.png" />
+    <Image Include="Assets\Instructions\great_exp.png" />
+    <Image Include="Assets\Instructions\normal_exp.png" />
+    <Image Include="Assets\Instructions\magnet_text.png" />
+    <Image Include="Assets\Instructions\directionalKeys_text.png" />
+    <Image Include="..\Resources\DigiPen_Singapore_Logo (2)\DigiPen Singapore Logo\DigiPen_Singapore_WEB_WHITE.png" />
+    <Image Include="Assets\DigiPen_Singapore_WEB_WHITE.png" />
+  </ItemGroup>
+  <ItemGroup>
+    <Media Include="Assets\Sound\click.wav" />
+    <Media Include="Assets\Sound\hitHurt.wav" />
+    <Media Include="Assets\Sound\laserShoot.wav" />
+    <Media Include="Assets\Sound\pickupCoin.wav" />
+    <Media Include="Assets\Sound\powerUp.wav" />
+    <Media Include="Assets\Sound\static.mp3" />
+    <Media Include="Assets\Sound\thememusic.mp3" />
+    <Media Include="Assets\Sound\levelUp.wav" />
+    <Media Include="Assets\Sound\ingameBGM.mp3" />
+    <Media Include="Assets\Sound\mainmenuBGM.mp3" />
+  </ItemGroup>
+  <ItemGroup>
+    <Image Include="Assests\DigiPen_Singapore_WEB_RED.png" />
+    <Image Include="Assets\background.png" />
+    <Image Include="Assets\Title.png" />
+    <Image Include="Assets\Zombie.png" />
+  </ItemGroup>
+  <ItemGroup>
+    <Text Include="Assets\upgradesdata.txt" />
+  </ItemGroup>
+</Project>

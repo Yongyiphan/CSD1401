@@ -39,8 +39,8 @@ float width, height;
 float songLength = 500;
 int isPlaying = 0;
 int MMAudio = 0;
-//float SFX_vol = 1.0, BGM_vol = 1.0;
-float SFX_vol = 0.5, BGM_vol = 0.05;
+float SFX_vol = 0.8, BGM_vol = 0.8;
+//float SFX_vol = 0.5, BGM_vol = 0.05;
 int splashscreen_time = 2;
 void Main_Menu_Init(void)
 {

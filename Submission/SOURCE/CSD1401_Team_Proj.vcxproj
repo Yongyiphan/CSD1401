@@ -1,0 +1,172 @@
+<?xml version="1.0" encoding="utf-8"?>
+<Project DefaultTargets="Build" xmlns="http://schemas.microsoft.com/developer/msbuild/2003">
+  <ItemGroup Label="ProjectConfigurations">
+    <ProjectConfiguration Include="Debug|x64">
+      <Configuration>Debug</Configuration>
+      <Platform>x64</Platform>
+    </ProjectConfiguration>
+    <ProjectConfiguration Include="Release|x64">
+      <Configuration>Release</Configuration>
+      <Platform>x64</Platform>
+    </ProjectConfiguration>
+  </ItemGroup>
+  <PropertyGroup Label="Globals">
+    <VCProjectVersion>16.0</VCProjectVersion>
+    <Keyword>Win32Proj</Keyword>
+    <ProjectGuid>{84400926-9F90-4028-B828-1D9D72B44C64}</ProjectGuid>
+    <RootNamespace>CProcessingPractice</RootNamespace>
+    <WindowsTargetPlatformVersion>10.0</WindowsTargetPlatformVersion>
+  </PropertyGroup>
+  <Import Project="$(VCTargetsPath)\Microsoft.Cpp.Default.props" />
+  <PropertyGroup Condition="'$(Configuration)|$(Platform)'=='Debug|x64'" Label="Configuration">
+    <ConfigurationType>Application</ConfigurationType>
+    <UseDebugLibraries>true</UseDebugLibraries>
+    <PlatformToolset>v143</PlatformToolset>
+    <CharacterSet>MultiByte</CharacterSet>
+  </PropertyGroup>
+  <PropertyGroup Condition="'$(Configuration)|$(Platform)'=='Release|x64'" Label="Configuration">
+    <ConfigurationType>Application</ConfigurationType>
+    <UseDebugLibraries>false</UseDebugLibraries>
+    <PlatformToolset>v143</PlatformToolset>
+    <WholeProgramOptimization>true</WholeProgramOptimization>
+    <CharacterSet>MultiByte</CharacterSet>
+  </PropertyGroup>
+  <Import Project="$(VCTargetsPath)\Microsoft.Cpp.props" />
+  <ImportGroup Label="ExtensionSettings">
+  </ImportGroup>
+  <ImportGroup Label="Shared">
+  </ImportGroup>
+  <ImportGroup Label="PropertySheets" Condition="'$(Configuration)|$(Platform)'=='Debug|x64'">
+    <Import Project="$(UserRootDir)\Microsoft.Cpp.$(Platform).user.props" Condition="exists('$(UserRootDir)\Microsoft.Cpp.$(Platform).user.props')" Label="LocalAppDataPlatform" />
+  </ImportGroup>
+  <ImportGroup Label="PropertySheets" Condition="'$(Configuration)|$(Platform)'=='Release|x64'">
+    <Import Project="$(UserRootDir)\Microsoft.Cpp.$(Platform).user.props" Condition="exists('$(UserRootDir)\Microsoft.Cpp.$(Platform).user.props')" Label="LocalAppDataPlatform" />
+  </ImportGroup>
+  <PropertyGroup Label="UserMacros" />
+  <PropertyGroup Condition="'$(Configuration)|$(Platform)'=='Debug|x64'">
+    <IncludePath>$(VC_IncludePath);$(WindowsSDK_IncludePath);$(SolutionDir)Extern\CProcessing\inc;$(SolutionDir)Inc</IncludePath>
+    <LibraryPath>$(VC_LibraryPath_x64);$(WindowsSDK_LibraryPath_x64);$(SolutionDir)Extern\CProcessing\lib\x64</LibraryPath>
+    <OutDir>$(SolutionDir)bin\$(Configuration)-$(Platform)\</OutDir>
+    <IntDir>$(SolutionDir).tmp\$(Configuration)-$(Platform)\</IntDir>
+  </PropertyGroup>
+  <PropertyGroup Condition="'$(Configuration)|$(Platform)'=='Release|x64'">
+    <IncludePath>$(VC_IncludePath);$(WindowsSDK_IncludePath);$(SolutionDir)Extern\CProcessing\inc;$(SolutionDir)Inc</IncludePath>
+    <LibraryPath>$(VC_LibraryPath_x64);$(WindowsSDK_LibraryPath_x64);$(SolutionDir)Extern\CProcessing\lib\x64</LibraryPath>
+    <OutDir>$(SolutionDir)bin\$(Configuration)-$(Platform)\</OutDir>
+    <IntDir>$(SolutionDir).tmp\$(Configuration)-$(Platform)\</IntDir>
+  </PropertyGroup>
+  <ItemDefinitionGroup Condition="'$(Configuration)|$(Platform)'=='Debug|x64'">
+    <ClCompile>
+      <WarningLevel>Level3</WarningLevel>
+      <SDLCheck>true</SDLCheck>
+      <PreprocessorDefinitions>_DEBUG;_CONSOLE;%(PreprocessorDefinitions)</PreprocessorDefinitions>
+      <ConformanceMode>true</ConformanceMode>
+    </ClCompile>
+    <Link>
+      <SubSystem>Console</SubSystem>
+      <GenerateDebugInformation>true</GenerateDebugInformation>
+      <EntryPointSymbol>mainCRTStartup</EntryPointSymbol>
+      <AdditionalDependencies>$(CoreLibraryDependencies);%(AdditionalDependencies);CProcessingd.lib</AdditionalDependencies>
+    </Link>
+    <PostBuildEvent>
+      <Command>xcopy "$(SolutionDir)Extern\CProcessing\lib\x64\CProcessingd.dll" "$(OutDir)" /s /r /y /q
+xcopy "$(SolutionDir)Extern\CProcessing\lib\x64\fmodL.dll" "$(OutDir)" /s /r /y /q
+xcopy "$(SolutionDir)Assets\*" "$(OutDir)Assets\" /s /r /y /q
+			</Command>
+    </PostBuildEvent>
+  </ItemDefinitionGroup>
+  <ItemDefinitionGroup Condition="'$(Configuration)|$(Platform)'=='Release|x64'">
+    <ClCompile>
+      <WarningLevel>Level3</WarningLevel>
+      <FunctionLevelLinking>true</FunctionLevelLinking>
+      <IntrinsicFunctions>true</IntrinsicFunctions>
+      <SDLCheck>true</SDLCheck>
+      <PreprocessorDefinitions>NDEBUG;_CONSOLE;%(PreprocessorDefinitions)</PreprocessorDefinitions>
+      <ConformanceMode>true</ConformanceMode>
+    </ClCompile>
+    <Link>
+      <SubSystem>Windows</SubSystem>
+      <EnableCOMDATFolding>true</EnableCOMDATFolding>
+      <OptimizeReferences>true</OptimizeReferences>
+      <GenerateDebugInformation>true</GenerateDebugInformation>
+      <EntryPointSymbol>mainCRTStartup</EntryPointSymbol>
+      <AdditionalDependencies>$(CoreLibraryDependencies);%(AdditionalDependencies);CProcessing.lib</AdditionalDependencies>
+    </Link>
+    <PostBuildEvent>
+      <Command>
+				xcopy "$(SolutionDir)Extern\CProcessing\lib\x64\CProcessing.dll" "$(OutDir)" /s /r /y /q
+				xcopy "$(SolutionDir)Extern\CProcessing\lib\x64\fmod.dll" "$(OutDir)" /s /r /y /q
+				xcopy "$(SolutionDir)Assets\*" "$(OutDir)Assets\" /s /r /y /q
+			</Command>
+    </PostBuildEvent>
+  </ItemDefinitionGroup>
+  <ItemGroup>
+    <Image Include="..\Resources\DigiPen_Singapore_Logo (2)\DigiPen Singapore Logo\DigiPen_Singapore_WEB_WHITE.png" />
+    <Image Include="Assests\DigiPen_Singapore_WEB_RED.png" />
+    <Image Include="Assets\background.png" />
+    <Image Include="Assets\Credits\credits.png" />
+    <Image Include="Assets\Credits\ournames.png" />
+    <Image Include="Assets\Credits\smeg.png" />
+    <Image Include="Assets\DigiPen_Singapore_WEB_WHITE.png" />
+    <Image Include="Assets\Instructions\atkSpd_text.png" />
+    <Image Include="Assets\Instructions\directionalKeys_text.png" />
+    <Image Include="Assets\Instructions\dmg_text.png" />
+    <Image Include="Assets\Instructions\great_exp.png" />
+    <Image Include="Assets\Instructions\hp_text.png" />
+    <Image Include="Assets\Instructions\magnet_text.png" />
+    <Image Include="Assets\Instructions\maxHP_text.png" />
+    <Image Include="Assets\Instructions\mvmtSpd_text.png" />
+    <Image Include="Assets\Instructions\normal_exp.png" />
+    <Image Include="Assets\Title.png" />
+    <Image Include="Assets\Zombie.png" />
+  </ItemGroup>
+  <ItemGroup>
+    <ClCompile Include="Src\audio_manager.c" />
+    <ClCompile Include="Src\bullet.c" />
+    <ClCompile Include="Src\Camera.c" />
+    <ClCompile Include="Src\credits.c" />
+    <ClCompile Include="Src\instructions.c" />
+    <ClCompile Include="Src\Items.c" />
+    <ClCompile Include="Src\main.c" />
+    <ClCompile Include="Src\mainmenu.c" />
+    <ClCompile Include="Src\map.c" />
+    <ClCompile Include="Src\options.c" />
+    <ClCompile Include="Src\player.c" />
+    <ClCompile Include="Src\upgrades.c" />
+    <ClCompile Include="Src\utils.c" />
+    <ClCompile Include="Src\Mob.c" />
+  </ItemGroup>
+  <ItemGroup>
+    <ClInclude Include="Inc\audio_manager.h" />
+    <ClInclude Include="Inc\bullet.h" />
+    <ClInclude Include="Inc\Camera.h" />
+    <ClInclude Include="Inc\credits.h" />
+    <ClInclude Include="Inc\instructions.h" />
+    <ClInclude Include="Inc\mainmenu.h" />
+    <ClInclude Include="Inc\Items.h" />
+    <ClInclude Include="Inc\map.h" />
+    <ClInclude Include="Inc\options.h" />
+    <ClInclude Include="Inc\player.h" />
+    <ClInclude Include="Inc\upgrades.h" />
+    <ClInclude Include="Inc\utils.h" />
+    <ClInclude Include="Inc\Mob.h" />
+  </ItemGroup>
+  <ItemGroup>
+    <Media Include="Assets\Sound\click.wav" />
+    <Media Include="Assets\Sound\hitHurt.wav" />
+    <Media Include="Assets\Sound\ingameBGM.mp3" />
+    <Media Include="Assets\Sound\laserShoot.wav" />
+    <Media Include="Assets\Sound\levelUp.wav" />
+    <Media Include="Assets\Sound\mainmenuBGM.mp3" />
+    <Media Include="Assets\Sound\pickupCoin.wav" />
+    <Media Include="Assets\Sound\powerUp.wav" />
+    <Media Include="Assets\Sound\static.mp3" />
+    <Media Include="Assets\Sound\thememusic.mp3" />
+  </ItemGroup>
+  <ItemGroup>
+    <Text Include="Assets\upgradesdata.txt" />
+  </ItemGroup>
+  <Import Project="$(VCTargetsPath)\Microsoft.Cpp.targets" />
+  <ImportGroup Label="ExtensionTargets">
+  </ImportGroup>
+</Project>
