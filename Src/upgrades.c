@@ -1,3 +1,17 @@
+/*----------------------------------------------------------------------
+	file: upgrades.c
+  author: Mah Ming Qian Michael
+   email: m.mah@digipen.edu
+
+   brief: Upgrades source file.
+				Manages initialization, updating and drawing of the upgrades screen.
+				Saves, loads and updates player uprgades.
+				Provides an interface to level up or reset the specific 
+				upgrades and apply them to the player.
+				Utilises a currency to allow players to upgrade as well.
+Copyright 2022 Digipen, All rights reserved
+----------------------------------------------------------------------*/
+
 #pragma once
 #include "cprocessing.h"
 #include "utils.h"
