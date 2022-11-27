@@ -9,6 +9,9 @@
 #include "credits.h"
 #include "instructions.h"
 
+
+
+
 #define WINDOWSIZEX 1300
 #define WINDOWSIZEY 900
 
@@ -21,7 +24,7 @@ float width, height;
 float songLength = 500;
 int isPlaying = 0;
 int MMAudio = 0;
-float SFX_vol = 1.0, BGM_vol = 0.05;
+float SFX_vol = 0.2, BGM_vol = 0.05;
 int splashscreen_time = 2;
 void Main_Menu_Init(void)
 {
@@ -99,6 +102,7 @@ void Main_Menu_Update()
 			//click how to play to go to instructions screen
 			if (IsAreaClicked(width / 2, (height / 2) - (height / 10) + (height / 10 * 2), (width / 5), ((height / 6) / 2), CP_Input_GetMouseX(), CP_Input_GetMouseY()))
 			{
+				CP_Engine_SetNextGameState(Instructions_Init, Instructions_Update, Instructions_Exit);
 			}
 			
 			//click options to go to options screen

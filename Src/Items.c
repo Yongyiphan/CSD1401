@@ -10,18 +10,12 @@
 #include "Map.h"
 #include <assert.h>
 #include "audio_manager.h"
-/*
-@brief		Function that initialise array with empty items
-@params		tracker	-> Contains stats for tracking Items
-@returns	Item arr with blank items
-*/
-
 
 /* --------------------------------------
 * File Level Documentation
 * @author	Edgar Yong
 * @email	y.yiphanedgar.digipen.edu
-* @contributor Sen Chuan
+* @contributor Sen Chuan, Geoffrey
 * @file		Items.c
 * @brief	This file contains all functions required for item generation
 			-> Store items in linked list, and draw items' sprites
@@ -409,7 +403,7 @@ void ItemInteraction(ItemLink** head) {
 		}
 		if (current->key->collected == -1) {
 			float speed = dist * CP_System_GetDt() * 2;
-			CP_Vector Movement = CP_Vector_Scale(CP_Vector_Normalize(target), speed * (P.STATTOTAL.SPEED_TOTAL / 100));
+			CP_Vector Movement = CP_Vector_Scale(CP_Vector_Normalize(target), speed * (P.STAT.SPEED / 100));
 			if (current->key->knockback > 0) {
 				current->key->coor = CP_Vector_Subtract(current->key->coor, CP_Vector_Scale(Movement, 2));
 				current->key->knockback--;
