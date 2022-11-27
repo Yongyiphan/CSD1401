@@ -10,6 +10,18 @@
 
 #define _countof(array) (sizeof(array) / sizeof(array[0]))
 
+/* --------------------------------------
+* File Level Documentation
+* @author		Geoffrey Cho Jian Ming
+* @email		g.cho@digipen.edu
+* @contributor	Sen Chuan
+* @file			utils.c
+* @brief		This file contains utilities and 
+*				miscellaneous functions for the game.
+
+* Copyright 2022 Digipen, All Rights Reserved.
+*//*-------------------------------------*/
+
 int IsAreaClicked(float area_center_x, float area_center_y, float area_width, float area_height, float click_x, float click_y)
 {
 	// TODO

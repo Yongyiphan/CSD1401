@@ -5,6 +5,21 @@
 #include "bullet.h"
 #include "cprocessing.h"
 
+/* --------------------------------------
+* File Level Documentation
+* @author	Geoffrey Cho Jian Ming
+* @email	g.cho@digipen.edu
+* @contributor Edgar Yong
+* @file		player.h
+* @brief	This file contains all functions required for player functions
+*			and movement
+			-> Create Interfaces that interact with player
+			e.g. death screen, upgrade screen
+			-> Create stats of players
+			-> Draw out stats of players
+* Copyright 2022 Digipen, All Rights Reserved.
+*//*-------------------------------------*/
+
 extern int NoBaseStats;
 
 typedef struct PlayerStats {

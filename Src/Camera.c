@@ -3,6 +3,17 @@
 #include <stdio.h>
 #include "player.h"
 
+/* --------------------------------------
+* File Level Documentation
+* @author	Geoffrey Cho Jian Ming
+* @email	g.cho@digipen.edu
+* @file		Camera.c
+* @brief	This file contains all functions required for camera movement
+			- Displaces any object placed below the camera function
+			- Fixes the player to the middle of the screen
+* Copyright 2022 Digipen, All Rights Reserved.
+*//*-------------------------------------*/
+
 static const float SCALE_QUANTUM = 1.5f;
 static const float ROTATION_QUANTUM = 5.0f;
 static const float PAN_QUANTUM = 200.0f;
