@@ -125,6 +125,7 @@ Item* CreateItemEffect(CP_Vector coor, int exp, int expVal) {
 	case COIN:
 		newItem->Duration = -1;
 		newItem->Hitbox = 25;
+		newItem->Modifier = 10;
 		break;
 	case BULLETType:
 		newItem->Duration = 5;
@@ -192,6 +193,9 @@ void IAffectPlayer(Item* item, int method) {
 			else blegal4 += 1;
 			break;
 		}
+		break;
+	case COIN:
+		P.STAT.Coin_Gained += item->Modifier;
 		break;
 	}
 }
@@ -442,8 +446,6 @@ void ItemInteraction(ItemLink** head) {
 					deleteItemLink(head, current->key);
 					current = next;
 					ItemTracker->DropCount[CType][0]--;
-					if (CType == COIN)
-						P.STAT.Coin_Gained += 5;
 					continue;
 				}
 				if (current->key->applying == 0) {

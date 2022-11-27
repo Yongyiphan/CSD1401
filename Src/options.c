@@ -11,7 +11,6 @@
 CP_Color white, black, grey, dark_green;
 float width, height;
 float SFX_length, BGM_length;
-//float SFX_vol, BGM_vol;
 float rectWidth, rectHeight;
 CP_Vector center;
 

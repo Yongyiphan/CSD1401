@@ -11,8 +11,10 @@ float windowWidth, windowHeight;
 float rectWidth, rectHeight;
 CP_Vector middle;
 CP_Color color, black, white, green, dark_grey;
-CP_Image credits, ournames, group_name;
+//CP_Image credits, ournames, group_name;
 CP_Image rollingcredit;
+int rollingspeed = 5;
+int offset;
 void Credits_Init(void) {
 	CP_System_SetWindowSize(WINDOWSIZEX, WINDOWSIZEY);
 	windowWidth = CP_System_GetWindowWidth();
@@ -21,18 +23,17 @@ void Credits_Init(void) {
 	color = CP_Color_Create(100, 177, 80, 255);
 	black = CP_Color_Create(0, 0, 0, 255);
 	dark_grey = CP_Color_Create(50, 30, 30, 255);
-	white = CP_Color_Create(255, 255, 255, 255);
+	//white = CP_Color_Create(255, 255, 255, 255);
 	green = CP_Color_Create(50, 150, 50, 255);
 
 	rectWidth = 150, rectHeight = 50;
 
-	credits = CP_Image_Load("./Assets/Credits/credits.png");
-	ournames = CP_Image_Load("./Assets/Credits/ournames.png");
-	group_name = CP_Image_Load("./Assets/Credits/smeg.png");
+//	credits = CP_Image_Load("./Assets/Credits/credits.png");
+//	ournames = CP_Image_Load("./Assets/Credits/ournames.png");
+//	group_name = CP_Image_Load("./Assets/Credits/smeg.png");
 	rollingcredit = CP_Image_Load("./Assets/Credits/RollingCredit-1 (1).png");
+	offset = 0;
 }
-int rollingspeed = 5;
-int offset;
 void Credits_Update(void) {
 	//CP_Graphics_ClearBackground(color);
 	//CP_Settings_Fill(black);
@@ -70,7 +71,7 @@ void Credits_Update(void) {
 	//Draw Exit Button
 	CP_Settings_StrokeWeight(0.0f);
 	CP_Settings_Fill(green);
-	CP_Vector exitbtn = CP_Vector_Set(windowWidth / 10, windowHeight * 9 / 10);
+	CP_Vector exitbtn = CP_Vector_Set(windowWidth * 11 / 12, windowHeight * 9 / 10);
 	CP_Graphics_DrawRectAdvanced(exitbtn.x, exitbtn.y, rectWidth, rectHeight, 0, 20);
 	CP_Settings_Fill(dark_grey);
 	CP_Settings_TextSize(50.0f);
@@ -86,14 +87,9 @@ void Credits_Update(void) {
 }
 
 void Credits_Exit(void) {
-	CP_Image_Free(credits);
-	CP_Image_Free(ournames);
-	CP_Image_Free(group_name);
+//	CP_Image_Free(credits);
+//	CP_Image_Free(ournames);
+//	CP_Image_Free(group_name);
 
 	CP_Image_Free(rollingcredit);
-}
-
-void DrawRollingCredit(void) {
-	
-
 }
