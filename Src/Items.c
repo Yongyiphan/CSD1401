@@ -147,7 +147,7 @@ void IAffectPlayer(Item* item, int method) {
 	float boost = item->Modifier * method;
 	switch (item->Type) {
 	case StatBoost://Affect Base Stats
-		Audio_Pickup_Item();
+		//Audio_Pickup_Item();
 		switch (item->AffectedBaseStat) {
 		case 0://HP
 			P.CURRENT_HP += (item->Modifier * 1000);
@@ -408,7 +408,6 @@ void ItemInteraction(ItemLink** head) {
 			if (current->key->knockback > 0) {
 				current->key->coor = CP_Vector_Subtract(current->key->coor, CP_Vector_Scale(Movement, 2));
 				current->key->knockback--;
-				printf("Knockback: %d\n", current->key->knockback);
 			}
 			else {
 				if (dist < P.STAT.PICKUP && dist > P.HITBOX) {
@@ -472,9 +471,7 @@ void ItemInteraction(ItemLink** head) {
 			}
 		}
 
-
 		//only draw items that are newly initialised or not collected
-		//if (current->key->collected == 1 && current->key->applying != 1) {
 		if (current->key->applying != 1) {
 			DrawItemImage(current->key);
 		}

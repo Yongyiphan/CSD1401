@@ -298,7 +298,7 @@ int level_up(LEVEL* level) {
 
 // Show player's available upgrades
 void upgrade_screen(Player* P, int* isUpgrade, int* isPaused) {
-	
+	CP_Graphics_ClearBackground(CP_Color_Create(50, 50, 0, 255));
 	float screen_width = (float) CP_System_GetWindowWidth();
 	float screen_height = (float) CP_System_GetWindowHeight();
 	CP_Vector middle = CP_Vector_Set(screen_width / 2, screen_height / 2);

@@ -232,7 +232,6 @@ void map_Update(void) {
 					bulletcd[i] = 0;
 				}
 			}
-
 			// Check cd valid for explosive bullet
 			// CD of 3s base value but affected by atk_speed
 			if (bulletcd[2] > 3 / P.STATTOTAL.ATK_SPEED_TOTAL) {
@@ -246,6 +245,7 @@ void map_Update(void) {
 			// Default bullet is always active, no additional check required
 			if (bulletcd[0] == 0) {
 				BulletShoot(P.x, P.y, bulletangle, PBULLET_NORMAL, BULLET_PLAYER);
+				Audio_Bullet();
 			}
 			// Shoot other bullet types when valid
 			for (int i = 1; i < 4; i++)
